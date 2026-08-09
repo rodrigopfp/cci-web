@@ -144,6 +144,27 @@ export interface CertifiedCompany {
   convenio?: boolean;
 }
 
+// ---- Voces de la industrialización -------------------------------------
+
+export interface VozEntrevistaItem {
+  pregunta: string;
+  respuesta: string;
+}
+
+export interface Voz {
+  id: string;
+  slug: string;
+  nombre: string;
+  cargo?: string;
+  organizacion?: string;
+  /** URL del retrato: imagen de Sanity ya resuelta o URL externa. */
+  foto?: string;
+  fraseDestacada?: string;
+  entrevista: VozEntrevistaItem[];
+  linkedin?: string;
+  orden?: number;
+}
+
 export type HitoTipo = "normativa" | "obra" | "gremial" | "dato";
 
 export interface Hito {

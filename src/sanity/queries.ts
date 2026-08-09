@@ -33,6 +33,27 @@ export const noticiaBySlugQuery = `*[_type == "noticia" && slug.current == $slug
 
 export const noticiaSlugsQuery = `*[_type == "noticia" && defined(slug.current)]{"slug": slug.current}`;
 
+// --- Voces de la industrialización --------------------------------------
+const VOZ_FIELDS = `
+  _id,
+  nombre,
+  "slug": slug.current,
+  cargo,
+  organizacion,
+  foto,
+  fotoUrl,
+  fraseDestacada,
+  entrevista[]{ pregunta, respuesta },
+  linkedin,
+  orden
+`;
+
+export const vocesQuery = `*[_type == "voz"] | order(orden asc, nombre asc){${VOZ_FIELDS}}`;
+
+export const vozBySlugQuery = `*[_type == "voz" && slug.current == $slug][0]{${VOZ_FIELDS}}`;
+
+export const vozSlugsQuery = `*[_type == "voz" && defined(slug.current)]{"slug": slug.current}`;
+
 // --- Empresas certificadas (Radar) --------------------------------------
 export const empresasCertificadasQuery = `*[_type == "empresaCertificada"] | order(fecha desc){
   _id,

@@ -10,6 +10,7 @@ const nav = [
   { href: "/radar", label: "Radar" },
   { href: "/evidencia", label: "Evidencia" },
   { href: "/socios", label: "Ecosistema" },
+  { href: "/voces", label: "Voces" },
   { href: "/recursos", label: "Recursos" },
   { href: "/eventos", label: "Eventos" },
   { href: "/publica", label: "Publica" },

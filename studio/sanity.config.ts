@@ -18,6 +18,7 @@ export default defineConfig({
           .title("Contenido")
           .items([
             S.documentTypeListItem("noticia").title("Noticias"),
+            S.documentTypeListItem("voz").title("Voces de la industrialización"),
             S.divider(),
             S.documentTypeListItem("empresaCertificada").title("Radar · Empresas certificadas"),
             S.documentTypeListItem("indicador").title("Radar · Indicadores"),

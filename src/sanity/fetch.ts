@@ -13,6 +13,9 @@ import {
   noticiasQuery,
   noticiaBySlugQuery,
   noticiaSlugsQuery,
+  vocesQuery,
+  vozBySlugQuery,
+  vozSlugsQuery,
   empresasCertificadasQuery,
   conveniosDitecQuery,
   indicadoresQuery,
@@ -34,6 +37,7 @@ import type {
   Resource,
   CertifiedCompany,
   Hito,
+  Voz,
 } from "@/data/types";
 
 const builder = createImageUrlBuilder(client);
@@ -151,6 +155,60 @@ export function getRelatedArticles(article: Article, all: Article[], limit = 3):
     .filter((a) => a.id !== article.id && a.category === article.category)
     .concat(all.filter((a) => a.id !== article.id && a.category !== article.category))
     .slice(0, limit);
+}
+
+// --- Voces de la industrialización --------------------------------------
+type VozDoc = {
+  _id: string;
+  nombre: string;
+  slug: string;
+  cargo?: string;
+  organizacion?: string;
+  foto?: { asset?: { _ref?: string } };
+  fotoUrl?: string;
+  fraseDestacada?: string;
+  entrevista?: { pregunta?: string; respuesta?: string }[];
+  linkedin?: string;
+  orden?: number;
+};
+
+function toVoz(d: VozDoc): Voz {
+  // Mismo patrón dual que las noticias: imagen subida a Sanity o URL externa.
+  const foto = d.foto?.asset?._ref
+    ? builder.image(d.foto).width(800).fit("max").auto("format").url()
+    : d.fotoUrl || undefined;
+
+  const entrevista = (Array.isArray(d.entrevista) ? d.entrevista : [])
+    .filter((e) => e?.pregunta && e?.respuesta)
+    .map((e) => ({ pregunta: e.pregunta as string, respuesta: e.respuesta as string }));
+
+  return {
+    id: d._id,
+    slug: d.slug,
+    nombre: d.nombre,
+    cargo: d.cargo,
+    organizacion: d.organizacion,
+    foto,
+    fraseDestacada: d.fraseDestacada,
+    entrevista,
+    linkedin: d.linkedin,
+    orden: d.orden,
+  };
+}
+
+export async function getVoces(): Promise<Voz[]> {
+  const docs = await client.fetch<VozDoc[]>(vocesQuery);
+  return docs.map(toVoz);
+}
+
+export async function getVozBySlug(slug: string): Promise<Voz | null> {
+  const doc = await client.fetch<VozDoc | null>(vozBySlugQuery, { slug });
+  return doc ? toVoz(doc) : null;
+}
+
+export async function getVozSlugs(): Promise<string[]> {
+  const rows = await client.fetch<{ slug: string }[]>(vozSlugsQuery);
+  return rows.map((r) => r.slug).filter(Boolean);
 }
 
 // --- Indicadores ---------------------------------------------------------
