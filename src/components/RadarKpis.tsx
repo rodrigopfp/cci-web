@@ -19,7 +19,6 @@ import {
   productividad,
   mundo,
   type KpiSource,
-  type KpiGauge,
   type KpiCounter,
   type KpiDonut,
   type KpiProductividad,
@@ -140,72 +139,91 @@ function polar(cx: number, cy: number, r: number, angleDeg: number): [number, nu
   return [cx + r * Math.cos(a), cy - r * Math.sin(a)];
 }
 
-/** Arco sobre un semicírculo. La escala 0–100 mapea 180°(izq)→0°(der). */
-function arcPath(cx: number, cy: number, r: number, from: number, to: number): string {
-  const a0 = 180 - from * 1.8;
-  const a1 = 180 - to * 1.8;
+/** Arco sobre un semicírculo. La escala 0–scaleMax mapea 180°(izq)→0°(der). */
+function arcPath(
+  cx: number,
+  cy: number,
+  r: number,
+  from: number,
+  to: number,
+  scaleMax: number
+): string {
+  const a0 = 180 - (from / scaleMax) * 180;
+  const a1 = 180 - (to / scaleMax) * 180;
   const [x0, y0] = polar(cx, cy, r, a0);
   const [x1, y1] = polar(cx, cy, r, a1);
   const large = Math.abs(a0 - a1) > 180 ? 1 : 0;
   return `M ${x0} ${y0} A ${r} ${r} 0 ${large} 1 ${x1} ${y1}`;
 }
 
+/** Altura fija del área del instrumento (gauge/dona), para que los tres
+ *  gráficos de la primera fila queden centrados a la misma altura. */
+const INSTRUMENT_AREA = "flex h-[160px] items-center justify-center";
+
 // ---- Instrumentos ------------------------------------------------------
 
-function GaugeCard({ kpi, reduced }: { kpi: KpiGauge; reduced: boolean }) {
+/**
+ * Velocímetro genérico: semicírculo con aguja y un número grande bajo el arco.
+ * Lo comparten VELOCIDAD DE OBRA y POTENCIAL DE PRODUCTIVIDAD, para que la
+ * primera fila tenga instrumentos consistentes.
+ */
+function GaugeCard({
+  label,
+  note,
+  source,
+  scaleMax,
+  band,
+  target,
+  format,
+  ariaLabel,
+  reduced,
+}: {
+  label: string;
+  note: string;
+  source: KpiSource;
+  scaleMax: number;
+  band: [number, number];
+  target: number;
+  format: (v: number) => string;
+  ariaLabel: string;
+  reduced: boolean;
+}) {
   const { ref, inView } = useInView<HTMLElement>();
-  const v = useCountUp(kpi.rangeMax, inView, reduced);
+  const v = useCountUp(target, inView, reduced);
   const cx = 100;
   const cy = 100;
   const r = 78;
-  const angle = 180 - (v / 100) * 180;
+  const angle = 180 - (v / scaleMax) * 180;
   const [nx, ny] = polar(cx, cy, r - 8, angle);
 
   return (
     <Card innerRef={ref}>
       <span className="text-xs font-700 uppercase tracking-wide text-cci-slate-light">
-        {kpi.label}
+        {label}
       </span>
-      <div className="mx-auto mt-2 w-full max-w-[240px]">
-        <svg viewBox="0 0 200 108" className="w-full" role="img" aria-label={kpi.display}>
-          {/* pista */}
-          <path
-            d={arcPath(cx, cy, r, 0, 100)}
-            fill="none"
-            stroke="#E6E4E2"
-            strokeWidth={14}
-            strokeLinecap="round"
-          />
-          {/* banda del rango verificado 20–50 */}
-          <path
-            d={arcPath(cx, cy, r, kpi.rangeMin, kpi.rangeMax)}
-            fill="none"
-            stroke="#F6BA8C"
-            strokeWidth={14}
-            strokeLinecap="round"
-          />
-          {/* progreso animado */}
-          <path
-            d={arcPath(cx, cy, r, 0, Math.max(v, 0.01))}
-            fill="none"
-            stroke="#E04E00"
-            strokeWidth={14}
-            strokeLinecap="round"
-          />
-          {/* aguja */}
-          <line x1={cx} y1={cy} x2={nx} y2={ny} stroke="#2B2B2B" strokeWidth={3} strokeLinecap="round" />
-          <circle cx={cx} cy={cy} r={7} fill="#2B2B2B" />
-        </svg>
+      {/* Área del instrumento con altura fija: arco + número (velocímetro
+          clásico, el número vive bajo la línea base, nunca toca la aguja). */}
+      <div className={`mt-2 ${INSTRUMENT_AREA}`}>
+        <div className="w-full max-w-[200px]">
+          <svg viewBox="0 0 200 108" className="w-full" role="img" aria-label={ariaLabel}>
+            {/* pista */}
+            <path d={arcPath(cx, cy, r, 0, scaleMax, scaleMax)} fill="none" stroke="#E6E4E2" strokeWidth={14} strokeLinecap="round" />
+            {/* banda del rango destacado */}
+            <path d={arcPath(cx, cy, r, band[0], band[1], scaleMax)} fill="none" stroke="#F6BA8C" strokeWidth={14} strokeLinecap="round" />
+            {/* progreso animado */}
+            <path d={arcPath(cx, cy, r, 0, Math.max(v, 0.01), scaleMax)} fill="none" stroke="#E04E00" strokeWidth={14} strokeLinecap="round" />
+            {/* aguja */}
+            <line x1={cx} y1={cy} x2={nx} y2={ny} stroke="#2B2B2B" strokeWidth={3} strokeLinecap="round" />
+            <circle cx={cx} cy={cy} r={7} fill="#2B2B2B" />
+          </svg>
+          <p className="mt-1 text-center font-display text-4xl font-900 leading-none text-cci-orange">
+            {format(v)}
+          </p>
+        </div>
       </div>
-      {/* Número bajo la línea base del semicírculo (velocímetro clásico): vive
-          fuera del área de la aguja, por lo que nunca se superponen. */}
-      <p className="mt-2 text-center font-display text-4xl font-900 leading-none text-cci-orange">
-        {Math.round(v)}%
-      </p>
-      <p className="mt-3 font-display text-lg font-800 text-cci-ink">{kpi.display}</p>
-      <p className="mt-1 text-sm text-cci-slate">{kpi.note}</p>
+      <p className="mt-3 text-sm text-cci-slate">{note}</p>
       <div className="mt-auto">
-        <SourceLink source={kpi.source} />
+        <SourceLink source={source} />
       </div>
     </Card>
   );
@@ -243,26 +261,29 @@ function DonutCard({ kpi, reduced }: { kpi: KpiDonut; reduced: boolean }) {
       <span className="text-xs font-700 uppercase tracking-wide text-cci-slate-light">
         {kpi.label}
       </span>
-      <div className="relative mx-auto mt-2 h-[150px] w-[150px]">
-        <svg viewBox="0 0 140 140" className="h-full w-full -rotate-90" role="img" aria-label={`${kpi.value}% ${kpi.label}`}>
-          <circle cx={70} cy={70} r={R} fill="none" stroke="#E6E4E2" strokeWidth={14} />
-          <circle
-            cx={70}
-            cy={70}
-            r={R}
-            fill="none"
-            stroke="#E04E00"
-            strokeWidth={14}
-            strokeLinecap="round"
-            strokeDasharray={C}
-            strokeDashoffset={offset}
-          />
-        </svg>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <span className="font-display text-4xl font-900 text-cci-orange">
-            {Math.round(v)}
-            {kpi.suffix}
-          </span>
+      {/* Misma área fija que los gauges; la dona ocupa el mismo alto visual. */}
+      <div className={`mt-2 ${INSTRUMENT_AREA}`}>
+        <div className="relative h-[140px] w-[140px]">
+          <svg viewBox="0 0 140 140" className="h-full w-full -rotate-90" role="img" aria-label={`${kpi.value}% ${kpi.label}`}>
+            <circle cx={70} cy={70} r={R} fill="none" stroke="#E6E4E2" strokeWidth={14} />
+            <circle
+              cx={70}
+              cy={70}
+              r={R}
+              fill="none"
+              stroke="#E04E00"
+              strokeWidth={14}
+              strokeLinecap="round"
+              strokeDasharray={C}
+              strokeDashoffset={offset}
+            />
+          </svg>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="font-display text-4xl font-900 text-cci-orange">
+              {Math.round(v)}
+              {kpi.suffix}
+            </span>
+          </div>
         </div>
       </div>
       <p className="mt-3 text-sm text-cci-slate">{kpi.note}</p>
@@ -377,9 +398,29 @@ export function RadarKpis() {
         </p>
 
         <div className="mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          <GaugeCard kpi={velocidad} reduced={reduced} />
+          <GaugeCard
+            label={velocidad.label}
+            note={velocidad.note}
+            source={velocidad.source}
+            scaleMax={100}
+            band={[velocidad.rangeMin, velocidad.rangeMax]}
+            target={velocidad.rangeMax}
+            format={(v) => `${Math.round(v)}%`}
+            ariaLabel={velocidad.display}
+            reduced={reduced}
+          />
           <DonutCard kpi={residuos} reduced={reduced} />
-          <CounterCard kpi={potencial} reduced={reduced} />
+          <GaugeCard
+            label={potencial.label}
+            note={potencial.note}
+            source={potencial.source}
+            scaleMax={12}
+            band={[5, 10]}
+            target={potencial.value}
+            format={(v) => `${potencial.prefix ?? ""}${Math.round(v)}${potencial.suffix ?? ""}`}
+            ariaLabel={potencial.label}
+            reduced={reduced}
+          />
           <ProductividadCard kpi={productividad} reduced={reduced} />
           <CounterCard kpi={costo} reduced={reduced} />
           <CounterCard kpi={manoDeObra} reduced={reduced} />
