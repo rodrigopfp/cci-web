@@ -33,8 +33,18 @@ export function NoticiasClient({ articles }: { articles: Article[] }) {
       </section>
       <section className="sticky top-[105px] z-30 border-b border-cci-line bg-white/95 backdrop-blur">
         <div className="container-cci flex flex-col gap-3 py-4">
-          <div className="flex flex-wrap gap-2">{categories.map((c) => <button key={c} onClick={() => setCat(c)} className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition ${cat === c ? "bg-cci-graphite text-white" : "bg-cci-paper text-cci-slate hover:bg-cci-line"}`}>{c}</button>)}</div>
-          <div className="flex flex-wrap gap-2">{types.map((t) => <button key={t.value} onClick={() => setType(t.value)} className={`rounded-full border px-3.5 py-1.5 text-xs font-semibold transition ${type === t.value ? "border-cci-orange bg-cci-orange-soft text-cci-orange-dark" : "border-cci-line bg-white text-cci-slate hover:border-cci-slate-light"}`}>{t.label}</button>)}</div>
+          {/* Móvil: una sola fila con scroll horizontal (flex-nowrap + overflow-x-auto).
+              md+: se restaura el diseño actual (flex-wrap, sin scroll). El wrapper
+              `relative md:contents` sólo existe para anclar el degradado en móvil y
+              desaparece en escritorio, dejando el layout original intacto. */}
+          <div className="relative md:contents">
+            <div className="flex flex-nowrap gap-2 overflow-x-auto scrollbar-hide md:flex-wrap md:overflow-visible">{categories.map((c) => <button key={c} onClick={() => setCat(c)} className={`shrink-0 whitespace-nowrap rounded-full px-3.5 py-1.5 text-xs font-semibold transition ${cat === c ? "bg-cci-graphite text-white" : "bg-cci-paper text-cci-slate hover:bg-cci-line"}`}>{c}</button>)}</div>
+            <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-white to-transparent md:hidden" />
+          </div>
+          <div className="relative md:contents">
+            <div className="flex flex-nowrap gap-2 overflow-x-auto scrollbar-hide md:flex-wrap md:overflow-visible">{types.map((t) => <button key={t.value} onClick={() => setType(t.value)} className={`shrink-0 whitespace-nowrap rounded-full border px-3.5 py-1.5 text-xs font-semibold transition ${type === t.value ? "border-cci-orange bg-cci-orange-soft text-cci-orange-dark" : "border-cci-line bg-white text-cci-slate hover:border-cci-slate-light"}`}>{t.label}</button>)}</div>
+            <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-white to-transparent md:hidden" />
+          </div>
         </div>
       </section>
       <section className="container-cci py-12">

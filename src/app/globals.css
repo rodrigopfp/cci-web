@@ -46,6 +46,18 @@ body {
   .sweep-light { @apply pointer-events-none absolute bottom-0 left-0 h-[2px] w-0 bg-cci-orange-light transition-all duration-300 ease-out group-hover:w-full; }
 }
 
+/* Oculta la barra de scroll (Firefox, IE/Edge antiguos y WebKit/Blink).
+   Se usa en móvil para las filas de filtros con scroll horizontal. */
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none; /* IE y Edge */
+    scrollbar-width: none;    /* Firefox */
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;            /* Chrome, Safari y Opera */
+  }
+}
+
 @keyframes rise {
   from { opacity: 0; transform: translateY(16px); }
   to { opacity: 1; transform: translateY(0); }
