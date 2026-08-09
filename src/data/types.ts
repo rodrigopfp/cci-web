@@ -1,0 +1,125 @@
+// Tipos del dominio. Centralizados para mapear a un CMS a futuro.
+
+export type ContentType = "editorial" | "socio" | "patrocinado";
+
+export type Category =
+  | "País y políticas públicas"
+  | "Vivienda industrializada"
+  | "Innovación y productividad"
+  | "Casos de socios"
+  | "Normativa y certificación"
+  | "Sostenibilidad"
+  | "Opinión experta"
+  | "Eventos CCI"
+  | "Internacional"
+  | "Publirreportajes";
+
+export type PartnerCategory =
+  | "Industrializadora"
+  | "Proveedor de materiales"
+  | "Ingeniería"
+  | "Arquitectura"
+  | "Tecnología"
+  | "Academia"
+  | "Institución publica / gremial";
+
+export interface Partner {
+  id: string;
+  slug: string;
+  name: string;
+  category: PartnerCategory;
+  description: string;
+  logoInitials: string;
+  logoColor: string;
+}
+
+export interface Article {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  category: Category;
+  type: ContentType;
+  date: string;
+  author: string;
+  image: { from: string; to: string; label: string };
+  /** Foto de portada. URL remota (Unsplash, licencia libre) o /img/... local. */
+  photo?: string;
+  readingMinutes: number;
+  content: string[];
+  partner?: Partner;
+  /** URL de la fuente original de la noticia. Toda noticia real la lleva. */
+  sourceUrl?: string;
+  sourceName?: string;
+}
+
+export interface Resource {
+  id: string;
+  title: string;
+  description: string;
+  type: "Guía técnica" | "Estudio" | "Normativa" | "Ficha";
+  format: "PDF" | "XLSX" | "ZIP";
+  weight: string;
+  date: string;
+}
+
+export interface CCIEvent {
+  id: string;
+  title: string;
+  date: string;
+  location: string;
+  modality: "Presencial" | "Online" | "Híbrido";
+  description: string;
+}
+
+// ---- Gobernanza del dato (puntos 9, 10, 53, 57 del prompt maestro) ----
+
+// De dónde viene un dato. Define su badge y su nivel de confianza.
+export type SourceType =
+  | "oficial"       // MINVU, INE, organismos públicos
+  | "cci"           // levantado por el Consejo
+  | "empresa"       // declarado por empresa participante
+  | "académica"     // universidad, paper
+  | "internacional" // investigación internacional
+  | "estimación";   // cálculo con metodología explícita
+
+// Estado de verificación: distingue dato real de placeholder de desarrollo.
+export type DataStatus = "real" | "mock" | "pending";
+
+export interface Source {
+  id: string;
+  title: string;
+  organization: string;
+  year: number;
+  url?: string;
+  sourceType: SourceType;
+}
+
+export interface Indicator {
+  id: string;
+  // valor a mostrar en grande. Puede ser texto ("20–50%") o número formateado.
+  value: string;
+  unit?: string;
+  label: string;
+  // contexto obligatorio: qué mide y matices
+  note: string;
+  status: DataStatus;
+  sourceType: SourceType;
+  source?: Source;
+  lastUpdated?: string; // ISO
+  // ámbito geográfico del dato
+  geography: "Chile" | "Internacional";
+}
+
+export interface Study {
+  id: string;
+  slug: string;
+  title: string;
+  organization: string;
+  year: number;
+  geography: "Chile" | "Internacional";
+  topic: string;
+  keyFinding: string; // hallázgo principal parafraseado
+  url?: string;
+  sourceType: SourceType;
+}

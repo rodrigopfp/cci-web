@@ -1,0 +1,36 @@
+# Verificación automática en GitHub.
+#
+# Cada vez que alguien sube un cambio o abre una propuesta de cambio (pull
+# request), GitHub compila el sitio. Si algo quedó roto —una coma de más, una
+# categoría mal escrita— aparece marcado en rojo ANTES de que llegue a producción.
+#
+# Es la red de seguridad que permite que varias personas editen sin miedo.
+
+name: Verificar que el sitio compila
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Compilar el sitio
+        run: npm run build
+
+      - name: Revisar vulnerabilidades conocidas
+        run: npm audit --audit-level=high
+        continue-on-error: true

@@ -1,0 +1,38 @@
+# Configuración de despliegue en Netlify.
+# El sitio se publica como archivos estáticos: no hay servidor que mantener.
+
+[build]
+  command = "npm run build"
+  publish = "out"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# ---------------------------------------------------------------------------
+# CABECERAS DE SEGURIDAD
+# Se aplican a todas las rutas. Explicación de cada una:
+# ---------------------------------------------------------------------------
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # Impide que el sitio se incruste en un iframe ajeno (clickjacking).
+    X-Frame-Options = "DENY"
+    # Evita que el navegador "adivine" tipos de archivo distintos al declarado.
+    X-Content-Type-Options = "nosniff"
+    # Limita qué información de origen se envía al navegar a otros sitios.
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    # Desactiva APIs del navegador que este sitio no necesita.
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=()"
+    # Fuerza HTTPS durante un año, incluidos subdominios.
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
+    # Política de contenido: declara explícitamente de dónde puede cargar cada
+    # tipo de recurso. Todo lo no declarado queda bloqueado.
+    #   - fuentes e imágenes: Google Fonts y Unsplash (las que usa el sitio)
+    #   - sin objetos, sin frames, sin formularios hacia terceros
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://images.unsplash.com; connect-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+
+# Los archivos versionados de Next pueden cachearse de forma agresiva.
+[[headers]]
+  for = "/_next/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

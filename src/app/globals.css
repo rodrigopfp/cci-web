@@ -1,0 +1,61 @@
+/* Tipografía oficial del manual: MUSEO SANS (300/500/700/900) y MUSEO DISPLAY.
+   Museo Sans es comercial y requiere licencia webfont; mientras el CCI no
+   disponga de ella usamos Mulish, el sustituto libre más cercano.
+   IBM Plex Mono es la cara utilitaria para datos y anotaciones.
+   El @import debe ir primero: CSS lo exige y Next 16 lo verifica. */
+@import url("https://fonts.googleapis.com/css2?family=Mulish:ital,wght@0,300;0,500;0,600;0,700;0,800;0,900;1,500&family=IBM+Plex+Mono:wght@400;500;600&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+
+:root {
+  --font-display: "Mulish", system-ui, sans-serif;
+  --font-sans: "Mulish", system-ui, sans-serif;
+  /* Cara utilitaria para datos, años y anotaciones técnicas.
+     IBM Plex Mono aporta el registro de ficha de especificación del sector. */
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-sans);
+  color: #2B2B2B;
+  background: #ffffff;
+  -webkit-font-smoothing: antialiased;
+}
+
+@layer components {
+  .container-cci { @apply max-w-content mx-auto px-5 sm:px-8; }
+  .badge { @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide; }
+  /* Anotación técnica: etiqueta monoespaciada con barra de color a la izquierda,
+     en el registro de una ficha de especificación. Sustituye a la píldora genérica. */
+  .annot { @apply inline-flex items-center gap-2 font-mono text-[11.5px] font-500 uppercase leading-none tracking-[0.11em]; }
+  .annot-bar { @apply block h-3.5 w-[3px] shrink-0; }
+  .link-underline { @apply relative after:absolute after:left-0 after:-bottom-0.5 after:h-[2px] after:w-0 after:bg-cci-orange after:transition-all hover:after:w-full; }
+  .btn-primary { @apply inline-flex items-center justify-center gap-2 rounded-full bg-cci-orange px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-cci-orange-dark hover:shadow-lg active:scale-[0.98]; }
+  .btn-ghost { @apply inline-flex items-center justify-center gap-2 rounded-full border border-cci-line bg-white px-5 py-2.5 text-sm font-semibold text-cci-graphite transition-all hover:border-cci-graphite hover:bg-cci-paper; }
+  .card-rise { @apply transition-shadow duration-300 hover:shadow-card-hover; }
+  /* Firma de interacción: un filo naranja recorre el ancho del elemento al
+     pasar el cursor. Exige que el contenedor sea `group relative`.
+     Reemplaza al desplazamiento vertical como señal de foco. */
+  .sweep { @apply pointer-events-none absolute bottom-0 left-0 h-[2px] w-0 bg-cci-orange transition-all duration-300 ease-out group-hover:w-full; }
+  .sweep-light { @apply pointer-events-none absolute bottom-0 left-0 h-[2px] w-0 bg-cci-orange-light transition-all duration-300 ease-out group-hover:w-full; }
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-rise { animation: rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+/* Accesibilidad: sin animaciones si el sistema lo pide */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

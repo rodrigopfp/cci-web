@@ -1,0 +1,39 @@
+{
+	# Sin panel de administración: no se necesita y es una puerta menos.
+	admin off
+	# Railway termina el TLS en su borde, así que Caddy no gestiona certificados.
+	auto_https off
+	# No revelar el servidor usado.
+	servers {
+		trusted_proxies static private_ranges
+	}
+}
+
+:{$PORT:8080} {
+	root * /srv
+	encode gzip zstd
+
+	# ---- Cabeceras de seguridad (equivalentes a las de netlify.toml) ----
+	header {
+		X-Frame-Options "DENY"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://images.unsplash.com; connect-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+		# Ocultar la cabecera que identifica al servidor.
+		-Server
+	}
+
+	# Los archivos versionados de Next nunca cambian de contenido: caché larga.
+	@nextStatic path /_next/static/*
+	header @nextStatic Cache-Control "public, max-age=31536000, immutable"
+
+	# El HTML se revalida siempre, para que una publicación se vea de inmediato.
+	@html path *.html /
+	header @html Cache-Control "public, max-age=0, must-revalidate"
+
+	# Resolución de rutas: /radar/ -> /srv/radar/index.html
+	try_files {path} {path}/index.html {path}.html /404.html
+	file_server
+}
