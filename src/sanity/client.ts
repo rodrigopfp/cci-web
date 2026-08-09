@@ -4,8 +4,9 @@ import { createClient } from "@sanity/client";
  * Cliente de Sanity para LECTURA en tiempo de compilación.
  *
  * El sitio es 100% estático (output: "export"): este cliente solo se usa al
- * compilar, nunca desde el navegador del visitante. Por eso useCdn: true — se
- * consulta la API con caché de Sanity, más rápida y suficiente para un build.
+ * compilar, nunca desde el navegador del visitante. Por eso useCdn: false — se
+ * consulta la API en vivo (no el CDN): tras publicar en Sanity, el CDN puede
+ * tardar minutos en refrescarse y el build leería datos desactualizados.
  *
  * projectId y dataset se leen de variables de entorno (NEXT_PUBLIC_*) para no
  * incrustar identificadores en el código. En desarrollo viven en .env.local;
@@ -26,5 +27,8 @@ export const client = createClient({
   projectId,
   dataset,
   apiVersion: "2024-10-01",
-  useCdn: true,
+  // useCdn: false — el sitio consulta Sanity solo en build;
+  // leer la API en vivo evita datos desactualizados del CDN tras publicar.
+  useCdn: false,
+  perspective: "published",
 });
