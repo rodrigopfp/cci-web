@@ -1,5 +1,5 @@
 import type { Indicator } from "./types";
-import { sources } from "./indicators";
+import { sources } from "./indicators.respaldo";
 
 // ============================================================================
 // RADAR CCI — datos REALES extraídos del listado oficial del MINVU
@@ -110,7 +110,7 @@ export const radarIndicators: Indicator[] = [
     geography: "Chile",
   },
   {
-    id: "déficit-radar",
+    id: "deficit-radar",
     value: "491.904",
     unit: "viviendas",
     label: "Déficit habitacional",

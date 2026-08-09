@@ -1,6 +1,7 @@
-import { events } from "@/data/resources";
+import { getEvents } from "@/sanity/fetch";
 import { formatDate } from "@/lib/format";
-export default function EventosPage() {
+export default async function EventosPage() {
+  const events = await getEvents();
   return (
     <>
       <section className="border-b border-cci-line bg-cci-paper"><div className="container-cci py-14">

@@ -1,0 +1,384 @@
+/**
+ * Capa de conversión: consulta Sanity y devuelve los datos YA convertidos a los
+ * tipos de src/data/types.ts, para que los componentes del sitio no cambien.
+ *
+ * Todo se ejecuta en tiempo de compilación (el sitio es estático). Ninguna de
+ * estas funciones debe llamarse desde un componente de cliente.
+ */
+import { createImageUrlBuilder } from "@sanity/image-url";
+import { toPlainText } from "@portabletext/react";
+import type { PortableTextBlock } from "@portabletext/types";
+import { client } from "./client";
+import {
+  noticiasQuery,
+  noticiaBySlugQuery,
+  noticiaSlugsQuery,
+  empresasCertificadasQuery,
+  conveniosDitecQuery,
+  indicadoresQuery,
+  hitosQuery,
+  estudiosQuery,
+  empresasQuery,
+  eventosQuery,
+  recursosQuery,
+} from "./queries";
+import type {
+  Article,
+  Indicator,
+  Source,
+  SourceType,
+  Study,
+  Partner,
+  PartnerCategory,
+  CCIEvent,
+  Resource,
+  CertifiedCompany,
+  Hito,
+} from "@/data/types";
+
+const builder = createImageUrlBuilder(client);
+
+// --- Normalizadores ------------------------------------------------------
+// Los documentos migrados guardan el tipo de fuente con tilde ("académica",
+// "estimación"), pero el panel ofrece las variantes sin tilde. Aceptamos ambas.
+function normalizeSourceType(v: string | undefined): SourceType {
+  switch (v) {
+    case "academica":
+    case "académica":
+      return "académica";
+    case "estimacion":
+    case "estimación":
+      return "estimación";
+    case "oficial":
+    case "cci":
+    case "empresa":
+    case "internacional":
+      return v;
+    default:
+      return (v as SourceType) ?? "cci";
+  }
+}
+
+// El panel usa "Institución pública / gremial" (con tilde); el tipo del sitio
+// usa la variante sin tilde. Normalizamos para que el filtro de Socios calce.
+function normalizePartnerCategory(v: string | undefined): PartnerCategory {
+  if (v === "Institución pública / gremial") return "Institución publica / gremial";
+  return (v as PartnerCategory) ?? "Industrializadora";
+}
+
+function bytesLegibles(size: number | undefined): string | undefined {
+  if (!size || size <= 0) return undefined;
+  if (size < 1024 * 1024) return `${Math.round(size / 1024)} KB`;
+  return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+const FORMATOS_VALIDOS = new Set(["PDF", "XLSX", "ZIP"]);
+
+// --- Noticias ------------------------------------------------------------
+type NoticiaDoc = {
+  _id: string;
+  titulo: string;
+  slug: string;
+  bajada: string;
+  categoria: Article["category"];
+  tipo: Article["type"];
+  fecha: string;
+  autor?: string;
+  foto?: { asset?: { _ref?: string } };
+  fotoUrl?: string;
+  etiquetaFoto?: string;
+  minutosLectura?: number;
+  cuerpo?: PortableTextBlock[];
+  fuenteUrl?: string;
+  fuenteNombre?: string;
+  colorDesde?: string;
+  colorHasta?: string;
+};
+
+function toArticle(d: NoticiaDoc): Article {
+  // La foto puede venir como imagen subida en Sanity (asset) o como URL externa.
+  const photo = d.foto?.asset?._ref
+    ? builder.image(d.foto).width(1200).fit("max").auto("format").url()
+    : d.fotoUrl || undefined;
+
+  const cuerpo = Array.isArray(d.cuerpo) ? d.cuerpo : [];
+  // Texto plano de respaldo: un string por bloque.
+  const content = cuerpo
+    .map((b) => toPlainText([b]))
+    .filter((t) => t.trim().length > 0);
+
+  return {
+    id: d._id,
+    slug: d.slug,
+    title: d.titulo,
+    excerpt: d.bajada,
+    category: d.categoria,
+    type: d.tipo,
+    date: d.fecha,
+    author: d.autor ?? "Redacción CCI",
+    image: {
+      from: d.colorDesde ?? "#2B2B2B",
+      to: d.colorHasta ?? "#5C5C5C",
+      label: d.etiquetaFoto ?? "",
+    },
+    photo,
+    readingMinutes: d.minutosLectura ?? 4,
+    content,
+    body: cuerpo,
+    sourceUrl: d.fuenteUrl,
+    sourceName: d.fuenteNombre,
+  };
+}
+
+export async function getArticles(): Promise<Article[]> {
+  const docs = await client.fetch<NoticiaDoc[]>(noticiasQuery);
+  return docs.map(toArticle);
+}
+
+export async function getArticleBySlug(slug: string): Promise<Article | null> {
+  const doc = await client.fetch<NoticiaDoc | null>(noticiaBySlugQuery, { slug });
+  return doc ? toArticle(doc) : null;
+}
+
+export async function getArticleSlugs(): Promise<string[]> {
+  const rows = await client.fetch<{ slug: string }[]>(noticiaSlugsQuery);
+  return rows.map((r) => r.slug).filter(Boolean);
+}
+
+/** Relacionadas: misma categoría primero, luego el resto. Lógica original. */
+export function getRelatedArticles(article: Article, all: Article[], limit = 3): Article[] {
+  return all
+    .filter((a) => a.id !== article.id && a.category === article.category)
+    .concat(all.filter((a) => a.id !== article.id && a.category !== article.category))
+    .slice(0, limit);
+}
+
+// --- Indicadores ---------------------------------------------------------
+type IndicadorDoc = {
+  _id: string;
+  clave: string;
+  valor: string;
+  unidad?: string;
+  etiqueta: string;
+  nota: string;
+  estado: Indicator["status"];
+  tipoFuente?: string;
+  ambito: Indicator["geography"];
+  actualizado?: string;
+  grupo: "portada" | "radar" | "pendiente";
+  fuente?: {
+    _id: string;
+    titulo: string;
+    organizacion: string;
+    anio: number;
+    url?: string;
+    tipoFuente?: string;
+  } | null;
+};
+
+function toIndicator(d: IndicadorDoc): Indicator {
+  const source: Source | undefined = d.fuente
+    ? {
+        id: d.fuente._id,
+        title: d.fuente.titulo,
+        organization: d.fuente.organizacion,
+        year: d.fuente.anio,
+        url: d.fuente.url,
+        sourceType: normalizeSourceType(d.fuente.tipoFuente),
+      }
+    : undefined;
+
+  return {
+    id: d.clave,
+    value: d.valor,
+    unit: d.unidad,
+    label: d.etiqueta,
+    note: d.nota,
+    status: d.estado,
+    sourceType: normalizeSourceType(d.tipoFuente),
+    source,
+    lastUpdated: d.actualizado,
+    geography: d.ambito,
+  };
+}
+
+async function getIndicadores(): Promise<IndicadorDoc[]> {
+  return client.fetch<IndicadorDoc[]>(indicadoresQuery);
+}
+
+/** grupo "portada": franja "El desafío y la evidencia" (Home y Evidencia). */
+export async function getPortadaIndicators(): Promise<Indicator[]> {
+  const docs = await getIndicadores();
+  return docs.filter((d) => d.grupo === "portada").map(toIndicator);
+}
+
+/** grupo "radar": estado del ecosistema. */
+export async function getRadarIndicators(): Promise<Indicator[]> {
+  const docs = await getIndicadores();
+  return docs.filter((d) => d.grupo === "radar").map(toIndicator);
+}
+
+/** grupo "pendiente": datos que aún no existen. */
+export async function getRadarPending(): Promise<Indicator[]> {
+  const docs = await getIndicadores();
+  return docs.filter((d) => d.grupo === "pendiente").map(toIndicator);
+}
+
+// --- Estudios ------------------------------------------------------------
+type EstudioDoc = {
+  _id: string;
+  titulo: string;
+  slug?: string;
+  organizacion: string;
+  anio: number;
+  ambito: Study["geography"];
+  tema: string;
+  hallazgo: string;
+  tipoFuente?: string;
+  url?: string;
+};
+
+export async function getStudies(): Promise<Study[]> {
+  const docs = await client.fetch<EstudioDoc[]>(estudiosQuery);
+  return docs.map((d) => ({
+    id: d._id,
+    slug: d.slug ?? "",
+    title: d.titulo,
+    organization: d.organizacion,
+    year: d.anio,
+    geography: d.ambito,
+    topic: d.tema,
+    keyFinding: d.hallazgo,
+    url: d.url,
+    sourceType: normalizeSourceType(d.tipoFuente),
+  }));
+}
+
+// --- Empresas certificadas (Radar) --------------------------------------
+type EmpresaCertDoc = {
+  _id: string;
+  nombre: string;
+  resolucion: string;
+  fecha: string;
+  segundaResolucion?: boolean;
+  convenioDitec?: boolean;
+};
+
+export async function getCertifiedCompanies(): Promise<CertifiedCompany[]> {
+  const docs = await client.fetch<EmpresaCertDoc[]>(empresasCertificadasQuery);
+  return docs.map((d) => ({
+    name: d.nombre,
+    resolution: d.resolucion,
+    date: d.fecha,
+    year: Number(d.fecha?.slice(0, 4)),
+    repeat: d.segundaResolucion || undefined,
+    convenio: d.convenioDitec || undefined,
+  }));
+}
+
+// --- Convenios DITEC -----------------------------------------------------
+// Listado oficial del MINVU, independiente del de empresas certificadas.
+// Incluye empresas que no aparecen entre las certificadas (p. ej. Easywood).
+export async function getConveniosDitec(): Promise<string[]> {
+  const rows = await client.fetch<{ nombre: string }[]>(conveniosDitecQuery);
+  return rows.map((r) => r.nombre).filter(Boolean);
+}
+
+// --- Hitos ---------------------------------------------------------------
+type HitoDoc = {
+  _id: string;
+  periodo: string;
+  fecha: string;
+  titulo: string;
+  detalle: string;
+  tipo: Hito["tipo"];
+  estado: Hito["estado"];
+  fuenteUrl?: string;
+};
+
+export async function getHitos(): Promise<Hito[]> {
+  const docs = await client.fetch<HitoDoc[]>(hitosQuery);
+  return docs.map((d) => ({
+    id: d._id,
+    periodo: d.periodo,
+    fecha: d.fecha,
+    titulo: d.titulo,
+    detalle: d.detalle,
+    tipo: d.tipo,
+    estado: d.estado,
+    fuente: d.fuenteUrl,
+  }));
+}
+
+// --- Empresas (Ecosistema / Socios) -------------------------------------
+type EmpresaDoc = {
+  _id: string;
+  nombre: string;
+  slug?: string;
+  categoria?: string;
+  descripcion: string;
+  iniciales?: string;
+  color?: string;
+};
+
+export async function getPartners(): Promise<Partner[]> {
+  const docs = await client.fetch<EmpresaDoc[]>(empresasQuery);
+  return docs.map((d) => ({
+    id: d._id,
+    slug: d.slug ?? "",
+    name: d.nombre,
+    category: normalizePartnerCategory(d.categoria),
+    description: d.descripcion,
+    logoInitials: d.iniciales ?? "",
+    logoColor: d.color ?? "#5C5C5C",
+  }));
+}
+
+// --- Eventos -------------------------------------------------------------
+type EventoDoc = {
+  _id: string;
+  titulo: string;
+  fecha: string;
+  lugar: string;
+  modalidad: CCIEvent["modality"];
+  descripcion?: string;
+};
+
+export async function getEvents(): Promise<CCIEvent[]> {
+  const docs = await client.fetch<EventoDoc[]>(eventosQuery);
+  return docs.map((d) => ({
+    id: d._id,
+    title: d.titulo,
+    date: d.fecha,
+    location: d.lugar,
+    modality: d.modalidad,
+    description: d.descripcion ?? "",
+  }));
+}
+
+// --- Recursos ------------------------------------------------------------
+type RecursoDoc = {
+  _id: string;
+  titulo: string;
+  descripcion: string;
+  tipo: Resource["type"];
+  fecha: string;
+  archivo?: { asset?: { extension?: string; size?: number } };
+};
+
+export async function getResources(): Promise<Resource[]> {
+  const docs = await client.fetch<RecursoDoc[]>(recursosQuery);
+  return docs.map((d) => {
+    const ext = d.archivo?.asset?.extension?.toUpperCase();
+    const format = ext && FORMATOS_VALIDOS.has(ext) ? (ext as Resource["format"]) : undefined;
+    return {
+      id: d._id,
+      title: d.titulo,
+      description: d.descripcion,
+      type: d.tipo,
+      format,
+      weight: bytesLegibles(d.archivo?.asset?.size),
+      date: d.fecha,
+    };
+  });
+}

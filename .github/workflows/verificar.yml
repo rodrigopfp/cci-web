@@ -18,9 +18,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      # v5: el runtime de la propia action ya no depende de Node 20 (evita el
+      # aviso de deprecación). node-version abajo sigue en 20 para compilar con
+      # la misma versión que produccion (Dockerfile node:20-alpine).
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: "20"
           cache: "npm"
@@ -29,6 +32,11 @@ jobs:
         run: npm ci
 
       - name: Compilar el sitio
+        # El build consulta a Sanity y necesita el projectId/dataset. Se toman
+        # de los secretos del repositorio (Settings → Secrets → Actions).
+        env:
+          NEXT_PUBLIC_SANITY_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_SANITY_PROJECT_ID }}
+          NEXT_PUBLIC_SANITY_DATASET: ${{ secrets.NEXT_PUBLIC_SANITY_DATASET }}
         run: npm run build
 
       - name: Revisar vulnerabilidades conocidas

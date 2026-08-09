@@ -87,7 +87,7 @@ export const sources: Record<string, Source> = {
 // Mezclan un dato país oficial con evidencia internacional sólida.
 export const indicators: Indicator[] = [
   {
-    id: "déficit",
+    id: "deficit",
     value: "491.904",
     unit: "viviendas",
     label: "Déficit habitacional en Chile",
@@ -130,36 +130,10 @@ export const indicators: Indicator[] = [
   },
 ];
 
-// Indicadores país que el CCI aún NO ha levantado: se muestran honestamente vacíos.
-export const pendingIndicators: Indicator[] = [
-  {
-    id: "viviendas-ind-cl",
-    value: "En levantamiento",
-    label: "Viviendas industrializadas en Chile",
-    note: "El CCI está construyendo la metodología para cuantificar el parque industrializado nacional. Dato aún no disponible.",
-    status: "pending",
-    sourceType: "cci",
-    geography: "Chile",
-  },
-  {
-    id: "empresas-cl",
-    value: "En levantamiento",
-    label: "Empresas industrializadoras",
-    note: "Catastro del ecosistema en construcción. Se publicara con su metodología.",
-    status: "pending",
-    sourceType: "cci",
-    geography: "Chile",
-  },
-  {
-    id: "plantas-cl",
-    value: "En levantamiento",
-    label: "Plantas productivas",
-    note: "Infraestructura industrial instalada en el país. Dato en desarrollo.",
-    status: "pending",
-    sourceType: "cci",
-    geography: "Chile",
-  },
-];
+// NOTA: `pendingIndicators` se eliminó. Era código muerto (no se renderizaba en
+// ninguna página) que duplicaba a los indicadores del grupo "pendiente" del
+// Radar. Sus 3 documentos migrados (empresas-cl, plantas-cl, viviendas-ind-cl)
+// también se borraron del dataset de Sanity.
 
 export const studies: Study[] = [
   {

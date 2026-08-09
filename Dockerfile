@@ -13,13 +13,37 @@
 FROM node:20-alpine AS build
 WORKDIR /app
 
+# Variables públicas de Sanity. Next.js las INCRUSTA en el bundle en tiempo de
+# compilación, así que deben estar en el entorno ANTES de `npm run build`.
+# Railway entrega las variables del servicio como build args con el mismo
+# nombre; aquí las recibimos como ARG y las exponemos como ENV para el build.
+# Sin ellas, el sitio compilaría sin projectId y quedaría vacío.
+ARG NEXT_PUBLIC_SANITY_PROJECT_ID
+ARG NEXT_PUBLIC_SANITY_DATASET=production
+ENV NEXT_PUBLIC_SANITY_PROJECT_ID=$NEXT_PUBLIC_SANITY_PROJECT_ID
+ENV NEXT_PUBLIC_SANITY_DATASET=$NEXT_PUBLIC_SANITY_DATASET
+
 # Se copian primero los manifiestos para aprovechar la caché de capas:
 # si no cambian las dependencias, no se reinstalan en cada despliegue.
+# npm ci depende SOLO de estos manifiestos, así que sigue cacheado (es lo lento).
 COPY package.json package-lock.json ./
 RUN npm ci
 
 COPY . .
-RUN npm run build
+
+# ----------------------------------------------------------------------------
+# INVALIDACIÓN DE CACHÉ DEL BUILD.
+# `npm run build` consulta a Sanity en tiempo de compilación, por lo que esta
+# capa NUNCA debe servirse desde caché: si no, un rebuild sin cambios de código
+# (p. ej. tras editar en el panel) reutilizaría la imagen anterior y el sitio
+# no vería el contenido nuevo.
+#
+# CACHE_BUST cambia en cada despliegue (variable de Railway = ${{ RAILWAY_DEPLOYMENT_ID }}).
+# Al referenciarlo dentro del RUN, BuildKit invalida esta capa y las siguientes
+# cada vez que su valor cambia, forzando la recompilación y una consulta fresca
+# a Sanity. npm ci (arriba) queda intacto porque no depende de este ARG.
+ARG CACHE_BUST=dev
+RUN echo "cache-bust: $CACHE_BUST" && npm run build
 
 # ---------- Etapa 2: publicación ----------
 FROM caddy:2-alpine

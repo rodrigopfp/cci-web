@@ -1,6 +1,7 @@
-import { resources } from "@/data/resources";
+import { getResources } from "@/sanity/fetch";
 import { ResourceCard } from "@/components/Blocks";
-export default function RecursosPage() {
+export default async function RecursosPage() {
+  const resources = await getResources();
   return (
     <>
       <section className="border-b border-cci-line bg-cci-paper"><div className="container-cci py-14">

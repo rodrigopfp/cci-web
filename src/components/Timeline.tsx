@@ -1,4 +1,5 @@
-import { hitos, tipoLabel, type Hito } from "@/data/hitos";
+import { tipoLabel } from "@/lib/format";
+import type { Hito } from "@/data/types";
 
 /**
  * LÍNEA DE TIEMPO — "vía de producción"
@@ -97,7 +98,7 @@ function HitoCard({ hito, index }: { hito: Hito; index: number }) {
   );
 }
 
-export function Timeline() {
+export function Timeline({ hitos }: { hitos: Hito[] }) {
   // índice donde termina lo ejecutado, para insertar el marcador HOY
   const corte = hitos.findIndex((h) => h.estado === "programado");
 

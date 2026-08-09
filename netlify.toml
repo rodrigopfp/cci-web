@@ -27,9 +27,9 @@
     Strict-Transport-Security = "max-age=31536000; includeSubDomains"
     # Política de contenido: declara explícitamente de dónde puede cargar cada
     # tipo de recurso. Todo lo no declarado queda bloqueado.
-    #   - fuentes e imágenes: Google Fonts y Unsplash (las que usa el sitio)
+    #   - fuentes e imágenes: Google Fonts, Unsplash y Sanity (las que usa el sitio)
     #   - sin objetos, sin frames, sin formularios hacia terceros
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://images.unsplash.com; connect-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://images.unsplash.com https://cdn.sanity.io; connect-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
 
 # Los archivos versionados de Next pueden cachearse de forma agresiva.
 [[headers]]

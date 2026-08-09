@@ -13,6 +13,7 @@ npm run build   # genera el sitio estático en /out
 ## Documentación del proyecto
 - **[GUIA-DE-EDICION.md](GUIA-DE-EDICION.md)** — cómo editar contenido sin ser programador. Empieza por aquí.
 - **[DESPLIEGUE.md](DESPLIEGUE.md)** — publicar en Railway + GitHub y trabajar entre varias personas.
+- **[CMS-SANITY.md](CMS-SANITY.md)** — instalar el panel de administración de contenido.
 - **[SEGURIDAD.md](SEGURIDAD.md)** — arquitectura de seguridad, mantenimiento y pendientes antes de publicar.
 
 ## Arquitectura

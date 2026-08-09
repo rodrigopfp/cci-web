@@ -1,0 +1,22 @@
+{
+  "name": "cci-studio",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Panel de administración de contenido del sitio CCI",
+  "scripts": {
+    "dev": "sanity dev",
+    "build": "sanity build",
+    "deploy": "sanity deploy",
+    "import": "sanity dataset import ../sanity-import.ndjson production"
+  },
+  "dependencies": {
+    "@sanity/vision": "^5.30.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "sanity": "^5.30.0",
+    "styled-components": "^6.1.19"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.3"
+  }
+}

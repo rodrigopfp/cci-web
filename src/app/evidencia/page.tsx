@@ -1,4 +1,5 @@
-import { studies, indicators } from "@/data/indicators";
+import { getStudies, getPortadaIndicators } from "@/sanity/fetch";
+import type { Study } from "@/data/types";
 import { MetricCard } from "@/components/MetricCard";
 import { sourceTypeLabel } from "@/lib/format";
 
@@ -7,7 +8,8 @@ export const metadata = {
   description: "Investigación, datos y estudios nacionales e internacionales sobre construcción industrializada.",
 };
 
-export default function EvidenciaPage() {
+export default async function EvidenciaPage() {
+  const [studies, indicators] = await Promise.all([getStudies(), getPortadaIndicators()]);
   const chilenos = studies.filter((s) => s.geography === "Chile");
   const internacionales = studies.filter((s) => s.geography === "Internacional");
 
@@ -69,7 +71,7 @@ export default function EvidenciaPage() {
   );
 }
 
-function StudyCard({ study }: { study: (typeof studies)[number] }) {
+function StudyCard({ study }: { study: Study }) {
   return (
     <a href={study.url} target="_blank" rel="noopener noreferrer" className="card-rise group relative flex flex-col gap-3 overflow-hidden rounded-xl border border-cci-line bg-white p-6 shadow-card">
       <div className="flex flex-wrap items-center gap-x-5 gap-y-2">

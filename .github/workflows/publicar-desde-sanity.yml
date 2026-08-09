@@ -1,0 +1,89 @@
+# PUENTE SANITY → RAILWAY
+#
+# Railway no acepta webhooks de entrada para recompilar, así que este flujo
+# hace de intermediario:
+#
+#   1. Alguien publica en Sanity
+#   2. Sanity avisa a GitHub (evento repository_dispatch)
+#   3. Este flujo le pide a Railway que vuelva a desplegar
+#   4. Railway recompila el sitio con el contenido nuevo (2–3 minutos)
+#
+# Configuración necesaria (una sola vez):
+#   - En GitHub → Settings → Secrets and variables → Actions → New repository
+#     secret, crear:
+#       RAILWAY_TOKEN          (token de cuenta de Railway: Account → Tokens)
+#       RAILWAY_SERVICE_ID     (ID del servicio, visible en su URL)
+#       RAILWAY_ENVIRONMENT_ID (ID del entorno production)
+#   - En Sanity → Manage → API → Webhooks, apuntar a la API de GitHub
+#     (el detalle está en CMS-SANITY.md)
+
+name: Publicar cambios de contenido
+
+on:
+  repository_dispatch:
+    types: [sanity-publicado]
+  # También permite lanzarlo a mano desde la pestaña Actions.
+  workflow_dispatch:
+
+jobs:
+  redesplegar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verificar que los secretos existen
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          RAILWAY_SERVICE_ID: ${{ secrets.RAILWAY_SERVICE_ID }}
+          RAILWAY_ENVIRONMENT_ID: ${{ secrets.RAILWAY_ENVIRONMENT_ID }}
+        run: |
+          faltan=""
+          [ -z "$RAILWAY_TOKEN" ] && faltan="$faltan RAILWAY_TOKEN"
+          [ -z "$RAILWAY_SERVICE_ID" ] && faltan="$faltan RAILWAY_SERVICE_ID"
+          [ -z "$RAILWAY_ENVIRONMENT_ID" ] && faltan="$faltan RAILWAY_ENVIRONMENT_ID"
+          if [ -n "$faltan" ]; then
+            echo "::error::Faltan secretos en GitHub → Settings → Secrets → Actions:$faltan"
+            exit 1
+          fi
+          echo "Secretos presentes."
+
+      - name: Pedir a Railway que vuelva a desplegar
+        env:
+          # Los secretos se pasan por entorno (no incrustados en el comando):
+          # evita problemas de escape y no expone el token en el script.
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          RAILWAY_SERVICE_ID: ${{ secrets.RAILWAY_SERVICE_ID }}
+          RAILWAY_ENVIRONMENT_ID: ${{ secrets.RAILWAY_ENVIRONMENT_ID }}
+        run: |
+          # El cuerpo JSON se arma con jq (preinstalado en ubuntu-latest) para
+          # escapar bien los valores.
+          payload=$(jq -n \
+            --arg s "$RAILWAY_SERVICE_ID" \
+            --arg e "$RAILWAY_ENVIRONMENT_ID" \
+            '{query: "mutation($serviceId: String!, $environmentId: String!) { serviceInstanceRedeploy(serviceId: $serviceId, environmentId: $environmentId) }", variables: {serviceId: $s, environmentId: $e}}')
+
+          # Se captura cuerpo y código HTTP por separado (sin --fail, para poder
+          # leer el mensaje de error de la API).
+          respuesta=$(curl --silent --show-error \
+            --write-out "\n%{http_code}" \
+            --request POST \
+            --url https://backboard.railway.app/graphql/v2 \
+            --header "Authorization: Bearer $RAILWAY_TOKEN" \
+            --header "Content-Type: application/json" \
+            --data "$payload")
+
+          codigo=$(printf '%s' "$respuesta" | tail -n1)
+          cuerpo=$(printf '%s' "$respuesta" | sed '$d')
+          echo "HTTP $codigo"
+          echo "Respuesta: $cuerpo"
+
+          # Falla si el HTTP no es 2xx…
+          if [ "$codigo" -lt 200 ] || [ "$codigo" -ge 300 ]; then
+            echo "::error::Railway respondió HTTP $codigo. Revisa RAILWAY_TOKEN."
+            exit 1
+          fi
+          # …o si GraphQL devolvió errores (esto viene con HTTP 200).
+          if printf '%s' "$cuerpo" | jq -e '.errors' >/dev/null 2>&1; then
+            echo "::error::Railway devolvió errores de GraphQL. Revisa RAILWAY_SERVICE_ID y RAILWAY_ENVIRONMENT_ID."
+            exit 1
+          fi
+
+          echo "Redespliegue solicitado. El sitio se actualiza en 2–3 minutos."

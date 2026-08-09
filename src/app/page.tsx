@@ -1,17 +1,30 @@
 import Link from "next/link";
-import { articles } from "@/data/articles";
-import { partners } from "@/data/partners";
-import { resources } from "@/data/resources";
-import { events } from "@/data/resources";
-import { indicators, studies } from "@/data/indicators";
-import { radarIndicators } from "@/data/radar";
+import {
+  getArticles,
+  getPartners,
+  getResources,
+  getEvents,
+  getPortadaIndicators,
+  getRadarIndicators,
+  getStudies,
+} from "@/sanity/fetch";
 import { ArticleCard, FeaturedArticle } from "@/components/ArticleCard";
 import { PartnerCard, SectionHeader, CTASection, EditorialPolicyBlock } from "@/components/Blocks";
 import { MetricCard } from "@/components/MetricCard";
 import { NewsletterBox } from "@/components/Footer";
 import { CCICubeOutline } from "@/components/Logo";
 
-export default function Home() {
+export default async function Home() {
+  const [articles, partners, resources, events, indicators, radarIndicators, studies] =
+    await Promise.all([
+      getArticles(),
+      getPartners(),
+      getResources(),
+      getEvents(),
+      getPortadaIndicators(),
+      getRadarIndicators(),
+      getStudies(),
+    ]);
   const featured = articles[0];
   const latest = articles.slice(1, 5);
 
