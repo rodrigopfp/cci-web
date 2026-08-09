@@ -166,8 +166,8 @@ function GaugeCard({ kpi, reduced }: { kpi: KpiGauge; reduced: boolean }) {
       <span className="text-xs font-700 uppercase tracking-wide text-cci-slate-light">
         {kpi.label}
       </span>
-      <div className="relative mx-auto mt-2 w-full max-w-[240px]">
-        <svg viewBox="0 0 200 116" className="w-full" role="img" aria-label={kpi.display}>
+      <div className="mx-auto mt-2 w-full max-w-[240px]">
+        <svg viewBox="0 0 200 108" className="w-full" role="img" aria-label={kpi.display}>
           {/* pista */}
           <path
             d={arcPath(cx, cy, r, 0, 100)}
@@ -196,10 +196,12 @@ function GaugeCard({ kpi, reduced }: { kpi: KpiGauge; reduced: boolean }) {
           <line x1={cx} y1={cy} x2={nx} y2={ny} stroke="#2B2B2B" strokeWidth={3} strokeLinecap="round" />
           <circle cx={cx} cy={cy} r={7} fill="#2B2B2B" />
         </svg>
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 text-center">
-          <span className="font-display text-4xl font-900 text-cci-orange">{Math.round(v)}%</span>
-        </div>
       </div>
+      {/* Número bajo la línea base del semicírculo (velocímetro clásico): vive
+          fuera del área de la aguja, por lo que nunca se superponen. */}
+      <p className="mt-2 text-center font-display text-4xl font-900 leading-none text-cci-orange">
+        {Math.round(v)}%
+      </p>
       <p className="mt-3 font-display text-lg font-800 text-cci-ink">{kpi.display}</p>
       <p className="mt-1 text-sm text-cci-slate">{kpi.note}</p>
       <div className="mt-auto">
