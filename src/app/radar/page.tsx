@@ -1,11 +1,10 @@
 import {
-  radarIndicators,
-  radarPending,
-  certifiedCompanies,
-  certificationsByYear,
-  conveniosDitec,
-  uniqueCompanyCount,
-} from "@/data/radar";
+  getRadarIndicators,
+  getRadarPending,
+  getCertifiedCompanies,
+  getConveniosDitec,
+  getHitos,
+} from "@/sanity/fetch";
 import { MetricCard } from "@/components/MetricCard";
 import { Timeline } from "@/components/Timeline";
 import { formatDate } from "@/lib/format";
@@ -18,7 +17,25 @@ export const metadata = {
 
 const MINVU_URL = "https://www.minvu.gob.cl/construccion-industrializada/";
 
-export default function RadarPage() {
+export default async function RadarPage() {
+  const [radarIndicators, radarPending, certifiedCompanies, conveniosDitec, hitos] =
+    await Promise.all([
+      getRadarIndicators(),
+      getRadarPending(),
+      getCertifiedCompanies(),
+      getConveniosDitec(),
+      getHitos(),
+    ]);
+
+  // Derivados a partir del listado oficial (antes precalculados en src/data/radar).
+  const certificationsByYear = [2023, 2024, 2025, 2026].map((year) => ({
+    year,
+    count: certifiedCompanies.filter((c) => c.year === year).length,
+  }));
+  const uniqueCompanyCount = new Set(
+    certifiedCompanies.filter((c) => !c.repeat).map((c) => c.name)
+  ).size;
+
   const maxCount = Math.max(...certificationsByYear.map((c) => c.count));
 
   return (
@@ -117,7 +134,7 @@ export default function RadarPage() {
           Desplázate para recorrer la secuencia.
         </p>
         <div className="mt-10">
-          <Timeline />
+          <Timeline hitos={hitos} />
         </div>
       </section>
 

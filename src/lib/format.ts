@@ -1,4 +1,4 @@
-import type { ContentType, SourceType, DataStatus, Category } from "@/data/types";
+import type { ContentType, SourceType, DataStatus, Category, HitoTipo } from "@/data/types";
 
 export function formatDate(iso: string) {
   const d = new Date(iso + "T00:00:00");
@@ -33,6 +33,14 @@ export const dataStatusLabel: Record<DataStatus, string> = {
   real: "Dato verificado",
   mock: "Dato de ejemplo",
   pending: "En levantamiento",
+};
+
+// Etiqueta del tipo de hito en la línea de tiempo del Radar.
+export const tipoLabel: Record<HitoTipo, string> = {
+  normativa: "Normativa",
+  obra: "Obra",
+  gremial: "Gremial",
+  dato: "Dato",
 };
 export const dataStatusStyle: Record<DataStatus, string> = {
   real: "bg-cci-blue-soft text-cci-blue",

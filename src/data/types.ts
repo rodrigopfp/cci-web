@@ -1,5 +1,7 @@
 // Tipos del dominio. Centralizados para mapear a un CMS a futuro.
 
+import type { PortableTextBlock } from "@portabletext/types";
+
 export type ContentType = "editorial" | "socio" | "patrocinado";
 
 export type Category =
@@ -47,6 +49,9 @@ export interface Article {
   photo?: string;
   readingMinutes: number;
   content: string[];
+  /** Cuerpo en texto enriquecido (Portable Text) desde Sanity. Se renderiza
+   *  con <PortableText>. `content` se mantiene como texto plano de respaldo. */
+  body?: PortableTextBlock[];
   partner?: Partner;
   /** URL de la fuente original de la noticia. Toda noticia real la lleva. */
   sourceUrl?: string;
@@ -58,8 +63,10 @@ export interface Resource {
   title: string;
   description: string;
   type: "Guía técnica" | "Estudio" | "Normativa" | "Ficha";
-  format: "PDF" | "XLSX" | "ZIP";
-  weight: string;
+  /** Derivados del archivo subido en Sanity. Opcionales: los recursos migrados
+   *  aún no tienen archivo cargado (descargas simuladas, ver SEGURIDAD.md). */
+  format?: "PDF" | "XLSX" | "ZIP";
+  weight?: string;
   date: string;
 }
 
@@ -122,4 +129,32 @@ export interface Study {
   keyFinding: string; // hallázgo principal parafraseado
   url?: string;
   sourceType: SourceType;
+}
+
+// ---- Radar: empresas certificadas y línea de tiempo --------------------
+
+export interface CertifiedCompany {
+  name: string;
+  resolution: string;
+  date: string; // ISO
+  year: number;
+  /** true cuando es una segunda resolución de una empresa ya certificada */
+  repeat?: boolean;
+  /** empresa además en convenio con DITEC */
+  convenio?: boolean;
+}
+
+export type HitoTipo = "normativa" | "obra" | "gremial" | "dato";
+
+export interface Hito {
+  id: string;
+  /** Etiqueta corta de período, para el eje */
+  periodo: string;
+  /** Fecha ISO aproximada, para ordenar */
+  fecha: string;
+  titulo: string;
+  detalle: string;
+  tipo: HitoTipo;
+  estado: "ejecutado" | "programado";
+  fuente?: string;
 }

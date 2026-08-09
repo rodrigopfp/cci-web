@@ -1,0 +1,45 @@
+# PUENTE SANITY → RAILWAY
+#
+# Railway no acepta webhooks de entrada para recompilar, así que este flujo
+# hace de intermediario:
+#
+#   1. Alguien publica en Sanity
+#   2. Sanity avisa a GitHub (evento repository_dispatch)
+#   3. Este flujo le pide a Railway que vuelva a desplegar
+#   4. Railway recompila el sitio con el contenido nuevo (2–3 minutos)
+#
+# Configuración necesaria (una sola vez):
+#   - En GitHub → Settings → Secrets → Actions, crear:
+#       RAILWAY_TOKEN        (token de cuenta de Railway)
+#       RAILWAY_SERVICE_ID   (ID del servicio, visible en su URL)
+#       RAILWAY_ENVIRONMENT_ID (ID del entorno production)
+#   - En Sanity → Manage → API → Webhooks, apuntar a la API de GitHub
+#     (el detalle está en CMS-SANITY.md)
+
+name: Publicar cambios de contenido
+
+on:
+  repository_dispatch:
+    types: [sanity-publicado]
+  # También permite lanzarlo a mano desde la pestaña Actions.
+  workflow_dispatch:
+
+jobs:
+  redesplegar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pedir a Railway que vuelva a desplegar
+        run: |
+          curl --fail --silent --show-error \
+            --request POST \
+            --url https://backboard.railway.app/graphql/v2 \
+            --header "Authorization: Bearer ${{ secrets.RAILWAY_TOKEN }}" \
+            --header "Content-Type: application/json" \
+            --data '{
+              "query": "mutation($serviceId: String!, $environmentId: String!) { serviceInstanceRedeploy(serviceId: $serviceId, environmentId: $environmentId) }",
+              "variables": {
+                "serviceId": "${{ secrets.RAILWAY_SERVICE_ID }}",
+                "environmentId": "${{ secrets.RAILWAY_ENVIRONMENT_ID }}"
+              }
+            }'
+          echo "Redespliegue solicitado. El sitio se actualiza en 2–3 minutos."

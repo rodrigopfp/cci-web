@@ -13,6 +13,16 @@
 FROM node:20-alpine AS build
 WORKDIR /app
 
+# Variables públicas de Sanity. Next.js las INCRUSTA en el bundle en tiempo de
+# compilación, así que deben estar en el entorno ANTES de `npm run build`.
+# Railway entrega las variables del servicio como build args con el mismo
+# nombre; aquí las recibimos como ARG y las exponemos como ENV para el build.
+# Sin ellas, el sitio compilaría sin projectId y quedaría vacío.
+ARG NEXT_PUBLIC_SANITY_PROJECT_ID
+ARG NEXT_PUBLIC_SANITY_DATASET=production
+ENV NEXT_PUBLIC_SANITY_PROJECT_ID=$NEXT_PUBLIC_SANITY_PROJECT_ID
+ENV NEXT_PUBLIC_SANITY_DATASET=$NEXT_PUBLIC_SANITY_DATASET
+
 # Se copian primero los manifiestos para aprovechar la caché de capas:
 # si no cambian las dependencias, no se reinstalan en cada despliegue.
 COPY package.json package-lock.json ./

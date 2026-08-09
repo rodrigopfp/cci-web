@@ -1,18 +1,23 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { articles, getArticleBySlug, getRelatedArticles } from "@/data/articles";
+import { PortableText } from "@portabletext/react";
+import { getArticles, getArticleBySlug, getArticleSlugs, getRelatedArticles } from "@/sanity/fetch";
 import { ArticleImage } from "@/components/ArticleImage";
 import { ArticleCard } from "@/components/ArticleCard";
 import { CategoryBadge, ContentTypeBadge, SponsoredBadge } from "@/components/Badges";
 import { PartnerLogo } from "@/components/Blocks";
 import { formatDate } from "@/lib/format";
 
-export function generateStaticParams() { return articles.map((a) => ({ slug: a.slug })); }
+export async function generateStaticParams() {
+  const slugs = await getArticleSlugs();
+  return slugs.map((slug) => ({ slug }));
+}
 
-export default function ArticlePage({ params }: { params: { slug: string } }) {
-  const article = getArticleBySlug(params.slug);
+export default async function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const article = await getArticleBySlug(slug);
   if (!article) notFound();
-  const related = getRelatedArticles(article);
+  const related = getRelatedArticles(article, await getArticles());
   return (
     <article>
       <div className="container-cci max-w-3xl pt-10">
@@ -28,7 +33,13 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
       <div className="container-cci max-w-4xl py-8"><ArticleImage image={article.image} photo={article.photo} alt={article.title} className="aspect-[21/9]" /></div>
       <div className="container-cci max-w-3xl">
         {article.type === "patrocinado" && <div className="mb-8"><SponsoredBadge /></div>}
-        <div className="space-y-5 text-[17px] leading-[1.75] text-cci-ink/90">{article.content.map((par, i) => <p key={i}>{par}</p>)}</div>
+        <div className="space-y-5 text-[17px] leading-[1.75] text-cci-ink/90">
+          {article.body && article.body.length > 0 ? (
+            <PortableText value={article.body} />
+          ) : (
+            article.content.map((par, i) => <p key={i}>{par}</p>)
+          )}
+        </div>
         {/* Fuente original: la plataforma enlaza, no reemplaza a la fuente */}
         {article.sourceUrl && (
           <div className="mt-8 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-cci-line bg-cci-paper p-5">
