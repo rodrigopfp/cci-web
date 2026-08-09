@@ -6,6 +6,7 @@ import {
   getHitos,
 } from "@/sanity/fetch";
 import { MetricCard } from "@/components/MetricCard";
+import { RadarKpis } from "@/components/RadarKpis";
 import { Timeline } from "@/components/Timeline";
 import { formatDate } from "@/lib/format";
 
@@ -57,6 +58,9 @@ export default async function RadarPage() {
           </p>
         </div>
       </section>
+
+      {/* LA INDUSTRIALIZACIÓN EN CIFRAS (KPIs internacionales) */}
+      <RadarKpis />
 
       {/* INDICADORES */}
       <section className="container-cci py-14">
