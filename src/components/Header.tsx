@@ -13,6 +13,7 @@ const nav = [
   { href: "/voces", label: "Voces" },
   { href: "/recursos", label: "Recursos" },
   { href: "/eventos", label: "Eventos" },
+  { href: "/eici", label: "EICI" },
   { href: "/publica", label: "Publica" },
 ];
 

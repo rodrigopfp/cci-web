@@ -54,6 +54,17 @@ export const vozBySlugQuery = `*[_type == "voz" && slug.current == $slug][0]{${V
 
 export const vozSlugsQuery = `*[_type == "voz" && defined(slug.current)]{"slug": slug.current}`;
 
+// --- EICI (singleton de la página del Encuentro) ------------------------
+export const eiciQuery = `*[_type == "eici"][0]{
+  tituloProximaEdicion,
+  fechaInicio,
+  fechaFin,
+  lugar,
+  emailCallForSpeakers,
+  mostrarCallForSpeakers,
+  galeria[]{ _key, caption, asset }
+}`;
+
 // --- Empresas certificadas (Radar) --------------------------------------
 export const empresasCertificadasQuery = `*[_type == "empresaCertificada"] | order(fecha desc){
   _id,

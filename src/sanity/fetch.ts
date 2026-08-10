@@ -16,6 +16,7 @@ import {
   vocesQuery,
   vozBySlugQuery,
   vozSlugsQuery,
+  eiciQuery,
   empresasCertificadasQuery,
   conveniosDitecQuery,
   indicadoresQuery,
@@ -38,6 +39,7 @@ import type {
   CertifiedCompany,
   Hito,
   Voz,
+  EiciConfig,
 } from "@/data/types";
 
 const builder = createImageUrlBuilder(client);
@@ -209,6 +211,39 @@ export async function getVozBySlug(slug: string): Promise<Voz | null> {
 export async function getVozSlugs(): Promise<string[]> {
   const rows = await client.fetch<{ slug: string }[]>(vozSlugsQuery);
   return rows.map((r) => r.slug).filter(Boolean);
+}
+
+// --- EICI (singleton de la página del Encuentro) ------------------------
+type EiciDoc = {
+  tituloProximaEdicion?: string;
+  fechaInicio?: string;
+  fechaFin?: string;
+  lugar?: string;
+  emailCallForSpeakers?: string;
+  mostrarCallForSpeakers?: boolean;
+  galeria?: { _key: string; caption?: string; asset?: { _ref?: string } }[];
+};
+
+export async function getEici(): Promise<EiciConfig | null> {
+  const d = await client.fetch<EiciDoc | null>(eiciQuery);
+  if (!d) return null;
+
+  const galeria = (Array.isArray(d.galeria) ? d.galeria : [])
+    .filter((g) => g?.asset?._ref)
+    .map((g) => ({
+      url: builder.image({ asset: g.asset }).width(1400).fit("max").auto("format").url(),
+      caption: g.caption,
+    }));
+
+  return {
+    tituloProximaEdicion: d.tituloProximaEdicion ?? "EICI 2027",
+    fechaInicio: d.fechaInicio,
+    fechaFin: d.fechaFin,
+    lugar: d.lugar,
+    emailCallForSpeakers: d.emailCallForSpeakers,
+    mostrarCallForSpeakers: d.mostrarCallForSpeakers ?? true,
+    galeria,
+  };
 }
 
 // --- Indicadores ---------------------------------------------------------

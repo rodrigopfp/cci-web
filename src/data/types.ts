@@ -165,6 +165,24 @@ export interface Voz {
   orden?: number;
 }
 
+// ---- EICI (Encuentro Internacional de Construcción Industrializada) -----
+
+export interface EiciGalleryItem {
+  url: string;
+  caption?: string;
+}
+
+export interface EiciConfig {
+  tituloProximaEdicion: string;
+  /** ISO date (YYYY-MM-DD) de inicio; la cuenta regresiva apunta aquí. */
+  fechaInicio?: string;
+  fechaFin?: string;
+  lugar?: string;
+  emailCallForSpeakers?: string;
+  mostrarCallForSpeakers: boolean;
+  galeria: EiciGalleryItem[];
+}
+
 export type HitoTipo = "normativa" | "obra" | "gremial" | "dato";
 
 export interface Hito {
