@@ -62,26 +62,21 @@ export default async function EiciPage() {
 
   return (
     <>
-      {/* 1 · HERO — banner oficial. Fondo blanco para que se funda con la imagen. */}
-      <section className="border-b border-cci-line bg-white">
-        <div className="container-cci py-10 md:py-14">
+      {/* 1 · HERO (banner oficial) + CUENTA REGRESIVA — mismo contenedor a ancho
+          completo: banner y tarjeta comparten ancho y bordes alineados. En móvil,
+          de borde a borde con un padding mínimo. */}
+      <section className="bg-white py-6 md:py-8">
+        <div className="mx-auto w-full px-3 sm:px-6">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/eici/eici-2027-banner.jpg"
             alt="EICI Chile 2027 — Encuentro Internacional de Construcción Industrializada, 8 al 10 de septiembre"
-            className="mx-auto h-auto w-full max-w-[1000px]"
+            className="block h-auto w-full"
           />
+          <div className="mt-4 md:mt-6">
+            <EiciCountdown fechaInicio={eici?.fechaInicio} />
+          </div>
         </div>
-      </section>
-
-      {/* 2 · CUENTA REGRESIVA */}
-      <section className="container-cci pt-4 md:pt-6">
-        <EiciCountdown
-          titulo={titulo}
-          fechaInicio={eici?.fechaInicio}
-          fechaFin={eici?.fechaFin}
-          lugar={eici?.lugar}
-        />
       </section>
 
       {/* 3 · QUÉ ES EL EICI */}
