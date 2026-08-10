@@ -1,5 +1,6 @@
 import { getEici } from "@/sanity/fetch";
 import { EiciCountdown } from "@/components/EiciCountdown";
+import { EiciCifras } from "@/components/EiciCifras";
 
 export const metadata = {
   title: "EICI · Encuentro Internacional de Construcción Industrializada",
@@ -25,13 +26,6 @@ const COLABORADORES = [
   { nombre: "CTEC", marca: "CTEC", color: "#009DE6" },
   { nombre: "AOA", marca: "AOA", color: "#005CAD" },
   { nombre: "Colegio de Ingenieros", marca: "CI", color: "#5C5C5C" },
-];
-
-const CIFRAS_2025 = [
-  { valor: "+3.300", etiqueta: "Asistentes" },
-  { valor: "14", etiqueta: "Ciudades, de Arica a Punta Arenas" },
-  { valor: "+100", etiqueta: "Expertos" },
-  { valor: "3", etiqueta: "Jornadas (8–10 de septiembre)" },
 ];
 
 /** Marca tipográfica (sustituto generado, NO el logo oficial). */
@@ -149,16 +143,7 @@ export default async function EiciPage() {
             obras, y el anuncio de los premios Build UP CCI.
           </p>
 
-          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {CIFRAS_2025.map((c) => (
-              <div key={c.etiqueta} className="rounded-2xl border border-cci-line bg-white p-6 shadow-card">
-                <div className="font-display text-5xl font-900 leading-none text-cci-orange">
-                  {c.valor}
-                </div>
-                <p className="mt-3 text-sm text-cci-slate">{c.etiqueta}</p>
-              </div>
-            ))}
-          </div>
+          <EiciCifras />
 
           <div className="mt-6 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-cci-slate-light">
             <span>Fuente:</span>
