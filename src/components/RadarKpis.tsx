@@ -298,29 +298,8 @@ export function RadarKpis() {
             ariaLabel={velocidad.display}
             reduced={reduced}
           />
-          <GaugeCard
-            label={residuos.label}
-            note={residuos.note}
-            source={residuos.source}
-            scaleMax={100}
-            band={[0, residuos.value]}
-            target={residuos.value}
-            mirror
-            format={(v) => `-${Math.round(v)}%`}
-            ariaLabel={`${residuos.value}% menos residuos`}
-            reduced={reduced}
-          />
-          <GaugeCard
-            label={potencial.label}
-            note={potencial.note}
-            source={potencial.source}
-            scaleMax={12}
-            band={[5, 10]}
-            target={potencial.value}
-            format={(v) => `${potencial.prefix ?? ""}${Math.round(v)}${potencial.suffix ?? ""}`}
-            ariaLabel={potencial.label}
-            reduced={reduced}
-          />
+          <ResiduosGauge reduced={reduced} />
+          <PotencialGauge reduced={reduced} />
           <ProductividadCard kpi={productividad} reduced={reduced} />
           <CounterCard kpi={calidad} reduced={reduced} />
           <CounterCard kpi={costo} reduced={reduced} />
@@ -329,5 +308,58 @@ export function RadarKpis() {
         </div>
       </div>
     </section>
+  );
+}
+
+// ---- Instrumentos reutilizables (Radar + portada) ----------------------
+// Envuelven GaugeCard con la configuración de cada KPI, para usarlos en más de
+// un lugar sin duplicar el cableado de props.
+
+function PotencialGauge({ reduced }: { reduced: boolean }) {
+  return (
+    <GaugeCard
+      label={potencial.label}
+      note={potencial.note}
+      source={potencial.source}
+      scaleMax={12}
+      band={[5, 10]}
+      target={potencial.value}
+      format={(v) => `${potencial.prefix ?? ""}${Math.round(v)}${potencial.suffix ?? ""}`}
+      ariaLabel={potencial.label}
+      reduced={reduced}
+    />
+  );
+}
+
+function ResiduosGauge({ reduced }: { reduced: boolean }) {
+  return (
+    <GaugeCard
+      label={residuos.label}
+      note={residuos.note}
+      source={residuos.source}
+      scaleMax={100}
+      band={[0, residuos.value]}
+      target={residuos.value}
+      mirror
+      format={(v) => `-${Math.round(v)}%`}
+      ariaLabel={`${residuos.value}% menos residuos`}
+      reduced={reduced}
+    />
+  );
+}
+
+/**
+ * Avance para la portada: tres instrumentos (potencial · calidad · residuos)
+ * reutilizando los mismos componentes y datos, con la fila alineada igual que en
+ * el Radar (3 columnas en desktop; apiladas y parejas en móvil).
+ */
+export function RadarKpisPreview() {
+  const reduced = usePrefersReducedMotion();
+  return (
+    <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <PotencialGauge reduced={reduced} />
+      <CounterCard kpi={calidad} reduced={reduced} />
+      <ResiduosGauge reduced={reduced} />
+    </div>
   );
 }

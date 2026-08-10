@@ -4,26 +4,26 @@ import {
   getPartners,
   getResources,
   getEvents,
-  getPortadaIndicators,
   getRadarIndicators,
   getStudies,
   getVoces,
 } from "@/sanity/fetch";
-import { ArticleCard, FeaturedArticle } from "@/components/ArticleCard";
+import { FeaturedArticle } from "@/components/ArticleCard";
+import { RadarKpisPreview } from "@/components/RadarKpis";
 import { VozPortrait } from "@/components/VozCard";
 import { PartnerCard, SectionHeader, CTASection, EditorialPolicyBlock } from "@/components/Blocks";
 import { MetricCard } from "@/components/MetricCard";
 import { NewsletterBox } from "@/components/Footer";
 import { CCICubeOutline } from "@/components/Logo";
+import { formatDate } from "@/lib/format";
 
 export default async function Home() {
-  const [articles, partners, resources, events, indicators, radarIndicators, studies, voces] =
+  const [articles, partners, resources, events, radarIndicators, studies, voces] =
     await Promise.all([
       getArticles(),
       getPartners(),
       getResources(),
       getEvents(),
-      getPortadaIndicators(),
       getRadarIndicators(),
       getStudies(),
       getVoces(),
@@ -57,27 +57,63 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* INDICADORES — el desafío + la evidencia, cada uno con su fuente */}
+      {/* RADAR — instrumentos destacados: abre la portada con las cifras */}
       <section className="container-cci py-14">
-        <SectionHeader kicker="El punto de partida" title="El desafío, y lo que muestra la evidencia" />
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {indicators.map((ind) => (
-            <MetricCard key={ind.id} indicator={ind} />
-          ))}
+        <SectionHeader kicker="Radar" title="La industrialización en cifras" />
+        <RadarKpisPreview />
+        <div className="mt-8">
+          <Link
+            href="/radar"
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-cci-orange hover:text-cci-orange-dark"
+          >
+            Ver todas las cifras en el Radar
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </Link>
         </div>
-        <p className="mt-6 max-w-3xl text-sm leading-relaxed text-cci-slate">
-          El déficit habitacional es un dato oficial del Censo 2024. Las cifras de plazo, costo y residuos provienen de
-          investigación internacional sobre construcción industrializada off-site: son evidencia real, no mediciones propias del CCI.
-          Cada tarjeta enlaza a su fuente original.
-        </p>
       </section>
 
       {/* ACTUALIDAD — asoma apenas pasado el punto de partida (sitio vivo) */}
       <section className="container-cci py-14">
         <SectionHeader kicker="Actualidad" title="Lo último del sector" href="/noticias" hrefLabel="Ver toda la actualidad" />
         <FeaturedArticle article={featured} />
-        <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {latest.map((a) => <ArticleCard key={a.id} article={a} />)}
+
+        {/* Más noticias — listado compacto estilo BBC: miniatura + título + fecha */}
+        <div className="mt-10">
+          <h3 className="mb-3 font-display text-lg font-800 text-cci-ink">Más noticias</h3>
+          <ul className="border-t border-cci-line">
+            {latest.map((a) => (
+              <li key={a.id}>
+                <Link
+                  href={`/noticias/${a.slug}`}
+                  className="group flex items-start gap-4 border-b border-cci-line py-4"
+                >
+                  <div
+                    className="relative aspect-[4/3] w-24 shrink-0 overflow-hidden rounded-md sm:w-32"
+                    style={{ background: `linear-gradient(135deg, ${a.image.from} 0%, ${a.image.to} 100%)` }}
+                  >
+                    {a.photo && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={a.photo}
+                        alt=""
+                        aria-hidden="true"
+                        loading="lazy"
+                        className="absolute inset-0 h-full w-full object-cover"
+                      />
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h4 className="line-clamp-2 font-display text-base font-800 leading-snug text-cci-ink transition-colors group-hover:text-cci-orange-dark sm:line-clamp-3 sm:text-lg">
+                      {a.title}
+                    </h4>
+                    <p className="mt-1 text-xs text-cci-slate-light">{formatDate(a.date)}</p>
+                  </div>
+                </Link>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
 
