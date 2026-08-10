@@ -7,10 +7,10 @@ import { CCILogo } from "./Logo";
 const nav = [
   { href: "/", label: "Inicio" },
   { href: "/noticias", label: "Actualidad" },
+  { href: "/voces", label: "Voces" },
   { href: "/radar", label: "Radar" },
   { href: "/evidencia", label: "Evidencia" },
   { href: "/socios", label: "Ecosistema" },
-  { href: "/voces", label: "Voces" },
   { href: "/recursos", label: "Recursos" },
   { href: "/eventos", label: "Eventos" },
   { href: "/eici", label: "EICI" },

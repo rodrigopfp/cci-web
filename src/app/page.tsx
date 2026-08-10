@@ -7,15 +7,17 @@ import {
   getPortadaIndicators,
   getRadarIndicators,
   getStudies,
+  getVoces,
 } from "@/sanity/fetch";
 import { ArticleCard, FeaturedArticle } from "@/components/ArticleCard";
+import { VozPortrait } from "@/components/VozCard";
 import { PartnerCard, SectionHeader, CTASection, EditorialPolicyBlock } from "@/components/Blocks";
 import { MetricCard } from "@/components/MetricCard";
 import { NewsletterBox } from "@/components/Footer";
 import { CCICubeOutline } from "@/components/Logo";
 
 export default async function Home() {
-  const [articles, partners, resources, events, indicators, radarIndicators, studies] =
+  const [articles, partners, resources, events, indicators, radarIndicators, studies, voces] =
     await Promise.all([
       getArticles(),
       getPartners(),
@@ -24,6 +26,7 @@ export default async function Home() {
       getPortadaIndicators(),
       getRadarIndicators(),
       getStudies(),
+      getVoces(),
     ]);
   const featured = articles[0];
   const latest = articles.slice(1, 5);
@@ -69,27 +72,45 @@ export default async function Home() {
         </p>
       </section>
 
-      {/* RADAR: datos reales del ecosistema chileno */}
-      <section className="bg-cci-paper py-14">
-        <div className="container-cci">
-          <SectionHeader kicker="Radar" title="El ecosistema industrializado de Chile, hoy" href="/radar" hrefLabel="Ver el Radar completo" />
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {radarIndicators.map((i) => <MetricCard key={i.id} indicator={i} />)}
-          </div>
-          <p className="mt-6 max-w-3xl text-sm leading-relaxed text-cci-slate">
-            Datos del listado oficial de la DITEC del MINVU. El Radar detalla empresa por empresa, con
-            su resolución y fecha, y muestra la evolución de las certificaciones desde 2023.
-          </p>
-        </div>
-      </section>
-
-      {/* DESTACADA */}
+      {/* ACTUALIDAD — asoma apenas pasado el punto de partida (sitio vivo) */}
       <section className="container-cci py-14">
-        <SectionHeader kicker="Actualidad" title="Lo último del sector" href="/noticias" />
+        <SectionHeader kicker="Actualidad" title="Lo último del sector" href="/noticias" hrefLabel="Ver toda la actualidad" />
         <FeaturedArticle article={featured} />
         <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {latest.map((a) => <ArticleCard key={a.id} article={a} />)}
         </div>
+      </section>
+
+      {/* VOCES — avance de la sección de referentes */}
+      {voces.length > 0 && (
+        <section className="bg-cci-paper py-14">
+          <div className="container-cci">
+            <SectionHeader kicker="Voces" title="Voces de la industrialización" href="/voces" hrefLabel="Conoce las voces" />
+            <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-5">
+              {voces.slice(0, 5).map((v) => (
+                <Link key={v.id} href={`/voces/${v.slug}`} className="group">
+                  <VozPortrait voz={v} className="aspect-[4/5]" />
+                  <h3 className="mt-3 font-display text-sm font-800 leading-snug text-cci-ink transition-colors group-hover:text-cci-orange-dark">
+                    {v.nombre}
+                  </h3>
+                  {v.cargo && <p className="mt-0.5 text-xs leading-snug text-cci-slate">{v.cargo}</p>}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* RADAR: datos reales del ecosistema chileno */}
+      <section className="container-cci py-14">
+        <SectionHeader kicker="Radar" title="El ecosistema industrializado de Chile, hoy" href="/radar" hrefLabel="Ver el Radar completo" />
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {radarIndicators.map((i) => <MetricCard key={i.id} indicator={i} />)}
+        </div>
+        <p className="mt-6 max-w-3xl text-sm leading-relaxed text-cci-slate">
+          Datos del listado oficial de la DITEC del MINVU. El Radar detalla empresa por empresa, con
+          su resolución y fecha, y muestra la evolución de las certificaciones desde 2023.
+        </p>
       </section>
 
       {/* EVIDENCIA destacada */}
