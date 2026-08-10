@@ -14,8 +14,6 @@ const FUENTES = [
   "https://construye2025.cl/2025/08/07/eici-2025-chile-se-convierte-en-epicentro-de-la-construccion-industrializada-en-latinoamerica/",
 ];
 
-const SELLOS = ["Rápido", "Sostenible", "Rentable"];
-
 const COCREADORES = [
   { nombre: "CCI", marca: "CCI", color: "#E04E00" },
   { nombre: "Construye2025", marca: "C25", color: "#009DE6" },
@@ -64,38 +62,20 @@ export default async function EiciPage() {
 
   return (
     <>
-      {/* 1 · HERO */}
-      <section className="relative overflow-hidden border-b border-cci-line bg-cci-graphite-dark">
-        <div className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-cci-blue-light/10 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-32 -left-24 h-96 w-96 rounded-full bg-cci-orange/10 blur-3xl" />
-        <div className="container-cci relative py-20 md:py-28">
-          <div className="animate-rise flex items-center gap-2 text-sm font-700 uppercase tracking-[0.2em] text-cci-blue-light">
-            <span className="h-[2px] w-8 bg-cci-orange" />
-            Encuentro Internacional
-          </div>
-          <h1 className="animate-rise mt-6 font-display text-[24vw] font-900 leading-[0.82] tracking-tight sm:text-[18vw] lg:text-[13rem]">
-            <span className="bg-gradient-to-r from-cci-orange via-cci-orange-mid to-cci-blue-light bg-clip-text text-transparent">
-              EICI
-            </span>
-          </h1>
-          <p className="animate-rise mt-6 max-w-2xl font-display text-2xl font-800 leading-tight text-white md:text-3xl">
-            Encuentro Internacional de Construcción Industrializada
-          </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            {SELLOS.map((s) => (
-              <span
-                key={s}
-                className="rounded-full border border-white/15 bg-white/[0.06] px-5 py-2 text-sm font-700 text-white"
-              >
-                {s}
-              </span>
-            ))}
-          </div>
+      {/* 1 · HERO — banner oficial. Fondo blanco para que se funda con la imagen. */}
+      <section className="border-b border-cci-line bg-white">
+        <div className="container-cci py-10 md:py-14">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/eici/eici-2027-banner.jpg"
+            alt="EICI Chile 2027 — Encuentro Internacional de Construcción Industrializada, 8 al 10 de septiembre"
+            className="mx-auto h-auto w-full max-w-[1000px]"
+          />
         </div>
       </section>
 
       {/* 2 · CUENTA REGRESIVA */}
-      <section className="container-cci -mt-8 md:-mt-10">
+      <section className="container-cci pt-4 md:pt-6">
         <EiciCountdown
           titulo={titulo}
           fechaInicio={eici?.fechaInicio}
