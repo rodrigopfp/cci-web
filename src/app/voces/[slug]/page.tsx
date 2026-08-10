@@ -71,8 +71,8 @@ export default async function VozPage({ params }: { params: Promise<{ slug: stri
         </blockquote>
       )}
 
-      {/* ENTREVISTA */}
-      {voz.entrevista.length > 0 && (
+      {/* ENTREVISTA — o, si aún no existe, un bloque "próximamente" elegante */}
+      {voz.entrevista.length > 0 ? (
         <section className="mt-12 space-y-8 border-t border-cci-line pt-10">
           {voz.entrevista.map((qa, i) => (
             <div key={i}>
@@ -84,6 +84,18 @@ export default async function VozPage({ params }: { params: Promise<{ slug: stri
               </p>
             </div>
           ))}
+        </section>
+      ) : (
+        <section className="mt-12 border-t border-cci-line pt-10">
+          <div className="rounded-2xl border border-dashed border-cci-line bg-cci-paper px-8 py-12 text-center">
+            <div className="mx-auto mb-4 flex h-11 w-11 items-center justify-center rounded-full bg-cci-orange-soft text-cci-orange">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
+            <h2 className="font-display text-xl font-800 text-cci-ink">Entrevista próximamente</h2>
+            <p className="mt-2 text-cci-slate">Pronto compartiremos la conversación con {voz.nombre}.</p>
+          </div>
         </section>
       )}
     </article>
