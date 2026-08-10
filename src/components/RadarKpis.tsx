@@ -19,7 +19,6 @@ import {
   mundo,
   type KpiSource,
   type KpiCounter,
-  type KpiDonut,
   type KpiProductividad,
   type KpiMundo,
 } from "@/data/kpis";
@@ -67,21 +66,16 @@ function polar(cx: number, cy: number, r: number, angleDeg: number): [number, nu
   return [cx + r * Math.cos(a), cy - r * Math.sin(a)];
 }
 
-/** Arco sobre un semicírculo. La escala 0–scaleMax mapea 180°(izq)→0°(der). */
-function arcPath(
-  cx: number,
-  cy: number,
-  r: number,
-  from: number,
-  to: number,
-  scaleMax: number
-): string {
-  const a0 = 180 - (from / scaleMax) * 180;
-  const a1 = 180 - (to / scaleMax) * 180;
+/** Arco sobre el semicírculo superior entre dos ángulos (grados; 0°=derecha,
+ *  180°=izquierda). El sentido (sweep) se elige para recorrer siempre el arco
+ *  de arriba, tanto de izquierda→derecha (normal) como de derecha→izquierda
+ *  (espejado). */
+function arcByAngle(cx: number, cy: number, r: number, a0: number, a1: number): string {
   const [x0, y0] = polar(cx, cy, r, a0);
   const [x1, y1] = polar(cx, cy, r, a1);
   const large = Math.abs(a0 - a1) > 180 ? 1 : 0;
-  return `M ${x0} ${y0} A ${r} ${r} 0 ${large} 1 ${x1} ${y1}`;
+  const sweep = a0 > a1 ? 1 : 0;
+  return `M ${x0} ${y0} A ${r} ${r} 0 ${large} ${sweep} ${x1} ${y1}`;
 }
 
 /** Altura fija del área del instrumento (gauge/dona), para que los tres
@@ -105,6 +99,7 @@ function GaugeCard({
   format,
   ariaLabel,
   reduced,
+  mirror = false,
 }: {
   label: string;
   note: string;
@@ -115,14 +110,20 @@ function GaugeCard({
   format: (v: number) => string;
   ariaLabel: string;
   reduced: boolean;
+  /** Espeja el instrumento: el arco se llena de derecha a izquierda y la aguja
+   *  cae hacia el lado izquierdo. Se usa para comunicar reducción (residuos). */
+  mirror?: boolean;
 }) {
   const { ref, inView } = useInView<HTMLElement>();
   const v = useCountUp(target, inView, reduced);
   const cx = 100;
   const cy = 100;
   const r = 78;
-  const angle = 180 - (v / scaleMax) * 180;
-  const [nx, ny] = polar(cx, cy, r - 8, angle);
+  // Ángulo de un valor. Normal: 0→180°(izq), scaleMax→0°(der). Espejado al revés,
+  // de modo que el llenado y la aguja avancen de derecha a izquierda.
+  const A = (value: number) =>
+    mirror ? (value / scaleMax) * 180 : 180 - (value / scaleMax) * 180;
+  const [nx, ny] = polar(cx, cy, r - 8, A(v));
 
   return (
     <Card innerRef={ref}>
@@ -135,11 +136,11 @@ function GaugeCard({
         <div className="w-full max-w-[200px]">
           <svg viewBox="0 0 200 108" className="w-full" role="img" aria-label={ariaLabel}>
             {/* pista */}
-            <path d={arcPath(cx, cy, r, 0, scaleMax, scaleMax)} fill="none" stroke="#E6E4E2" strokeWidth={14} strokeLinecap="round" />
+            <path d={arcByAngle(cx, cy, r, A(0), A(scaleMax))} fill="none" stroke="#E6E4E2" strokeWidth={14} strokeLinecap="round" />
             {/* banda del rango destacado */}
-            <path d={arcPath(cx, cy, r, band[0], band[1], scaleMax)} fill="none" stroke="#F6BA8C" strokeWidth={14} strokeLinecap="round" />
+            <path d={arcByAngle(cx, cy, r, A(band[0]), A(band[1]))} fill="none" stroke="#F6BA8C" strokeWidth={14} strokeLinecap="round" />
             {/* progreso animado */}
-            <path d={arcPath(cx, cy, r, 0, Math.max(v, 0.01), scaleMax)} fill="none" stroke="#E04E00" strokeWidth={14} strokeLinecap="round" />
+            <path d={arcByAngle(cx, cy, r, A(0), A(Math.max(v, 0.01)))} fill="none" stroke="#E04E00" strokeWidth={14} strokeLinecap="round" />
             {/* aguja */}
             <line x1={cx} y1={cy} x2={nx} y2={ny} stroke="#2B2B2B" strokeWidth={3} strokeLinecap="round" />
             <circle cx={cx} cy={cy} r={7} fill="#2B2B2B" />
@@ -169,50 +170,6 @@ function CounterCard({ kpi, reduced }: { kpi: KpiCounter; reduced: boolean }) {
         {kpi.prefix}
         {Math.round(v)}
         {kpi.suffix}
-      </div>
-      <p className="mt-3 text-sm text-cci-slate">{kpi.note}</p>
-      <div className="mt-auto">
-        <SourceLink source={kpi.source} />
-      </div>
-    </Card>
-  );
-}
-
-function DonutCard({ kpi, reduced }: { kpi: KpiDonut; reduced: boolean }) {
-  const { ref, inView } = useInView<HTMLElement>();
-  const v = useCountUp(kpi.value, inView, reduced);
-  const R = 52;
-  const C = 2 * Math.PI * R;
-  const offset = C * (1 - v / 100);
-  return (
-    <Card innerRef={ref}>
-      <span className="text-xs font-700 uppercase tracking-wide text-cci-slate-light">
-        {kpi.label}
-      </span>
-      {/* Misma área fija que los gauges; la dona ocupa el mismo alto visual. */}
-      <div className={`mt-2 ${INSTRUMENT_AREA}`}>
-        <div className="relative h-[140px] w-[140px]">
-          <svg viewBox="0 0 140 140" className="h-full w-full -rotate-90" role="img" aria-label={`${kpi.value}% ${kpi.label}`}>
-            <circle cx={70} cy={70} r={R} fill="none" stroke="#E6E4E2" strokeWidth={14} />
-            <circle
-              cx={70}
-              cy={70}
-              r={R}
-              fill="none"
-              stroke="#E04E00"
-              strokeWidth={14}
-              strokeLinecap="round"
-              strokeDasharray={C}
-              strokeDashoffset={offset}
-            />
-          </svg>
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className="font-display text-4xl font-900 text-cci-orange">
-              {Math.round(v)}
-              {kpi.suffix}
-            </span>
-          </div>
-        </div>
       </div>
       <p className="mt-3 text-sm text-cci-slate">{kpi.note}</p>
       <div className="mt-auto">
@@ -337,7 +294,18 @@ export function RadarKpis() {
             ariaLabel={velocidad.display}
             reduced={reduced}
           />
-          <DonutCard kpi={residuos} reduced={reduced} />
+          <GaugeCard
+            label={residuos.label}
+            note={residuos.note}
+            source={residuos.source}
+            scaleMax={100}
+            band={[0, residuos.value]}
+            target={residuos.value}
+            mirror
+            format={(v) => `-${Math.round(v)}%`}
+            ariaLabel={`${residuos.value}% menos residuos`}
+            reduced={reduced}
+          />
           <GaugeCard
             label={potencial.label}
             note={potencial.note}
