@@ -14,6 +14,7 @@ import {
   costo,
   manoDeObra,
   potencial,
+  calidad,
   residuos,
   productividad,
   mundo,
@@ -184,7 +185,7 @@ function ProductividadCard({ kpi, reduced }: { kpi: KpiProductividad; reduced: b
   const active = inView || reduced;
   const maxScale = Math.max(...kpi.series.map((s) => s.value));
   return (
-    <Card innerRef={ref} className="sm:col-span-2 lg:col-span-3">
+    <Card innerRef={ref} className="sm:col-span-2 lg:col-span-2">
       <span className="text-xs font-700 uppercase tracking-wide text-cci-slate-light">
         {kpi.label}
       </span>
@@ -281,6 +282,9 @@ export function RadarKpis() {
           Lo que muestran los datos internacionales. Cifras de referencia sobre el impacto de la
           construcción industrializada; cada instrumento enlaza a su fuente.
         </p>
+        <p className="mt-1 max-w-2xl text-xs text-cci-slate-light">
+          Los estudios internacionales citados miden construcción industrializada off-site.
+        </p>
 
         <div className="mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           <GaugeCard
@@ -318,6 +322,7 @@ export function RadarKpis() {
             reduced={reduced}
           />
           <ProductividadCard kpi={productividad} reduced={reduced} />
+          <CounterCard kpi={calidad} reduced={reduced} />
           <CounterCard kpi={costo} reduced={reduced} />
           <CounterCard kpi={manoDeObra} reduced={reduced} />
           <MundoCard kpi={mundo} reduced={reduced} />

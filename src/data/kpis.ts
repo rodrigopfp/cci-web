@@ -27,9 +27,17 @@ const MCKINSEY_MODULAR: KpiSource = {
 
 const ASCE_RESIDUOS: KpiSource = {
   name: "ASCE · Journal of Management in Engineering",
-  title: "Construcción modular y reducción de residuos (estudio de 59 edificios)",
+  title: "Construcción industrializada off-site y reducción de residuos (estudio de 59 edificios)",
   year: 2024,
   url: "https://ascelibrary.org/doi/10.1061/JMENEA.MEENG-5828",
+};
+
+// El título del informe se conserva en inglés (nombre propio de la fuente).
+const DODGE_CALIDAD: KpiSource = {
+  name: "Dodge Data & Analytics",
+  title: "Prefabrication and Modular Construction 2020 SmartMarket Report",
+  year: 2020,
+  url: "https://www.construction.com/resource/prefabrication-modular-construction-2020/",
 };
 
 const MCKINSEY_PRODUCTIVIDAD: KpiSource = {
@@ -71,7 +79,7 @@ export interface KpiGauge {
 export const velocidad: KpiGauge = {
   id: "velocidad",
   label: "Velocidad de obra",
-  note: "Los proyectos modulares aceleran los plazos entre 20% y 50% frente a la construcción tradicional, según McKinsey.",
+  note: "Los proyectos industrializados aceleran los plazos entre 20% y 50% frente a la construcción tradicional, según McKinsey.",
   rangeMin: 20,
   rangeMax: 50,
   display: "Hasta 50% más rápido",
@@ -122,6 +130,15 @@ export const potencial: KpiCounter = {
   source: MCKINSEY_REINVENTING,
 };
 
+export const calidad: KpiCounter = {
+  id: "calidad",
+  label: "Calidad",
+  note: "9 de cada 10 profesionales que construyen de forma industrializada reportan mejor calidad que con la construcción tradicional, junto a mejor productividad y mayor certeza de plazos.",
+  value: 90,
+  suffix: "%",
+  source: DODGE_CALIDAD,
+};
+
 /** (4) Residuos — dona / anillo. ≈80% menos residuos. */
 export interface KpiDonut {
   id: string;
@@ -136,7 +153,7 @@ export interface KpiDonut {
 export const residuos: KpiDonut = {
   id: "residuos",
   label: "Menos residuos",
-  note: "Un estudio de 59 edificios con construcción modular midió cerca de un 80% menos de residuos de construcción.",
+  note: "Un estudio de 59 edificios con construcción industrializada off-site midió cerca de un 80% menos de residuos de construcción.",
   value: 80,
   suffix: "%",
   source: ASCE_RESIDUOS,

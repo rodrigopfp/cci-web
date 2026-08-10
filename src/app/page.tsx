@@ -67,7 +67,7 @@ export default async function Home() {
         </div>
         <p className="mt-6 max-w-3xl text-sm leading-relaxed text-cci-slate">
           El déficit habitacional es un dato oficial del Censo 2024. Las cifras de plazo, costo y residuos provienen de
-          investigación internacional sobre construcción modular y offsite: son evidencia real, no mediciones propias del CCI.
+          investigación internacional sobre construcción industrializada off-site: son evidencia real, no mediciones propias del CCI.
           Cada tarjeta enlaza a su fuente original.
         </p>
       </section>
