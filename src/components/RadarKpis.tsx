@@ -301,7 +301,7 @@ export function RadarKpis() {
           <ResiduosGauge reduced={reduced} />
           <PotencialGauge reduced={reduced} />
           <ProductividadCard kpi={productividad} reduced={reduced} />
-          <CounterCard kpi={calidad} reduced={reduced} />
+          <CalidadGauge reduced={reduced} />
           <CounterCard kpi={costo} reduced={reduced} />
           <CounterCard kpi={manoDeObra} reduced={reduced} />
           <MundoCard kpi={mundo} reduced={reduced} />
@@ -348,6 +348,22 @@ function ResiduosGauge({ reduced }: { reduced: boolean }) {
   );
 }
 
+function CalidadGauge({ reduced }: { reduced: boolean }) {
+  return (
+    <GaugeCard
+      label={calidad.label}
+      note={calidad.note}
+      source={calidad.source}
+      scaleMax={100}
+      band={[0, calidad.value]}
+      target={calidad.value}
+      format={(v) => `${Math.round(v)}%`}
+      ariaLabel={`${calidad.value}% ${calidad.label}`}
+      reduced={reduced}
+    />
+  );
+}
+
 /**
  * Avance para la portada: tres instrumentos (potencial · calidad · residuos)
  * reutilizando los mismos componentes y datos, con la fila alineada igual que en
@@ -358,7 +374,7 @@ export function RadarKpisPreview() {
   return (
     <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
       <PotencialGauge reduced={reduced} />
-      <CounterCard kpi={calidad} reduced={reduced} />
+      <CalidadGauge reduced={reduced} />
       <ResiduosGauge reduced={reduced} />
     </div>
   );

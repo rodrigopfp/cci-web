@@ -16,6 +16,26 @@ export function SectionHeader({ kicker, title, href, hrefLabel = "Ver todo", dar
 }
 
 /**
+ * Enlace "Ver todas…" al pie de un bloque de la portada. Naranja, en negrita y
+ * con flecha; compartido para que los tres bloques queden idénticos.
+ */
+export function VerMasLink({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <div className="mt-8">
+      <Link
+        href={href}
+        className="inline-flex items-center gap-1.5 text-sm font-semibold text-cci-orange hover:text-cci-orange-dark"
+      >
+        {children}
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </Link>
+    </div>
+  );
+}
+
+/**
  * Marca tipográfica de empresa. Es un sustituto generado, NO el logotipo real:
  * los logotipos oficiales requieren el archivo y la autorización de cada empresa.
  */

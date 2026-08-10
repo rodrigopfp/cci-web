@@ -11,7 +11,7 @@ import {
 import { FeaturedArticle } from "@/components/ArticleCard";
 import { RadarKpisPreview } from "@/components/RadarKpis";
 import { VozPortrait } from "@/components/VozCard";
-import { PartnerCard, SectionHeader, CTASection, EditorialPolicyBlock } from "@/components/Blocks";
+import { PartnerCard, SectionHeader, CTASection, EditorialPolicyBlock, VerMasLink } from "@/components/Blocks";
 import { MetricCard } from "@/components/MetricCard";
 import { NewsletterBox } from "@/components/Footer";
 import { CCICubeOutline } from "@/components/Logo";
@@ -61,22 +61,12 @@ export default async function Home() {
       <section className="container-cci py-14">
         <SectionHeader kicker="Radar" title="La industrialización en cifras" />
         <RadarKpisPreview />
-        <div className="mt-8">
-          <Link
-            href="/radar"
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-cci-orange hover:text-cci-orange-dark"
-          >
-            Ver todas las cifras en el Radar
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </Link>
-        </div>
+        <VerMasLink href="/radar">Ver todas las cifras en el Radar</VerMasLink>
       </section>
 
       {/* ACTUALIDAD — asoma apenas pasado el punto de partida (sitio vivo) */}
       <section className="container-cci py-14">
-        <SectionHeader kicker="Actualidad" title="Lo último del sector" href="/noticias" hrefLabel="Ver toda la actualidad" />
+        <SectionHeader kicker="Actualidad" title="Lo último del sector" />
         <FeaturedArticle article={featured} />
 
         {/* Más noticias — listado compacto estilo BBC: miniatura + título + fecha */}
@@ -115,13 +105,14 @@ export default async function Home() {
             ))}
           </ul>
         </div>
+        <VerMasLink href="/noticias">Ver todas las noticias</VerMasLink>
       </section>
 
       {/* VOCES — avance de la sección de referentes */}
       {voces.length > 0 && (
         <section className="bg-cci-paper py-14">
           <div className="container-cci">
-            <SectionHeader kicker="Voces" title="Voces de la industrialización" href="/voces" hrefLabel="Conoce las voces" />
+            <SectionHeader kicker="Voces" title="Voces de la industrialización" />
             <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-5">
               {voces.slice(0, 5).map((v) => (
                 <Link key={v.id} href={`/voces/${v.slug}`} className="group">
@@ -133,6 +124,7 @@ export default async function Home() {
                 </Link>
               ))}
             </div>
+            <VerMasLink href="/voces">Ver todas las voces</VerMasLink>
           </div>
         </section>
       )}
