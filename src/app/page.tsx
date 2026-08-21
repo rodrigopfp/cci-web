@@ -33,16 +33,19 @@ export default async function Home() {
 
   return (
     <>
-      {/* HERO — el desafío país */}
-      <section className="relative overflow-hidden border-b border-cci-line bg-cci-graphite-dark">
+      {/* HERO — el desafío país (a pantalla completa) */}
+      <section className="relative flex items-center overflow-hidden border-b border-cci-line bg-cci-graphite-dark [min-height:max(560px,100svh)]">
         <div className="absolute inset-0 opacity-[0.22]" style={{ backgroundImage: "radial-gradient(circle at 88% 15%, #E04E00 0%, transparent 42%), radial-gradient(circle at 5% 95%, #5C5C5C 0%, transparent 45%)" }} />
         {/* Escena de montaje industrializado (grúa + módulos), animada en loop.
-            Móvil: más tenue y parcialmente tras el texto; el titular manda. */}
-        <HeroObra className="absolute inset-y-0 right-0 w-[72%] max-w-[560px] opacity-40 md:opacity-90 lg:opacity-100" />
+            Cubre todo el hero y enmarca el texto: pluma arriba, mástil a la
+            derecha, edificio en la base. Nunca pasa por delante del titular. */}
+        <HeroObra className="absolute inset-0 opacity-80 md:opacity-100" />
         {/* Refuerzo del degradado bajo la columna de texto para mantener el contraste. */}
-        <div className="absolute inset-0" style={{ backgroundImage: "linear-gradient(90deg, #3D3D3D 0%, rgba(61,61,61,0.82) 32%, rgba(61,61,61,0) 70%)" }} />
-        <div className="container-cci relative py-20 md:py-28">
-          <div className="max-w-3xl animate-rise">
+        <div className="absolute inset-0" style={{ backgroundImage: "linear-gradient(100deg, #3D3D3D 0%, rgba(61,61,61,0.86) 30%, rgba(61,61,61,0.35) 55%, rgba(61,61,61,0) 74%)" }} />
+        <div className="container-cci relative py-16">
+          {/* En móvil el texto se limita a ~82vw para reservar el costado derecho
+              a la grúa (mástil) y no cruzarse con ninguna línea. */}
+          <div className="max-w-[82vw] animate-rise sm:max-w-2xl">
             <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-3 py-1 text-xs font-700 uppercase tracking-wide text-cci-orange-light">
               <span className="h-1.5 w-1.5 rounded-full bg-cci-orange" />Consejo de Construcción Industrializada
             </div>
