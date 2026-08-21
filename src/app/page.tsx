@@ -33,19 +33,21 @@ export default async function Home() {
 
   return (
     <>
-      {/* HERO — el desafío país (a pantalla completa) */}
-      <section className="relative flex items-center overflow-hidden border-b border-cci-line bg-cci-graphite-dark [min-height:max(560px,100svh)]">
+      {/* HERO — el desafío país. Alto acotado (no pantalla completa) para que la
+          sección RADAR asome al pie de la primera pantalla. */}
+      <section className="relative flex items-center overflow-hidden border-b border-cci-line bg-cci-graphite-dark min-h-[88svh] md:min-h-[560px] md:max-h-[620px] md:h-[72svh]">
         <div className="absolute inset-0 opacity-[0.22]" style={{ backgroundImage: "radial-gradient(circle at 88% 15%, #E04E00 0%, transparent 42%), radial-gradient(circle at 5% 95%, #5C5C5C 0%, transparent 45%)" }} />
         {/* Escena de montaje industrializado (grúa + módulos), animada en loop.
-            Cubre todo el hero y enmarca el texto: pluma arriba, mástil a la
-            derecha, edificio en la base. Nunca pasa por delante del titular. */}
+            Enmarca el texto: pluma arriba, mástil a la derecha, edificio abajo a
+            la derecha. Nunca pasa por delante del titular. */}
         <HeroObra className="absolute inset-0 opacity-80 md:opacity-100" />
-        {/* Refuerzo del degradado bajo la columna de texto para mantener el contraste. */}
-        <div className="absolute inset-0" style={{ backgroundImage: "linear-gradient(100deg, #3D3D3D 0%, rgba(61,61,61,0.86) 30%, rgba(61,61,61,0.35) 55%, rgba(61,61,61,0) 74%)" }} />
-        <div className="container-cci relative py-16">
-          {/* En móvil el texto se limita a ~82vw para reservar el costado derecho
-              a la grúa (mástil) y no cruzarse con ninguna línea. */}
-          <div className="max-w-[82vw] animate-rise sm:max-w-2xl">
+        {/* Velo bajo el bloque de texto (centro-izquierda) para asegurar contraste. */}
+        <div className="absolute inset-0" style={{ backgroundImage: "radial-gradient(ellipse 60% 82% at 38% 50%, rgba(61,61,61,0.92) 0%, rgba(61,61,61,0.6) 52%, rgba(61,61,61,0) 82%)" }} />
+        <div className="absolute inset-0" style={{ backgroundImage: "linear-gradient(100deg, rgba(61,61,61,0.85) 0%, rgba(61,61,61,0.7) 40%, rgba(61,61,61,0.2) 66%, transparent 82%)" }} />
+        {/* Bloque de texto: centrado vertical; en escritorio arranca ~21% del ancho
+            (alineado a la izquierda). En móvil limitado para dejar el corredor derecho. */}
+        <div className="relative w-full px-6 sm:px-10 md:px-0">
+          <div className="max-w-[66vw] animate-rise sm:max-w-md md:ml-[21%] md:max-w-xl">
             <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-3 py-1 text-xs font-700 uppercase tracking-wide text-cci-orange-light">
               <span className="h-1.5 w-1.5 rounded-full bg-cci-orange" />Consejo de Construcción Industrializada
             </div>

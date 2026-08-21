@@ -68,85 +68,95 @@ type Layout = {
   m: number; // tamaño del módulo en px
   jibY: number;
   mastX: number;
-  acopio: [number, number];
-  dropX: number;
-  travelY: number;
-  baseBandY: number;
+  carryY: number; // altura de acarreo del módulo, colgando bajo la pluma
+  pickup: [number, number]; // punto de acopio donde se toma cada módulo
   cableMax: number;
   targets: [number, number][];
 };
 
-// Layout responsivo. En escritorio el módulo recorre todo el marco (sube por la
-// derecha, cruza la pluma superior y baja por el corredor derecho, que queda
-// despejado porque el texto es angosto). En móvil el texto es casi tan ancho
-// como el viewport y su subtítulo se envuelve, de modo que NO hay corredor
-// lateral limpio: la única zona libre es la franja inferior, bajo los botones.
-// Por eso en móvil toda la acción del módulo se confina a esa franja (y > ~0.74h)
-// y el carro/cable superiores se ocultan; la grúa queda como marco del texto.
+// Layout responsivo. La grúa siempre ENMARCA el bloque de texto: la pluma cruza
+// el borde superior de lado a lado y el mástil baja por el costado derecho. El
+// módulo se toma en un costado, sube, viaja colgando bajo la pluma y baja hasta
+// el edificio, que se arma abajo a la derecha (entre el texto y el mástil). En
+// ningún instante ninguna línea entra en la zona del texto:
+//   · Escritorio: el texto arranca ~21% del ancho; el módulo se iza por el
+//     costado IZQUIERDO (libre, a la izquierda del texto), cruza la pluma y baja
+//     por la DERECHA sobre el edificio → bordea la zona por ambos costados.
+//   · Móvil: el texto se limita para dejar un corredor derecho; la grúa se ve
+//     completa (pluma y mástil con más contraste) y el módulo trabaja en el
+//     costado derecho + franja superior, con el edificio en la base derecha.
 function computeLayout(w: number, h: number): Layout {
   const mob = w < 720;
-  const n = mob ? 3 : 4;
-  const m = Math.max(mob ? 36 : 42, Math.min(w, h) * (mob ? 0.075 : 0.085));
-  const jibY = h * 0.1;
-  const mastX = w * (mob ? 0.93 : 0.9);
-  const acopio: [number, number] = mob ? [w * 0.82, h * 0.93] : [w * 0.85, h * 0.92];
-  const dropX = w * (mob ? 0.7 : 0.75);
-  // Altura de acarreo: bajo la pluma en escritorio; en la franja inferior en móvil.
-  const travelY = mob ? h * 0.74 : jibY + m * 0.75;
-  const baseBandY = h * (mob ? 0.9 : 0.88);
-  const cableMax = baseBandY - jibY;
-  // Edificio en la base, debajo de los botones. El módulo baja por el corredor
-  // derecho y se desliza por la franja base (bajo el texto) hasta encajar aquí.
-  const buildX = w * (mob ? 0.2 : 0.13);
-  const colW = w * (mob ? 0.13 : 0.078);
-  const buildBaseY = h * (mob ? 0.92 : 0.9);
-  const rowGap = h * 0.085;
-  const cells: [number, number][] = [
-    [buildX, buildBaseY],
-    [buildX + colW, buildBaseY],
-    [buildX, buildBaseY - rowGap],
-    [buildX + colW, buildBaseY - rowGap],
-  ];
-  return { w, h, mob, n, m, jibY, mastX, acopio, dropX, travelY, baseBandY, cableMax, targets: cells.slice(0, n) };
+  const m = Math.max(mob ? 30 : 40, Math.min(w, h) * (mob ? 0.085 : 0.074));
+  const jibY = h * (mob ? 0.09 : 0.11);
+  const mastX = w * (mob ? 0.94 : 0.9);
+  // El módulo cuelga justo bajo la pluma (relativo a su tamaño), de modo que la
+  // franja superior lo contenga por encima del texto aunque el hero sea bajo.
+  const carryY = jibY + m * 0.6;
+  // Acopio: en móvil a la derecha (mismo costado que baja); en escritorio a la
+  // izquierda, para que el módulo bordee el texto (sube izquierda, baja derecha).
+  const pickup: [number, number] = mob ? [w * 0.85, h * 0.88] : [w * 0.1, h * 0.86];
+  const buildBaseY = h * (mob ? 0.9 : 0.88);
+  // Edificio: en escritorio una torre 2×2 abajo a la derecha, entre el bloque de
+  // texto y el mástil. En móvil, una torre de una columna pegada al corredor
+  // derecho (menos módulos), despejada del texto y del mástil.
+  const cells: [number, number][] = mob
+    ? [
+        [w * 0.85, buildBaseY],
+        [w * 0.85, buildBaseY - h * 0.11],
+      ]
+    : (() => {
+        const bx = w * 0.68;
+        const cw = w * 0.075;
+        const rg = h * 0.13;
+        return [
+          [bx, buildBaseY],
+          [bx + cw, buildBaseY],
+          [bx, buildBaseY - rg],
+          [bx + cw, buildBaseY - rg],
+        ];
+      })();
+  const n = cells.length;
+  const cableMax = buildBaseY - jibY; // largo máximo del cable (bajar al edificio)
+  return { w, h, mob, n, m, jibY, mastX, carryY, pickup, cableMax, targets: cells };
 }
 
 // Fases locales de UN viaje (fracción 0..1 de su ventana): posición del módulo
 // (mx,my), su opacidad (fly), posición del carro (tx) y punta del gancho (hy).
 function tripTracks(L: Layout, i: number) {
-  const [ax, ay] = L.acopio;
+  const [ax, ay] = L.pickup;
   const [txT, tyT] = L.targets[i];
-  const tv = L.travelY;
-  const bb = L.baseBandY;
-  // [f, mx, my, fly]
+  const cy = L.carryY;
+  // [f, mx, my, fly] — el módulo aparece en el acopio, se iza a la franja
+  // superior, viaja colgando bajo la pluma hasta la columna destino y baja para
+  // encajar. Nunca sale del costado / franja superior / base derecha.
   const mod: [number, number, number, number][] = [
     [0.0, ax, ay, 0],
     [0.05, ax, ay, 1], // aparece en el acopio
-    [0.22, ax, tv, 1], // iza por el costado derecho
-    [0.36, L.dropX, tv, 1], // viaja por la pluma superior
-    [0.54, L.dropX, bb, 1], // baja por el corredor derecho a la franja base
-    [0.72, txT, bb, 1], // se desliza por la base hasta su columna
-    [0.86, txT, tyT, 1], // se asienta en su nivel
-    [0.92, txT, tyT, 0], // encaja → aparece el colocado + destello; se oculta
+    [0.24, ax, cy, 1], // iza por el costado a la franja superior
+    [0.44, txT, cy, 1], // viaja colgando bajo la pluma
+    [0.68, txT, tyT, 1], // baja y se asienta en su nivel
+    [0.75, txT, tyT, 0], // encaja → aparece el colocado + destello; se oculta
     [1.0, ax, ay, 0],
   ];
-  // [f, tx]
+  // [f, tx] — el carro sigue al módulo mientras cuelga y luego vuelve al acopio.
   const trolley: [number, number][] = [
     [0.0, ax],
-    [0.22, ax],
-    [0.36, L.dropX],
-    [0.54, L.dropX],
-    [0.7, ax],
+    [0.24, ax],
+    [0.44, txT],
+    [0.68, txT],
+    [0.8, ax],
     [1.0, ax],
   ];
   // [f, hy] — punta del gancho; el cable mide (hy - jibY)
   const hook: [number, number][] = [
-    [0.0, tv],
-    [0.05, ay],
-    [0.22, tv],
-    [0.36, tv],
-    [0.54, bb],
-    [0.6, tv],
-    [1.0, tv],
+    [0.0, cy],
+    [0.05, ay], // baja a tomar el módulo
+    [0.24, cy], // sube con el módulo
+    [0.44, cy], // acarreo
+    [0.68, tyT], // baja al edificio
+    [0.75, cy], // suelta y sube vacío
+    [1.0, cy],
   ];
   return { mod, trolley, hook };
 }
@@ -181,8 +191,8 @@ function buildCss(L: Layout): string {
     });
   }
   // Cierre del ciclo (88→100%): todo en reposo, coincide con el inicio.
-  const [ax, ay] = L.acopio;
-  const restLen = Math.max(0, L.travelY - L.jibY);
+  const [ax, ay] = L.pickup;
+  const restLen = Math.max(0, L.carryY - L.jibY);
   mx.push(`100% { transform: translateX(${ax.toFixed(1)}px); }`);
   my.push(`100% { transform: translateY(${ay.toFixed(1)}px); }`);
   fly.push(`100% { opacity: 0; }`);
@@ -279,10 +289,18 @@ export function HeroObra({ className = "" }: { className?: string }) {
   }, [size.w, size.h]);
 
   const { w, h, m, jibY, mastX } = L;
-  const restLen = Math.max(0, L.travelY - jibY);
+  const restLen = Math.max(0, L.carryY - jibY);
+  const baseY = L.targets[0][1]; // fila base del edificio (para suelo/guías)
+
+  // Trazo de la grúa: en móvil más grueso y con más contraste para que la
+  // pluma y el mástil se lean en pantalla pequeña (sin salir del rango discreto).
+  const gSW = L.mob ? 1.9 : 1.4; // cordones principales
+  const gOP = L.mob ? 0.62 : 0.5;
+  const gLat = L.mob ? 1.15 : 0.9; // celosía
+  const gLatOP = L.mob ? 0.72 : 0.7;
 
   // Reticulado del mástil y celdas de la pluma, en px.
-  const mastHalf = Math.max(7, m * 0.16);
+  const mastHalf = Math.max(L.mob ? 6 : 7, m * 0.16);
   const mastRungs = Math.max(4, Math.round((h - jibY) / (mastHalf * 2.4)));
   const jibCells = Math.max(6, Math.round((mastX + m) / (m * 0.7)));
 
@@ -307,19 +325,19 @@ export function HeroObra({ className = "" }: { className?: string }) {
           ))}
         </g>
         {/* Suelo */}
-        <line x1={0} y1={L.baseBandY + m * 0.55} x2={w} y2={L.baseBandY + m * 0.55} stroke={WHITE} strokeWidth={1} opacity={0.18} />
+        <line x1={0} y1={baseY + m * 0.55} x2={w} y2={baseY + m * 0.55} stroke={WHITE} strokeWidth={1} opacity={0.18} />
 
         {/* --- GRÚA TORRE (fija): pluma arriba de lado a lado, mástil a la derecha --- */}
         <g stroke={WHITE} fill="none" strokeLinecap="round" strokeLinejoin="round">
           {/* Mástil reticulado, recorre todo el alto por el costado derecho */}
-          <g strokeWidth={1.4} opacity={0.5}>
+          <g strokeWidth={gSW} opacity={gOP}>
             <line x1={mastX - mastHalf} y1={jibY} x2={mastX - mastHalf} y2={h} />
             <line x1={mastX + mastHalf} y1={jibY} x2={mastX + mastHalf} y2={h} />
             {Array.from({ length: mastRungs }, (_, i) => {
               const y0 = jibY + i * ((h - jibY) / mastRungs);
               const y1 = jibY + (i + 1) * ((h - jibY) / mastRungs);
               return (
-                <g key={i} strokeWidth={0.9} opacity={0.7}>
+                <g key={i} strokeWidth={gLat} opacity={gLatOP}>
                   <line x1={mastX - mastHalf} y1={y0} x2={mastX + mastHalf} y2={y0} />
                   <line x1={mastX - mastHalf} y1={y0} x2={mastX + mastHalf} y2={y1} />
                   <line x1={mastX + mastHalf} y1={y0} x2={mastX - mastHalf} y2={y1} />
@@ -328,24 +346,29 @@ export function HeroObra({ className = "" }: { className?: string }) {
             })}
           </g>
 
-          {/* Pluma: doble cordón de lado a lado por arriba del titular */}
-          <g strokeWidth={1.4} opacity={0.5}>
+          {/* Pluma: doble cordón de lado a lado por arriba del titular, con celosía */}
+          <g strokeWidth={gSW} opacity={gOP}>
             <line x1={0} y1={jibY - mastHalf} x2={mastX + m * 1.3} y2={jibY - mastHalf} />
             <line x1={0} y1={jibY} x2={mastX + m * 1.3} y2={jibY} />
             {Array.from({ length: jibCells }, (_, i) => {
               const x0 = i * (m * 0.7);
-              return <line key={i} x1={x0} y1={jibY} x2={x0 + m * 0.35} y2={jibY - mastHalf} strokeWidth={0.8} opacity={0.7} />;
+              return (
+                <g key={i} strokeWidth={gLat} opacity={gLatOP}>
+                  <line x1={x0} y1={jibY} x2={x0 + m * 0.35} y2={jibY - mastHalf} />
+                  <line x1={x0 + m * 0.35} y1={jibY - mastHalf} x2={x0 + m * 0.7} y2={jibY} />
+                </g>
+              );
             })}
           </g>
           {/* Ápice y tirantes */}
-          <g strokeWidth={0.9} opacity={0.45}>
-            <line x1={mastX} y1={jibY - mastHalf * 3.2} x2={mastX} y2={jibY} strokeWidth={1.1} opacity={0.6} />
+          <g strokeWidth={gLat} opacity={0.5}>
+            <line x1={mastX} y1={jibY - mastHalf * 3.2} x2={mastX} y2={jibY} strokeWidth={gSW} opacity={gOP} />
             <line x1={mastX} y1={jibY - mastHalf * 3.2} x2={w * 0.18} y2={jibY - mastHalf} />
             <line x1={mastX} y1={jibY - mastHalf * 3.2} x2={w * 0.5} y2={jibY - mastHalf} />
             <line x1={mastX} y1={jibY - mastHalf * 3.2} x2={mastX + m} y2={jibY - mastHalf} />
           </g>
           {/* Contrapeso */}
-          <rect x={mastX + m * 0.95} y={jibY - mastHalf} width={m * 0.35} height={mastHalf * 2} strokeWidth={1.1} opacity={0.55} />
+          <rect x={mastX + m * 0.95} y={jibY - mastHalf} width={m * 0.35} height={mastHalf * 2} strokeWidth={gLat} opacity={0.55} />
         </g>
 
         {/* --- MÓDULOS YA COLOCADOS (edificio en la base) --- */}
@@ -360,30 +383,28 @@ export function HeroObra({ className = "" }: { className?: string }) {
           </g>
         ))}
 
-        {/* --- CARRO + CABLE + GANCHO (sobre la pluma) — solo escritorio, donde
-              el módulo cuelga del gancho. En móvil el montaje ocurre en la base. --- */}
-        {!L.mob && (
-        <g data-a="" className="a-trolley" style={{ transform: `translateX(${L.acopio[0].toFixed(1)}px)` }}>
+        {/* --- CARRO + CABLE + GANCHO (sobre la pluma): el módulo cuelga del
+              gancho tanto en escritorio como en móvil, en la franja superior. --- */}
+        <g data-a="" className="a-trolley" style={{ transform: `translateX(${L.pickup[0].toFixed(1)}px)` }}>
           <g transform={`translate(0 ${jibY.toFixed(1)})`}>
-            <rect x={-m * 0.18} y={-m * 0.12} width={m * 0.36} height={m * 0.18} stroke={WHITE} strokeWidth={1.1} fill="none" opacity={0.55} rx={1} />
+            <rect x={-m * 0.18} y={-m * 0.12} width={m * 0.36} height={m * 0.18} stroke={WHITE} strokeWidth={gLat} fill="none" opacity={0.55} rx={1} />
             {/* Cable (escala en Y con el gancho) */}
             <g data-a="" className="a-cable" style={{ transform: `scaleY(${(restLen / L.cableMax).toFixed(4)})` }}>
-              <line x1={0} y1={0} x2={0} y2={L.cableMax} stroke={WHITE} strokeWidth={0.9} opacity={0.38} />
+              <line x1={0} y1={0} x2={0} y2={L.cableMax} stroke={WHITE} strokeWidth={L.mob ? 1.1 : 0.9} opacity={0.4} />
             </g>
             {/* Gancho */}
             <g data-a="" className="a-hook" style={{ transform: `translateY(${restLen.toFixed(1)}px)` }}>
-              <g stroke={WHITE} strokeWidth={1.1} fill="none" opacity={0.5} strokeLinecap="round">
+              <g stroke={WHITE} strokeWidth={gLat} fill="none" opacity={0.5} strokeLinecap="round">
                 <line x1={-4} y1={0} x2={4} y2={0} />
                 <path d="M 0 0 q -3 5 0 8 q 3 3 0 5" />
               </g>
             </g>
           </g>
         </g>
-        )}
 
         {/* --- MÓDULO EN VUELO (naranja) --- */}
-        <g data-a="" className="a-mx" style={{ transform: `translateX(${L.acopio[0].toFixed(1)}px)` }}>
-          <g data-a="" className="a-my" style={{ transform: `translateY(${L.acopio[1].toFixed(1)}px)` }}>
+        <g data-a="" className="a-mx" style={{ transform: `translateX(${L.pickup[0].toFixed(1)}px)` }}>
+          <g data-a="" className="a-my" style={{ transform: `translateY(${L.pickup[1].toFixed(1)}px)` }}>
             <g data-a="" className="a-sway">
               <g data-a="" className="a-fly" style={{ opacity: 0 }}>
                 <ModuleShape m={m} color={ORANGE} opacity={0.95} sw={1.8} />
