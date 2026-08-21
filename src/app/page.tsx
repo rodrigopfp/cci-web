@@ -14,7 +14,7 @@ import { VozPortrait } from "@/components/VozCard";
 import { PartnerCard, SectionHeader, CTASection, EditorialPolicyBlock, VerMasLink } from "@/components/Blocks";
 import { MetricCard } from "@/components/MetricCard";
 import { NewsletterBox } from "@/components/Footer";
-import { CCICubeOutline } from "@/components/Logo";
+import { HeroObra } from "@/components/HeroObra";
 import { formatDate } from "@/lib/format";
 
 export default async function Home() {
@@ -36,7 +36,11 @@ export default async function Home() {
       {/* HERO — el desafío país */}
       <section className="relative overflow-hidden border-b border-cci-line bg-cci-graphite-dark">
         <div className="absolute inset-0 opacity-[0.22]" style={{ backgroundImage: "radial-gradient(circle at 88% 15%, #E04E00 0%, transparent 42%), radial-gradient(circle at 5% 95%, #5C5C5C 0%, transparent 45%)" }} />
-        <div className="pointer-events-none absolute -right-16 top-1/2 hidden -translate-y-1/2 opacity-[0.14] lg:block"><CCICubeOutline size={520} color="#FFFFFF" strokeWidth={1.5} /></div>
+        {/* Escena de montaje industrializado (grúa + módulos), animada en loop.
+            Móvil: más tenue y parcialmente tras el texto; el titular manda. */}
+        <HeroObra className="absolute inset-y-0 right-0 w-[72%] max-w-[560px] opacity-40 md:opacity-90 lg:opacity-100" />
+        {/* Refuerzo del degradado bajo la columna de texto para mantener el contraste. */}
+        <div className="absolute inset-0" style={{ backgroundImage: "linear-gradient(90deg, #3D3D3D 0%, rgba(61,61,61,0.82) 32%, rgba(61,61,61,0) 70%)" }} />
         <div className="container-cci relative py-20 md:py-28">
           <div className="max-w-3xl animate-rise">
             <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-3 py-1 text-xs font-700 uppercase tracking-wide text-cci-orange-light">
