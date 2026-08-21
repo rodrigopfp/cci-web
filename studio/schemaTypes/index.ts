@@ -4,6 +4,8 @@ import { empresaCertificada, indicador, hito, convenioDitec } from "./radar";
 import { estudio, empresa, evento, recurso } from "./contenido";
 import { voz } from "./voz";
 import { eici } from "./eici";
+import { empresaVitrina } from "./empresaVitrina";
+import { requerimiento } from "./requerimiento";
 
 export const schemaTypes = [
   noticia,
@@ -18,4 +20,6 @@ export const schemaTypes = [
   recurso,
   voz,
   eici,
+  empresaVitrina,
+  requerimiento,
 ];

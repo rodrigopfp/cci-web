@@ -183,6 +183,45 @@ export interface EiciConfig {
   galeria: EiciGalleryItem[];
 }
 
+// ---- Vitrina (directorio comercial del ecosistema) ---------------------
+
+export type NivelVitrina =
+  | "oro"
+  | "plata"
+  | "bronce"
+  | "profesional"
+  | "academia"
+  | "pagada";
+
+export interface VitrinaProyecto {
+  titulo: string;
+  descripcion?: string;
+  /** URL de la imagen del proyecto, ya resuelta desde Sanity. */
+  imagen?: string;
+}
+
+export interface EmpresaVitrina {
+  id: string;
+  slug: string;
+  nombre: string;
+  nivel: NivelVitrina;
+  titular?: string;
+  descripcion?: string;
+  categorias: string[];
+  zonas: string[];
+  /** URL del logo: imagen de Sanity ya resuelta o URL externa. */
+  logo?: string;
+  galeria: string[];
+  sitioWeb?: string;
+  emailContacto?: string;
+  telefono?: string;
+  anioDesde?: number;
+  proyectosDestacados: VitrinaProyecto[];
+  /** ISO date (YYYY-MM-DD). Solo relevante para nivel "pagada". */
+  vigenteHasta?: string;
+  activo: boolean;
+}
+
 export type HitoTipo = "normativa" | "obra" | "gremial" | "dato";
 
 export interface Hito {

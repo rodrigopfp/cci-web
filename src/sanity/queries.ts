@@ -154,3 +154,28 @@ export const recursosQuery = `*[_type == "recurso"] | order(fecha desc){
   fecha,
   archivo{ asset->{ extension, size } }
 }`;
+
+// --- Vitrina (empresas del directorio comercial) ------------------------
+const EMPRESA_VITRINA_FIELDS = `
+  _id,
+  nombre,
+  "slug": slug.current,
+  nivel,
+  titular,
+  descripcion,
+  categorias,
+  zonas,
+  logo,
+  logoUrl,
+  galeria,
+  sitioWeb,
+  emailContacto,
+  telefono,
+  anioDesde,
+  proyectosDestacados[]{ titulo, descripcion, imagen },
+  vigenteHasta,
+  activo
+`;
+
+export const empresasVitrinaQuery = `*[_type == "empresaVitrina"] | order(nombre asc){${EMPRESA_VITRINA_FIELDS}}`;
+export const empresaVitrinaBySlugQuery = `*[_type == "empresaVitrina" && slug.current == $slug][0]{${EMPRESA_VITRINA_FIELDS}}`;

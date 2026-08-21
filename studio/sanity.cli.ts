@@ -13,5 +13,8 @@ export default defineCliConfig({
     // hospedado salte solo a la última versión mayor (el salto 5.x → 6.x está
     // pospuesto de forma deliberada).
     autoUpdates: false,
+    // Identificador de la aplicación de Studio en Sanity: fija el destino del
+    // deploy y evita que `sanity deploy` lo pregunte cada vez.
+    appId: "w24ve77zhbsatny0pccd5wlt",
   },
 });

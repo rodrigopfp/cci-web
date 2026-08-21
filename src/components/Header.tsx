@@ -11,6 +11,7 @@ const nav = [
   { href: "/radar", label: "Radar" },
   { href: "/evidencia", label: "Evidencia" },
   { href: "/socios", label: "Ecosistema" },
+  { href: "/vitrina", label: "Vitrina" },
   { href: "/recursos", label: "Recursos" },
   { href: "/eventos", label: "Eventos" },
   { href: "/eici", label: "EICI" },

@@ -25,6 +25,8 @@ import {
   empresasQuery,
   eventosQuery,
   recursosQuery,
+  empresasVitrinaQuery,
+  empresaVitrinaBySlugQuery,
 } from "./queries";
 import type {
   Article,
@@ -40,6 +42,8 @@ import type {
   Hito,
   Voz,
   EiciConfig,
+  EmpresaVitrina,
+  NivelVitrina,
 } from "@/data/types";
 
 const builder = createImageUrlBuilder(client);
@@ -474,4 +478,96 @@ export async function getResources(): Promise<Resource[]> {
       date: d.fecha,
     };
   });
+}
+
+// --- Vitrina (directorio comercial) -------------------------------------
+type ImagenDoc = { asset?: { _ref?: string } };
+type EmpresaVitrinaDoc = {
+  _id: string;
+  nombre: string;
+  slug: string;
+  nivel?: NivelVitrina;
+  titular?: string;
+  descripcion?: string;
+  categorias?: string[];
+  zonas?: string[];
+  logo?: ImagenDoc;
+  logoUrl?: string;
+  galeria?: ImagenDoc[];
+  sitioWeb?: string;
+  emailContacto?: string;
+  telefono?: string;
+  anioDesde?: number;
+  proyectosDestacados?: { titulo?: string; descripcion?: string; imagen?: ImagenDoc }[];
+  vigenteHasta?: string;
+  activo?: boolean;
+};
+
+function toEmpresaVitrina(d: EmpresaVitrinaDoc): EmpresaVitrina {
+  // Mismo patrón dual que las noticias: imagen subida a Sanity o URL externa.
+  const logo = d.logo?.asset?._ref
+    ? builder.image(d.logo).width(480).fit("max").auto("format").url()
+    : d.logoUrl || undefined;
+
+  const galeria = (Array.isArray(d.galeria) ? d.galeria : [])
+    .filter((g) => g?.asset?._ref)
+    .map((g) => builder.image(g).width(1400).fit("max").auto("format").url());
+
+  const proyectosDestacados = (Array.isArray(d.proyectosDestacados) ? d.proyectosDestacados : [])
+    .filter((p) => p?.titulo)
+    .map((p) => ({
+      titulo: p.titulo as string,
+      descripcion: p.descripcion,
+      imagen: p.imagen?.asset?._ref
+        ? builder.image(p.imagen).width(1200).fit("max").auto("format").url()
+        : undefined,
+    }));
+
+  return {
+    id: d._id,
+    slug: d.slug,
+    nombre: d.nombre,
+    nivel: (d.nivel as NivelVitrina) ?? "bronce",
+    titular: d.titular,
+    descripcion: d.descripcion,
+    categorias: Array.isArray(d.categorias) ? d.categorias : [],
+    zonas: Array.isArray(d.zonas) ? d.zonas : [],
+    logo,
+    galeria,
+    sitioWeb: d.sitioWeb,
+    emailContacto: d.emailContacto,
+    telefono: d.telefono,
+    anioDesde: d.anioDesde,
+    proyectosDestacados,
+    vigenteHasta: d.vigenteHasta,
+    activo: d.activo !== false,
+  };
+}
+
+/**
+ * Visibilidad en el sitio: se ocultan las inactivas y las publicaciones
+ * "pagada" cuya vigencia ya pasó (comparación por fecha ISO en tiempo de build).
+ */
+function esVisible(e: EmpresaVitrina): boolean {
+  if (!e.activo) return false;
+  const hoy = new Date().toISOString().slice(0, 10);
+  if (e.nivel === "pagada" && e.vigenteHasta && e.vigenteHasta < hoy) return false;
+  return true;
+}
+
+export async function getEmpresasVitrina(): Promise<EmpresaVitrina[]> {
+  const docs = await client.fetch<EmpresaVitrinaDoc[]>(empresasVitrinaQuery);
+  return docs.map(toEmpresaVitrina).filter(esVisible);
+}
+
+export async function getEmpresaVitrinaBySlug(slug: string): Promise<EmpresaVitrina | null> {
+  const doc = await client.fetch<EmpresaVitrinaDoc | null>(empresaVitrinaBySlugQuery, { slug });
+  if (!doc) return null;
+  const empresa = toEmpresaVitrina(doc);
+  return esVisible(empresa) ? empresa : null;
+}
+
+export async function getEmpresaVitrinaSlugs(): Promise<string[]> {
+  const empresas = await getEmpresasVitrina();
+  return empresas.map((e) => e.slug).filter(Boolean);
 }

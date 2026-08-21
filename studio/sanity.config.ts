@@ -19,6 +19,8 @@ export default defineConfig({
           .items([
             S.documentTypeListItem("noticia").title("Noticias"),
             S.documentTypeListItem("voz").title("Voces de la industrialización"),
+            S.documentTypeListItem("empresaVitrina").title("Vitrina · Empresas"),
+            S.documentTypeListItem("requerimiento").title("Vitrina · Requerimientos recibidos"),
             // Singleton: un único documento de configuración de la página EICI.
             S.listItem()
               .title("Página EICI")

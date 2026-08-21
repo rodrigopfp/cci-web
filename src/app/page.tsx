@@ -7,10 +7,12 @@ import {
   getRadarIndicators,
   getStudies,
   getVoces,
+  getEmpresasVitrina,
 } from "@/sanity/fetch";
 import { FeaturedArticle } from "@/components/ArticleCard";
 import { RadarKpisPreview } from "@/components/RadarKpis";
 import { VozPortrait } from "@/components/VozCard";
+import { VitrinaMiniCard } from "@/components/VitrinaCard";
 import { PartnerCard, SectionHeader, CTASection, EditorialPolicyBlock, VerMasLink } from "@/components/Blocks";
 import { MetricCard } from "@/components/MetricCard";
 import { NewsletterBox } from "@/components/Footer";
@@ -18,7 +20,7 @@ import { HeroObra } from "@/components/HeroObra";
 import { formatDate } from "@/lib/format";
 
 export default async function Home() {
-  const [articles, partners, resources, events, radarIndicators, studies, voces] =
+  const [articles, partners, resources, events, radarIndicators, studies, voces, empresasVitrina] =
     await Promise.all([
       getArticles(),
       getPartners(),
@@ -27,9 +29,12 @@ export default async function Home() {
       getRadarIndicators(),
       getStudies(),
       getVoces(),
+      getEmpresasVitrina(),
     ]);
   const featured = articles[0];
   const latest = articles.slice(1, 5);
+  // Franja Vitrina: hasta 4 socios oro.
+  const vitrinaOro = empresasVitrina.filter((e) => e.nivel === "oro").slice(0, 4);
 
   return (
     <>
@@ -138,6 +143,21 @@ export default async function Home() {
               ))}
             </div>
             <VerMasLink href="/voces">Ver todas las voces</VerMasLink>
+          </div>
+        </section>
+      )}
+
+      {/* VITRINA — avance del directorio comercial (socios oro) */}
+      {vitrinaOro.length > 0 && (
+        <section className="bg-cci-graphite-dark py-14">
+          <div className="container-cci">
+            <SectionHeader kicker="Vitrina" title="Quién construye industrializado" dark />
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              {vitrinaOro.map((e) => (
+                <VitrinaMiniCard key={e.id} empresa={e} />
+              ))}
+            </div>
+            <VerMasLink href="/vitrina">Ver toda la Vitrina</VerMasLink>
           </div>
         </section>
       )}
