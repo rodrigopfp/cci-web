@@ -48,8 +48,12 @@ export default async function Home() {
             (alineado a la izquierda). En móvil limitado para dejar el corredor derecho. */}
         <div className="relative w-full px-6 sm:px-10 md:px-0">
           <div className="max-w-[82vw] animate-rise sm:max-w-md md:ml-[21%] md:max-w-xl">
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-3 py-1 text-xs font-700 uppercase tracking-wide text-cci-orange-light">
-              <span className="h-1.5 w-1.5 rounded-full bg-cci-orange" />Consejo de Construcción Industrializada
+            {/* Antetítulo: caja rectangular translúcida con barra naranja a la
+                izquierda (sustituye al punto). Ancho definido por el contenido
+                (w-fit), en una sola línea; en móvil baja el tamaño de fuente para
+                caber sin cruzarse con la grúa. */}
+            <div className="mb-5 inline-flex w-fit items-center whitespace-nowrap border-l-4 border-cci-orange bg-white/[0.06] py-2 pl-4 pr-3 text-[9px] font-700 uppercase leading-none tracking-[0.15em] text-[#F5EEE6] md:text-xs">
+              Consejo de Construcción Industrializada
             </div>
             <h1 className="font-display text-4xl font-900 leading-[1.03] text-white md:text-6xl">
               Chile necesita<br />construir <span className="text-cci-orange">mejor.</span>
