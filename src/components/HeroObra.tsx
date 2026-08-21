@@ -87,23 +87,23 @@ type Layout = {
 //     costado derecho + franja superior, con el edificio en la base derecha.
 function computeLayout(w: number, h: number): Layout {
   const mob = w < 720;
-  const m = Math.max(mob ? 30 : 40, Math.min(w, h) * (mob ? 0.085 : 0.074));
+  const m = Math.max(mob ? 28 : 40, Math.min(w, h) * (mob ? 0.078 : 0.074));
   const jibY = h * (mob ? 0.09 : 0.11);
-  const mastX = w * (mob ? 0.94 : 0.9);
+  const mastX = w * (mob ? 0.98 : 0.9);
   // El módulo cuelga justo bajo la pluma (relativo a su tamaño), de modo que la
   // franja superior lo contenga por encima del texto aunque el hero sea bajo.
   const carryY = jibY + m * 0.6;
   // Acopio: en móvil a la derecha (mismo costado que baja); en escritorio a la
   // izquierda, para que el módulo bordee el texto (sube izquierda, baja derecha).
-  const pickup: [number, number] = mob ? [w * 0.85, h * 0.88] : [w * 0.1, h * 0.86];
-  const buildBaseY = h * (mob ? 0.9 : 0.88);
+  const pickup: [number, number] = mob ? [w * 0.9, h * 0.88] : [w * 0.1, h * 0.86];
+  const buildBaseY = h * (mob ? 0.94 : 0.88);
   // Edificio: en escritorio una torre 2×2 abajo a la derecha, entre el bloque de
   // texto y el mástil. En móvil, una torre de una columna pegada al corredor
   // derecho (menos módulos), despejada del texto y del mástil.
   const cells: [number, number][] = mob
     ? [
-        [w * 0.85, buildBaseY],
-        [w * 0.85, buildBaseY - h * 0.11],
+        [w * 0.9, buildBaseY],
+        [w * 0.9, buildBaseY - h * 0.075],
       ]
     : (() => {
         const bx = w * 0.68;

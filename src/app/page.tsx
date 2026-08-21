@@ -35,7 +35,7 @@ export default async function Home() {
     <>
       {/* HERO — el desafío país. Alto acotado (no pantalla completa) para que la
           sección RADAR asome al pie de la primera pantalla. */}
-      <section className="relative flex items-center overflow-hidden border-b border-cci-line bg-cci-graphite-dark min-h-[88svh] md:min-h-[560px] md:max-h-[620px] md:h-[72svh]">
+      <section className="relative flex items-center overflow-hidden border-b border-cci-line bg-cci-graphite-dark min-h-[560px] md:max-h-[620px] md:h-[72svh]">
         <div className="absolute inset-0 opacity-[0.22]" style={{ backgroundImage: "radial-gradient(circle at 88% 15%, #E04E00 0%, transparent 42%), radial-gradient(circle at 5% 95%, #5C5C5C 0%, transparent 45%)" }} />
         {/* Escena de montaje industrializado (grúa + módulos), animada en loop.
             Enmarca el texto: pluma arriba, mástil a la derecha, edificio abajo a
@@ -47,7 +47,7 @@ export default async function Home() {
         {/* Bloque de texto: centrado vertical; en escritorio arranca ~21% del ancho
             (alineado a la izquierda). En móvil limitado para dejar el corredor derecho. */}
         <div className="relative w-full px-6 sm:px-10 md:px-0">
-          <div className="max-w-[66vw] animate-rise sm:max-w-md md:ml-[21%] md:max-w-xl">
+          <div className="max-w-[82vw] animate-rise sm:max-w-md md:ml-[21%] md:max-w-xl">
             <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-3 py-1 text-xs font-700 uppercase tracking-wide text-cci-orange-light">
               <span className="h-1.5 w-1.5 rounded-full bg-cci-orange" />Consejo de Construcción Industrializada
             </div>
