@@ -15,6 +15,7 @@ const nav = [
   { href: "/recursos", label: "Recursos" },
   { href: "/eventos", label: "Eventos" },
   { href: "/eici", label: "EICI" },
+  { href: "/nosotros", label: "Quiénes somos" },
   { href: "/publica", label: "Publica" },
 ];
 
