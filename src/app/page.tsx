@@ -82,6 +82,37 @@ export default async function Home() {
         <VerMasLink href="/radar">Ver todas las cifras en el Radar</VerMasLink>
       </section>
 
+      {/* QUIÉNES SOMOS — presentación compacta del CCI (detalle vive en /nosotros) */}
+      <section className="bg-cci-paper py-14">
+        <div className="container-cci grid items-center gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-12">
+          <div>
+            <div className="inline-flex w-fit items-center whitespace-nowrap border-l-4 border-cci-orange bg-cci-orange-soft py-2 pl-4 pr-3 text-[11px] font-700 uppercase leading-none tracking-[0.15em] text-cci-orange-dark md:text-xs">
+              Quiénes somos
+            </div>
+            <h2 className="mt-5 font-display text-2xl font-800 leading-tight text-cci-ink md:text-[2rem]">
+              El ecosistema que está industrializando la construcción en Chile y{" "}
+              <span className="text-cci-orange">Latam</span>
+            </h2>
+            <p className="mt-4 max-w-xl leading-relaxed text-cci-slate">
+              El Consejo de Construcción Industrializada articula a empresas, profesionales, instituciones y
+              academia en torno a un objetivo común: elevar la productividad y la sustentabilidad de la
+              construcción a través de la industrialización.
+            </p>
+            <VerMasLink href="/nosotros">Conoce al CCI</VerMasLink>
+          </div>
+          <div className="flex justify-center lg:justify-end">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/nosotros/ecosistema-mapa.png"
+              alt="Mapa del ecosistema de la construcción industrializada del CCI en Chile y Latinoamérica."
+              width={990}
+              height={996}
+              className="h-auto w-full max-w-[420px]"
+            />
+          </div>
+        </div>
+      </section>
+
       {/* ACTUALIDAD — asoma apenas pasado el punto de partida (sitio vivo) */}
       <section className="container-cci py-14">
         <SectionHeader kicker="Actualidad" title="Lo último del sector" />
