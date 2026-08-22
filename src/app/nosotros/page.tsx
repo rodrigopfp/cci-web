@@ -84,8 +84,8 @@ export default function NosotrosPage() {
             <img
               src="/nosotros/ecosistema-mapa.png"
               alt="Mapa del ecosistema de la construcción industrializada del CCI en Chile y Latinoamérica."
-              width={1514}
-              height={893}
+              width={990}
+              height={996}
               className="h-auto w-full max-w-[460px]"
             />
           </div>
