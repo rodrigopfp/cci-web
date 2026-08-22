@@ -20,12 +20,18 @@
 }
 
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+/* overflow-x: clip evita el scroll horizontal por elementos full-bleed (100vw)
+   sin romper el header sticky (clip no crea contenedor de scroll ni fuerza
+   overflow-y: auto, a diferencia de hidden). Se aplica en html y body. */
+html { scroll-behavior: smooth; overflow-x: clip; }
 body {
   font-family: var(--font-sans);
   color: #2B2B2B;
   background: #ffffff;
   -webkit-font-smoothing: antialiased;
+  /* Evita scroll horizontal por elementos full-bleed (100vw). `clip` no crea
+     contenedor de scroll, así que no rompe el header sticky (a diferencia de hidden). */
+  overflow-x: clip;
 }
 
 @layer components {
@@ -69,5 +75,59 @@ body {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* ============================================================================
+   /nosotros — TARJETAS DE OBJETIVOS CON FOTO
+   Breakpoints propios (701px, 1101px). Las reglas de móvil (full-bleed) van al
+   FINAL, después de las de escritorio, para que no queden anuladas.
+   ============================================================================ */
+.obj-grid {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: 1fr; /* base: una por fila */
+}
+.obj-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* la foto respeta las esquinas redondeadas */
+  border-radius: 0.75rem;
+  border: 1px solid #e6e4e2; /* cci-line */
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(43, 43, 43, 0.04), 0 8px 24px rgba(43, 43, 43, 0.06);
+}
+.obj-card__photo {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+.obj-card__body {
+  border-top: 3px solid #e04e00; /* filete naranja bajo la foto */
+  padding: 1.5rem;
+}
+/* Intermedio: dos por fila */
+@media (min-width: 701px) {
+  .obj-grid { grid-template-columns: repeat(2, 1fr); }
+}
+/* Escritorio ancho: las tres en una fila */
+@media (min-width: 1101px) {
+  .obj-grid { grid-template-columns: repeat(3, 1fr); }
+}
+/* Móvil: una por fila, a ancho completo de pantalla (full-bleed). Rompe el
+   margen del contenedor; el texto interior conserva su padding lateral. */
+@media (max-width: 700px) {
+  .obj-card {
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+    border-radius: 0;
+    border-left: 0;
+    border-right: 0;
+  }
+  .obj-card__photo {
+    aspect-ratio: 16 / 9;
+    height: auto;
   }
 }

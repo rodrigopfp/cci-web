@@ -25,27 +25,26 @@ function FuenteTexto({ children }: { children: React.ReactNode }) {
   return <p className="mt-5 text-xs font-600 text-cci-slate-light">{children}</p>;
 }
 
-// Objetivos estratégicos del Consejo (Memoria CCI 2022-2024).
+// Objetivos estratégicos del Consejo (Memoria CCI 2022-2024). Cada tarjeta lleva
+// una fotografía arriba (gentileza de socios CCI).
 const OBJETIVOS = [
   {
     titulo: "Difusión y formación",
     desc: "Posicionar el concepto de industrialización y sus atributos mediante seminarios, capacitación, casos de éxito y buenas prácticas.",
-    icon: <path d="M12 3 2 8l10 5 10-5-10-5zM6 10v6c0 1.5 3 3 6 3s6-1.5 6-3v-6" strokeLinecap="round" strokeLinejoin="round" />,
+    img: "/nosotros/nosotros-difusion.jpg",
+    alt: "Visita técnica a planta industrializada",
   },
   {
     titulo: "Vinculación con el medio",
     desc: "Ser facilitador y articulador entre la industria, el Estado y la academia para aumentar la penetración de la construcción industrializada.",
-    icon: (
-      <>
-        <circle cx="6" cy="6" r="2.5" /><circle cx="18" cy="6" r="2.5" /><circle cx="12" cy="18" r="2.5" />
-        <path d="M7.5 7.8 11 15.5M16.5 7.8 13 15.5M8 6h8" strokeLinecap="round" />
-      </>
-    ),
+    img: "/nosotros/nosotros-vinculacion.jpg",
+    alt: "Comunidad de socios del CCI reunida",
   },
   {
     titulo: "Productividad y sustentabilidad",
     desc: "Promover la productividad y eficiencia asociadas a la industrialización, a partir de la normalización e integración de estándares y procedimientos de la construcción.",
-    icon: <path d="M3 3v18h18M7 15l4-4 3 3 5-6" strokeLinecap="round" strokeLinejoin="round" />,
+    img: "/nosotros/nosotros-productividad.jpg",
+    alt: "Línea de producción en planta industrializada",
   },
 ];
 
@@ -153,17 +152,19 @@ export default function NosotrosPage() {
       <section className="container-cci py-14 md:py-16">
         <Kicker>Objetivos</Kicker>
         <h2 className="font-display text-2xl font-800 text-cci-ink md:text-3xl">En qué trabaja el Consejo</h2>
-        <div className="mt-7 grid gap-5 md:grid-cols-3">
+        {/* Tarjetas con foto. La grilla y el comportamiento full-bleed en móvil
+            se definen en globals.css (.obj-grid / .obj-card) para controlar los
+            breakpoints (701px, 1101px) y el orden de las reglas. */}
+        <div className="obj-grid mt-7">
           {OBJETIVOS.map((o) => (
-            <div key={o.titulo} className="flex flex-col rounded-xl border border-cci-line bg-white p-6 shadow-card">
-              <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-lg bg-cci-orange-soft text-cci-orange">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  {o.icon}
-                </svg>
+            <article key={o.titulo} className="obj-card">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img className="obj-card__photo" src={o.img} alt={o.alt} loading="lazy" />
+              <div className="obj-card__body">
+                <h3 className="font-display text-lg font-800 text-cci-ink">{o.titulo}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-cci-slate">{o.desc}</p>
               </div>
-              <h3 className="font-display text-lg font-800 text-cci-ink">{o.titulo}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-cci-slate">{o.desc}</p>
-            </div>
+            </article>
           ))}
         </div>
 
@@ -173,7 +174,10 @@ export default function NosotrosPage() {
           industrialización desde etapas tempranas de los proyectos, vinculando la cadena de valor completa,
           desde el diseño y la planificación hasta el montaje.
         </div>
-        <FuenteTexto>Fuente: Memoria CCI 2022-2024</FuenteTexto>
+        <div className="mt-5 text-xs font-600 text-cci-slate-light">
+          <p>Fuente: Memoria CCI 2022-2024</p>
+          <p className="mt-1">Fotografías gentileza de socios CCI · Memoria CCI 2022-2024</p>
+        </div>
       </section>
 
       {/* 5. EL ECOSISTEMA EN CIFRAS */}
