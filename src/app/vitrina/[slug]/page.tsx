@@ -138,10 +138,12 @@ export default async function EmpresaVitrinaPage({ params }: { params: Promise<{
 
       {/* CONTACTO */}
       <section className="mt-10 flex flex-wrap items-center gap-3 border-t border-cci-line pt-8">
-        {empresa.emailContacto && (
+        {empresa.emailContacto ? (
           <a href={mailtoContacto(empresa.emailContacto, empresa.nombre)} className="btn-primary">
             Contactar
           </a>
+        ) : (
+          <span className="text-sm italic text-cci-slate-light">Contacto por confirmar</span>
         )}
         {empresa.sitioWeb && (
           <a

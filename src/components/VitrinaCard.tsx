@@ -92,7 +92,7 @@ export function VitrinaCard({ empresa }: { empresa: EmpresaVitrina }) {
       )}
 
       <div className="mt-auto flex flex-wrap items-center gap-2 border-t border-cci-line pt-4">
-        {empresa.emailContacto && (
+        {empresa.emailContacto ? (
           <a
             href={mailtoContacto(empresa.emailContacto, empresa.nombre)}
             className="inline-flex items-center gap-1.5 rounded-full bg-cci-orange px-3.5 py-2 text-xs font-semibold text-white transition hover:bg-cci-orange-dark"
@@ -102,6 +102,8 @@ export function VitrinaCard({ empresa }: { empresa: EmpresaVitrina }) {
             </svg>
             Contactar
           </a>
+        ) : (
+          <span className="text-xs italic text-cci-slate-light">Contacto por confirmar</span>
         )}
         <Link
           href={`/vitrina/${empresa.slug}`}

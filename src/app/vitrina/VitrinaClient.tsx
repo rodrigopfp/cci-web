@@ -69,6 +69,10 @@ export function VitrinaClient({ empresas }: { empresas: EmpresaVitrina[] }) {
             membresía y publicaciones de empresas no socias, siempre identificadas. Encuentra a tu proveedor
             por tipo de solución y zona.
           </p>
+          <p className="mt-3 max-w-2xl text-sm italic text-white/50">
+            Directorio en actualización: las descripciones y datos de contacto de cada empresa se están
+            completando.
+          </p>
         </div>
       </section>
 
