@@ -5,19 +5,17 @@ import type { NivelVitrina } from "@/data/types";
  * (oro → plata → bronce → pagada) y clases de la insignia. Los niveles
  * "profesional" y "academia" no van en la grilla de tarjetas (se listan aparte).
  */
+// `chip` = solo el color (fondo + texto) de la insignia de nivel. La forma
+// (chip discreto de esquinas suaves) la aplica <NivelBadge>. Tonos: oro en
+// arena/dorado apagado, plata en gris, bronce en tierra, pagada en azul tenue.
 export const NIVEL_INFO: Record<
   NivelVitrina,
   { label: string; orden: number; chip: string; enGrilla: boolean }
 > = {
-  oro: { label: "Socio Oro", orden: 0, chip: "bg-cci-orange text-white", enGrilla: true },
+  oro: { label: "Socio Oro", orden: 0, chip: "bg-[#EFE6CF] text-[#8A6A20]", enGrilla: true },
   plata: { label: "Socio Plata", orden: 1, chip: "bg-cci-paper text-cci-slate", enGrilla: true },
-  bronce: { label: "Socio Bronce", orden: 2, chip: "bg-cci-orange-soft text-cci-orange-dark", enGrilla: true },
-  pagada: {
-    label: "Publicación pagada",
-    orden: 3,
-    chip: "border border-dashed border-cci-orange bg-white text-cci-orange-dark",
-    enGrilla: true,
-  },
+  bronce: { label: "Socio Bronce", orden: 2, chip: "bg-[#EEE0D2] text-[#8A5A34]", enGrilla: true },
+  pagada: { label: "Publicación pagada", orden: 3, chip: "bg-cci-blue-soft text-cci-blue", enGrilla: true },
   profesional: { label: "Socio Profesional", orden: 4, chip: "bg-cci-blue-soft text-cci-blue", enGrilla: false },
   academia: { label: "Academia", orden: 5, chip: "bg-cci-blue-soft text-cci-blue", enGrilla: false },
 };
