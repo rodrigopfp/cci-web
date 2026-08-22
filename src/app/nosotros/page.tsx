@@ -4,36 +4,29 @@ import { NosotrosCifras } from "@/components/NosotrosCifras";
 export const metadata = {
   title: "Quiénes somos · CCI",
   description:
-    "El Consejo de Construcción Industrializada (CCI) articula al ecosistema de la construcción industrializada en Chile: qué es, su misión, sus focos estratégicos y cómo se organiza.",
+    "El Consejo de Construcción Industrializada (CCI) articula al ecosistema de la construcción industrializada en Chile y Latinoamérica: qué es, su misión y visión, objetivos, cifras y trayectoria.",
 };
 
-const FUENTE_CCI = "https://construccionindustrializada.cl/quienes-somos/";
+const EICI_2025 =
+  "https://construccionindustrializada.cl/2025/09/25/industrializacion-a-escala-nacional-eici-cierra-su-edicion-2025-con-actividades-a-lo-largo-del-pais/";
 
-// Enlace de fuente reutilizable al pie de un bloque.
-function FuenteLink({ href, children }: { href: string; children: React.ReactNode }) {
+// Antetítulo (kicker) con filete naranja, para fondos claros.
+function Kicker({ children }: { children: React.ReactNode }) {
   return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="mt-5 inline-flex items-center gap-1.5 text-xs font-600 text-cci-slate-light hover:text-cci-orange-dark"
-    >
+    <div className="mb-1 flex items-center gap-2 text-sm font-700 uppercase tracking-wide text-cci-orange">
+      <span className="h-[2px] w-6 bg-cci-orange" />
       {children}
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <path d="M7 17 17 7M7 7h10v10" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    </a>
+    </div>
   );
 }
 
-const FOCOS = [
-  {
-    titulo: "Productividad",
-    desc: "",
-    icon: (
-      <path d="M3 3v18h18M7 15l4-4 3 3 5-6" strokeLinecap="round" strokeLinejoin="round" />
-    ),
-  },
+// Línea de fuente al pie de un bloque (texto plano; la Memoria no tiene URL).
+function FuenteTexto({ children }: { children: React.ReactNode }) {
+  return <p className="mt-5 text-xs font-600 text-cci-slate-light">{children}</p>;
+}
+
+// Objetivos estratégicos del Consejo (Memoria CCI 2022-2024).
+const OBJETIVOS = [
   {
     titulo: "Difusión y formación",
     desc: "Posicionar el concepto de industrialización y sus atributos mediante seminarios, capacitación, casos de éxito y buenas prácticas.",
@@ -49,11 +42,24 @@ const FOCOS = [
       </>
     ),
   },
+  {
+    titulo: "Productividad y sustentabilidad",
+    desc: "Promover la productividad y eficiencia asociadas a la industrialización, a partir de la normalización e integración de estándares y procedimientos de la construcción.",
+    icon: <path d="M3 3v18h18M7 15l4-4 3 3 5-6" strokeLinecap="round" strokeLinejoin="round" />,
+  },
+];
+
+// Hitos de la trayectoria (Memoria CCI 2022-2024). El último es futuro/destacado.
+const HITOS = [
+  { anio: "2017", texto: "El CCI se conforma, impulsado por el programa Construye2025 de Corfo." },
+  { anio: "2019", texto: "El Consejo pasa a sustentarse con las membresías de sus socios; parte con 32 asociados." },
+  { anio: "2022", texto: "Presencia en Feria Edifica con soluciones habitacionales de socios en la Plaza de la Industrialización." },
+  { anio: "2023", texto: "Se publica la norma NCh3744 de construcción industrializada, impulsada desde el CCI, y se realiza el Encuentro Nacional en nueve regiones." },
+  { anio: "2025", texto: "Encuentro Internacional de Construcción Industrializada (EICI), con actividades en 14 ciudades." },
+  { anio: "2027", texto: "Próxima edición del EICI, los días 8, 9 y 10 de septiembre.", destacado: true, href: "/eici" },
 ];
 
 export default function NosotrosPage() {
-  const anios = new Date().getFullYear() - 2017;
-
   return (
     <>
       {/* 1. HERO — fondo claro y sobrio */}
@@ -64,7 +70,8 @@ export default function NosotrosPage() {
               Quiénes somos
             </div>
             <h1 className="mt-5 font-display text-3xl font-900 leading-[1.08] text-cci-ink md:text-5xl">
-              El ecosistema que está industrializando la construcción en Chile
+              El ecosistema que está industrializando la construcción en Chile y{" "}
+              <span className="text-cci-orange">Latam</span>
             </h1>
             <p className="mt-5 max-w-xl text-lg leading-relaxed text-cci-slate">
               El Consejo de Construcción Industrializada articula a empresas, profesionales, instituciones y
@@ -76,7 +83,7 @@ export default function NosotrosPage() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/nosotros/ecosistema-mapa.png"
-              alt="Mapa del ecosistema del CCI: el logo del Consejo de Construcción Industrializada sobre un mapamundi con nodos conectados en Sudamérica y el texto «El ecosistema de construcción industrializada más grande de Latinoamérica»."
+              alt="Mapa del ecosistema de la construcción industrializada del CCI en Chile y Latinoamérica."
               width={1514}
               height={893}
               className="h-auto w-full max-w-[460px]"
@@ -85,95 +92,161 @@ export default function NosotrosPage() {
         </div>
       </section>
 
-      {/* 2. QUÉ ES EL CCI */}
+      {/* 2. QUÉ ES EL CCI — dos columnas en escritorio */}
       <section className="container-cci py-14 md:py-16">
-        <div className="max-w-3xl">
-          <div className="mb-1 flex items-center gap-2 text-sm font-700 uppercase tracking-wide text-cci-orange">
-            <span className="h-[2px] w-6 bg-cci-orange" />
-            Qué es el CCI
+        <div className="grid gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:gap-14">
+          <div>
+            <Kicker>Qué es el CCI</Kicker>
+            <h2 className="font-display text-2xl font-800 leading-tight text-cci-ink md:text-3xl">
+              Una entidad técnica y permanente del sector
+            </h2>
           </div>
-          <h2 className="font-display text-2xl font-800 text-cci-ink md:text-3xl">
-            Una entidad técnica y permanente del sector
-          </h2>
-          <div className="mt-5 space-y-4 text-[17px] leading-[1.75] text-cci-ink/90">
-            <p>
-              El Consejo de Construcción Industrializada (CCI) nace como iniciativa impulsada por el programa
-              Construye2025 de Corfo, para promover la industrialización como estrategia de desarrollo de la
-              industria de la construcción nacional, avanzando en productividad y sustentabilidad.
-            </p>
-            <p>
-              Es una entidad de carácter técnico y permanente: un grupo abierto y convocante que desde 2017
-              reúne a actores del mundo público y privado que aportan conocimientos y experiencia al
-              mejoramiento de las técnicas de industrialización.
-            </p>
-            <p>
-              Su secretaría ejecutiva la ejerce la CDT y cuenta con el patrocinio de la CChC, Corfo y
-              Construye2025, entre otras instituciones.
-            </p>
+          <div>
+            <div className="space-y-4 text-[17px] leading-[1.75] text-cci-ink/90">
+              <p>
+                El Consejo de Construcción Industrializada (CCI) es una entidad de carácter técnico y permanente
+                que convoca a empresas, profesionales independientes, instituciones académicas y entidades
+                públicas y privadas, para trabajar de forma colaborativa en el desarrollo técnico, la formación y
+                la difusión de buenas prácticas que promuevan la construcción industrializada en Chile.
+              </p>
+              <p>
+                Fue impulsado en 2017 por el programa Construye2025 de Corfo. Desde 2019 se sustenta con las
+                membresías de sus socios y su secretaría ejecutiva está a cargo de la Corporación de Desarrollo
+                Tecnológico (CDT).
+              </p>
+              <p className="font-700 text-cci-ink">
+                En 2023, con 120 asociados, el CCI se consolidó como el mayor ecosistema de construcción
+                industrializada de Latinoamérica.
+              </p>
+            </div>
+            <FuenteTexto>Fuente: Memoria CCI 2022-2024</FuenteTexto>
           </div>
-          <FuenteLink href={FUENTE_CCI}>Fuente: construccionindustrializada.cl/quienes-somos</FuenteLink>
         </div>
       </section>
 
-      {/* 3. MISIÓN — destacada tipográficamente */}
-      <section className="bg-cci-paper py-14 md:py-16">
+      {/* 3. MISIÓN Y VISIÓN — bloque oscuro */}
+      <section className="bg-cci-graphite-dark py-14 md:py-16">
         <div className="container-cci max-w-4xl">
-          <div className="mb-4 flex items-center gap-2 text-sm font-700 uppercase tracking-wide text-cci-orange">
+          <div className="mb-4 flex items-center gap-2 text-sm font-700 uppercase tracking-wide text-cci-orange-light">
             <span className="h-[2px] w-6 bg-cci-orange" />
             Misión
           </div>
-          <p className="border-l-4 border-cci-orange pl-6 font-display text-2xl font-800 leading-snug text-cci-graphite md:text-[2rem]">
+          <p className="border-l-4 border-cci-orange pl-6 font-display text-2xl font-800 leading-snug text-white md:text-[2rem]">
             Promover el desarrollo de soluciones industrializadas y prefabricadas que mejoren la calidad, la
             productividad y la sustentabilidad en la edificación, incorporando mejores prácticas, tecnología e
             innovación en toda su cadena de valor.
           </p>
+
+          <div className="my-9 border-t border-white/15" />
+
+          <div className="mb-4 flex items-center gap-2 text-sm font-700 uppercase tracking-wide text-cci-orange-light">
+            <span className="h-[2px] w-6 bg-cci-orange" />
+            Nuestra visión
+          </div>
+          <p className="border-l-4 border-cci-orange pl-6 font-display text-2xl font-800 leading-snug text-white md:text-[2rem]">
+            Industrializar la construcción en Chile para ser el sector más productivo.
+          </p>
         </div>
       </section>
 
-      {/* 4. TRES FOCOS ESTRATÉGICOS */}
+      {/* 4. OBJETIVOS + DESAFÍO */}
       <section className="container-cci py-14 md:py-16">
-        <div className="mb-1 flex items-center gap-2 text-sm font-700 uppercase tracking-wide text-cci-orange">
-          <span className="h-[2px] w-6 bg-cci-orange" />
-          Focos estratégicos
-        </div>
+        <Kicker>Objetivos</Kicker>
         <h2 className="font-display text-2xl font-800 text-cci-ink md:text-3xl">En qué trabaja el Consejo</h2>
         <div className="mt-7 grid gap-5 md:grid-cols-3">
-          {FOCOS.map((f) => (
-            <div key={f.titulo} className="flex flex-col rounded-xl border border-cci-line bg-white p-6 shadow-card">
+          {OBJETIVOS.map((o) => (
+            <div key={o.titulo} className="flex flex-col rounded-xl border border-cci-line bg-white p-6 shadow-card">
               <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-lg bg-cci-orange-soft text-cci-orange">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  {f.icon}
+                  {o.icon}
                 </svg>
               </div>
-              <h3 className="font-display text-lg font-800 text-cci-ink">{f.titulo}</h3>
-              {f.desc && <p className="mt-2 text-sm leading-relaxed text-cci-slate">{f.desc}</p>}
+              <h3 className="font-display text-lg font-800 text-cci-ink">{o.titulo}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-cci-slate">{o.desc}</p>
             </div>
           ))}
         </div>
-        <FuenteLink href={FUENTE_CCI}>Fuente: construccionindustrializada.cl/quienes-somos</FuenteLink>
+
+        {/* Desafío destacado */}
+        <div className="mt-6 rounded-r-lg border-l-4 border-cci-orange bg-cci-orange-soft px-6 py-5 text-[17px] leading-relaxed text-cci-graphite">
+          <span className="font-800 text-cci-orange-dark">Nuestro desafío:</span> lograr la integración de la
+          industrialización desde etapas tempranas de los proyectos, vinculando la cadena de valor completa,
+          desde el diseño y la planificación hasta el montaje.
+        </div>
+        <FuenteTexto>Fuente: Memoria CCI 2022-2024</FuenteTexto>
       </section>
 
       {/* 5. EL ECOSISTEMA EN CIFRAS */}
       <section className="bg-cci-paper py-14 md:py-16">
         <div className="container-cci">
-          <div className="mb-1 flex items-center gap-2 text-sm font-700 uppercase tracking-wide text-cci-orange">
-            <span className="h-[2px] w-6 bg-cci-orange" />
-            El ecosistema en cifras
-          </div>
+          <Kicker>El ecosistema en cifras</Kicker>
           <h2 className="font-display text-2xl font-800 text-cci-ink md:text-3xl">Trayectoria y alcance</h2>
           <div className="mt-8">
-            <NosotrosCifras anios={anios} />
+            <NosotrosCifras />
           </div>
         </div>
       </section>
 
-      {/* 6. CÓMO SE ORGANIZA */}
+      {/* 6. TRAYECTORIA — línea de tiempo (horizontal en escritorio, vertical en móvil) */}
       <section className="container-cci py-14 md:py-16">
-        <div className="max-w-3xl">
-          <div className="mb-1 flex items-center gap-2 text-sm font-700 uppercase tracking-wide text-cci-orange">
-            <span className="h-[2px] w-6 bg-cci-orange" />
-            Cómo se organiza
-          </div>
+        <Kicker>Trayectoria</Kicker>
+        <h2 className="font-display text-2xl font-800 text-cci-ink md:text-3xl">Hitos del Consejo</h2>
+
+        {/* Escritorio: 6 columnas, punto sobre una línea superior continua */}
+        <div className="relative mt-10 hidden lg:block">
+          <div className="absolute left-0 right-0 top-1.5 h-0.5 bg-cci-line" />
+          <ol className="relative grid grid-cols-6 gap-6">
+            {HITOS.map((h) => (
+              <li key={h.anio}>
+                <span
+                  className={`block h-3.5 w-3.5 rounded-full border-2 border-white ring-1 ${
+                    h.destacado ? "bg-cci-orange ring-cci-orange" : "bg-cci-slate-light ring-cci-line"
+                  }`}
+                />
+                <div className="mt-4 font-mono text-xl font-700 tabular-nums text-cci-orange">{h.anio}</div>
+                <p className="mt-2 text-sm leading-snug text-cci-slate">{h.texto}</p>
+                {h.href && (
+                  <Link href={h.href} className="mt-2 inline-flex items-center gap-1 text-sm font-600 text-cci-orange hover:text-cci-orange-dark">
+                    Ver EICI
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </Link>
+                )}
+              </li>
+            ))}
+          </ol>
+        </div>
+
+        {/* Móvil: vertical, con línea a la izquierda */}
+        <ol className="relative mt-8 space-y-7 border-l-2 border-cci-line pl-7 lg:hidden">
+          {HITOS.map((h) => (
+            <li key={h.anio} className="relative">
+              <span
+                className={`absolute -left-[35px] top-1 h-3.5 w-3.5 rounded-full border-2 border-white ring-1 ${
+                  h.destacado ? "bg-cci-orange ring-cci-orange" : "bg-cci-slate-light ring-cci-line"
+                }`}
+              />
+              <div className="font-mono text-lg font-700 tabular-nums text-cci-orange">{h.anio}</div>
+              <p className="mt-1 text-sm leading-snug text-cci-slate">{h.texto}</p>
+              {h.href && (
+                <Link href={h.href} className="mt-1.5 inline-flex items-center gap-1 text-sm font-600 text-cci-orange hover:text-cci-orange-dark">
+                  Ver EICI
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </Link>
+              )}
+            </li>
+          ))}
+        </ol>
+        <FuenteTexto>Fuente: Memoria CCI 2022-2024</FuenteTexto>
+      </section>
+
+      {/* 7. CÓMO SE ORGANIZA */}
+      <section className="bg-cci-paper py-14 md:py-16">
+        <div className="container-cci max-w-3xl">
+          <Kicker>Cómo se organiza</Kicker>
           <h2 className="font-display text-2xl font-800 text-cci-ink md:text-3xl">Socios, categorías y trabajo técnico</h2>
           <div className="mt-5 space-y-4 text-[17px] leading-[1.75] text-cci-ink/90">
             <p>
@@ -181,8 +254,12 @@ export default function NosotrosPage() {
               Academia—, junto a los patrocinadores institucionales que respaldan su trabajo.
             </p>
             <p>
-              El trabajo técnico se organiza en grupos de trabajo, y un directorio elegido por los socios
-              conduce la organización y define sus prioridades.
+              El trabajo se desarrolla en grupos técnicos, plenarios de socios, encuentros técnicos y roadshows,
+              conducido por un directorio elegido por los socios.
+            </p>
+            <p>
+              El CCI mantiene alianzas con la AOA, la AICE, el Colegio de Arquitectos y el Colegio de Ingenieros,
+              además del trabajo conjunto con la CChC y Construye2025.
             </p>
           </div>
           <div className="mt-7 flex flex-wrap gap-3">
@@ -191,7 +268,7 @@ export default function NosotrosPage() {
             </Link>
             <Link
               href="/voces"
-              className="inline-flex items-center justify-center gap-2 rounded-full border border-cci-line px-5 py-2.5 text-sm font-semibold text-cci-graphite transition hover:border-cci-graphite hover:bg-cci-paper"
+              className="inline-flex items-center justify-center gap-2 rounded-full border border-cci-line bg-white px-5 py-2.5 text-sm font-semibold text-cci-graphite transition hover:border-cci-graphite hover:bg-cci-paper"
             >
               Voces de la industrialización
             </Link>
@@ -199,7 +276,7 @@ export default function NosotrosPage() {
         </div>
       </section>
 
-      {/* 7. CIERRE — membresía, fondo oscuro */}
+      {/* 8. CIERRE — membresía, fondo oscuro */}
       <section className="bg-cci-graphite-dark py-16 md:py-20">
         <div className="container-cci max-w-4xl">
           <div className="inline-flex w-fit items-center whitespace-nowrap border-l-4 border-cci-orange bg-white/[0.06] py-2 pl-4 pr-3 text-[11px] font-700 uppercase leading-none tracking-[0.15em] text-[#F5EEE6] md:text-xs">
@@ -209,9 +286,9 @@ export default function NosotrosPage() {
             Postula a ser socio CCI
           </h2>
           <p className="mt-5 max-w-2xl text-lg leading-relaxed text-white/75">
-            Pertenecer al Consejo es integrarse al grupo de empresas, profesionales e instituciones que están
-            definiendo cómo se construirá en Chile y Latinoamérica: donde se sientan los estándares del sector,
-            se comparte conocimiento técnico y se trabaja junto al Estado, la industria y la academia.
+            Postular a socio es integrarse a la red de construcción industrializada más grande de Latinoamérica:
+            donde se sientan los estándares del sector, se comparte conocimiento técnico y se trabaja junto al
+            Estado, la industria y la academia.
           </p>
           <p className="mt-5 max-w-2xl font-display text-xl font-800 leading-snug text-cci-orange-light">
             Suma a tu organización a ese ecosistema.
