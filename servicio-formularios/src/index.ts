@@ -93,13 +93,18 @@ const comunes = (b: Body) => ({
 
 app.get("/health", (_req, res) => res.json({ ok: true }));
 
+const lista = (v: unknown): string[] | undefined =>
+  Array.isArray(v) ? v.filter((x): x is string => typeof x === "string" && x.length > 0) : undefined;
+
 app.post(
   "/api/postulacion",
   handler(["nombre", "email", "organizacion"], (b) => ({
     _type: "postulacion",
-    nombre: str(b.nombre), apellido: str(b.apellido), email: str(b.email),
-    organizacion: str(b.organizacion), cargo: str(b.cargo), pais: str(b.pais),
-    tipoOrganizacion: str(b.tipoOrganizacion), interes: str(b.interes), mensaje: str(b.mensaje),
+    nombre: str(b.nombre), apellido: str(b.apellido), email: str(b.email), telefono: str(b.telefono),
+    organizacion: str(b.organizacion), sitioWeb: str(b.sitioWeb), cargo: str(b.cargo),
+    tipoOrganizacion: str(b.tipoOrganizacion), tamano: str(b.tamano), pais: str(b.pais),
+    regiones: lista(b.regiones), categoria: str(b.categoria), motivo: str(b.motivo),
+    ejeInteres: str(b.ejeInteres), mensaje: str(b.mensaje),
     estado: "nueva", ...comunes(b),
   }))
 );
