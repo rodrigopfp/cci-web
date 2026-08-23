@@ -1,0 +1,832 @@
+"use client";
+
+// CCI Data — scroll-story de 7 capítulos que fusiona el Radar y la Evidencia.
+//
+// Reutiliza EXCLUSIVAMENTE los tokens y componentes que ya existen en el sitio:
+// · MetricCard (tarjeta de dato oficial con chip "Fuente oficial" de barra azul)
+// · StudyCard (tarjeta de estudio con enlace a fuente)
+// · PotencialGauge (velocímetro "5 a 10x" del Radar)
+// · hooks de counters.ts (viewport + count-up + prefers-reduced-motion)
+//
+// Todas las cifras protagonistas se animan al entrar al viewport y respetan
+// prefers-reduced-motion. Formato chileno: miles con punto, decimales con coma.
+
+import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import type { Indicator, Study } from "@/data/types";
+import { MetricCard } from "@/components/MetricCard";
+import { StudyCard } from "@/components/StudyCard";
+import { PotencialGauge } from "@/components/RadarKpis";
+import { usePrefersReducedMotion, useInView, useCountUp } from "@/lib/counters";
+
+// URL pública del Estudio IPLC 2025 en la Biblioteca Técnica de la CDT. No se
+// aloja el PDF: solo se enlaza a su página oficial.
+const IPLC_URL =
+  "https://www.cdt.cl/bibliotecatecnica/estudio-y-analisis-del-indicador-de-productividad-laboral-de-la-construccion-2025";
+// La Guía de Integración Temprana es publicación propia del CCI y vive como
+// recurso descargable en /recursos.
+const GUIA_HREF = "/recursos";
+
+// ---- Formato chileno ---------------------------------------------------
+
+/** 491904 → "491.904" · 0.26 → "0,26" · 0.14 → "0,14". */
+function formatCL(n: number, decimals = 0): string {
+  const fixed = n.toFixed(decimals);
+  const [int, dec] = fixed.split(".");
+  const miles = int.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  return dec ? `${miles},${dec}` : miles;
+}
+
+// ---- Piezas de animación ----------------------------------------------
+
+/** Aparición suave (fade + translate). Con reduced-motion, estado final directo. */
+function Reveal({
+  children,
+  reduced,
+  className = "",
+  delay = 0,
+}: {
+  children: React.ReactNode;
+  reduced: boolean;
+  className?: string;
+  delay?: number;
+}) {
+  const { ref, inView } = useInView<HTMLDivElement>();
+  const show = inView || reduced;
+  if (reduced) {
+    return (
+      <div ref={ref} className={className}>
+        {children}
+      </div>
+    );
+  }
+  return (
+    <div
+      ref={ref}
+      className={`${className} transition-all duration-700 ease-out ${
+        show ? "translate-y-0 opacity-100" : "translate-y-5 opacity-0"
+      }`}
+      style={{ transitionDelay: show ? `${delay}ms` : "0ms" }}
+    >
+      {children}
+    </div>
+  );
+}
+
+/** Tarjeta blanca de cifra protagonista con conteo animado (estilo /nosotros). */
+function StatCard({
+  value,
+  decimals = 0,
+  prefix = "",
+  suffix = "",
+  label,
+  fuente,
+  fuenteUrl,
+  reduced,
+}: {
+  value: number;
+  decimals?: number;
+  prefix?: string;
+  suffix?: string;
+  label: string;
+  fuente: string;
+  fuenteUrl?: string;
+  reduced: boolean;
+}) {
+  const { ref, inView } = useInView<HTMLDivElement>();
+  const v = useCountUp(value, inView, reduced, 1500);
+  return (
+    <div
+      ref={ref}
+      className="flex h-full flex-col rounded-2xl border border-cci-line bg-white px-5 py-6 shadow-card"
+    >
+      <div className="font-display text-4xl font-900 leading-none tabular-nums text-cci-orange sm:text-5xl">
+        {prefix}
+        {formatCL(v, decimals)}
+        {suffix}
+      </div>
+      <p className="mt-3 flex-1 text-sm leading-snug text-cci-slate">{label}</p>
+      {fuenteUrl ? (
+        <a
+          href={fuenteUrl}
+          target={fuenteUrl.startsWith("http") ? "_blank" : undefined}
+          rel={fuenteUrl.startsWith("http") ? "noopener noreferrer" : undefined}
+          className="mt-4 inline-flex items-center gap-1 text-[11px] font-600 text-cci-slate-light hover:text-cci-orange-dark"
+        >
+          Fuente: {fuente}
+        </a>
+      ) : (
+        <span className="mt-4 text-[11px] font-600 text-cci-slate-light">Fuente: {fuente}</span>
+      )}
+    </div>
+  );
+}
+
+interface DuelItem {
+  label: string;
+  value: number;
+  suffix?: string;
+  highlight?: boolean;
+}
+
+/** Duelo de barras de elaboración propia: se llenan al entrar en pantalla, con
+ *  leve delay escalonado. La barra destacada va en naranjo. */
+function BarDuel({
+  title,
+  hint,
+  items,
+  decimals = 0,
+  chip,
+  reduced,
+  dark = false,
+}: {
+  title: string;
+  hint?: string;
+  items: DuelItem[];
+  decimals?: number;
+  chip?: string;
+  reduced: boolean;
+  dark?: boolean;
+}) {
+  const { ref, inView } = useInView<HTMLDivElement>();
+  const active = inView || reduced;
+  const max = Math.max(...items.map((i) => i.value));
+  return (
+    <div ref={ref}>
+      <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+        <span className={`text-sm font-700 ${dark ? "text-white" : "text-cci-ink"}`}>{title}</span>
+        {chip && (
+          <span className="rounded-full bg-cci-orange px-2.5 py-0.5 text-[11px] font-700 text-white">
+            {chip}
+          </span>
+        )}
+      </div>
+      <div className="space-y-3">
+        {items.map((it) => (
+          <div key={it.label}>
+            <div className="mb-1 flex items-baseline justify-between gap-3">
+              <span
+                className={`text-sm font-600 ${
+                  it.highlight ? "text-cci-orange" : dark ? "text-white/80" : "text-cci-slate"
+                }`}
+              >
+                {it.label}
+              </span>
+              <span
+                className={`font-mono text-sm font-700 tabular-nums ${
+                  it.highlight ? "text-cci-orange" : dark ? "text-white/70" : "text-cci-slate"
+                }`}
+              >
+                {formatCL(it.value, decimals)}
+                {it.suffix ?? ""}
+              </span>
+            </div>
+            <div
+              className={`h-3.5 w-full overflow-hidden rounded-full ${
+                dark ? "bg-white/10" : "bg-cci-paper"
+              }`}
+            >
+              <div
+                className={`h-full rounded-full ${reduced ? "" : "transition-[width] duration-1000 ease-out"} ${
+                  it.highlight ? "bg-cci-orange" : dark ? "bg-white/40" : "bg-cci-graphite"
+                }`}
+                style={{ width: active ? `${(it.value / max) * 100}%` : "0%" }}
+                role="img"
+                aria-label={`${it.label}: ${formatCL(it.value, decimals)}${it.suffix ?? ""}`}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+      {hint && (
+        <p className={`mt-2 text-[11px] ${dark ? "text-white/50" : "text-cci-slate-light"}`}>{hint}</p>
+      )}
+    </div>
+  );
+}
+
+// ---- Navegación por capítulos (pills sticky + scrollspy) ---------------
+
+const CHAPTERS = [
+  { id: "cap1", n: "01", label: "Oportunidad" },
+  { id: "cap2", n: "02", label: "El desafío" },
+  { id: "cap3", n: "03", label: "Por qué" },
+  { id: "cap4", n: "04", label: "Industrializar" },
+  { id: "cap5", n: "05", label: "Chile avanza" },
+  { id: "cap6", n: "06", label: "La evidencia" },
+  { id: "cap7", n: "07", label: "Qué medimos" },
+];
+
+function ChapterNav({ active }: { active: string }) {
+  return (
+    <nav className="sticky top-[105px] z-30 border-b border-cci-line bg-white/95 backdrop-blur">
+      <div className="container-cci">
+        <div className="flex flex-nowrap gap-2 overflow-x-auto scrollbar-hide py-3">
+          {CHAPTERS.map((c) => (
+            <a
+              key={c.id}
+              href={`#${c.id}`}
+              className={`shrink-0 whitespace-nowrap rounded-full px-3.5 py-1.5 text-xs font-semibold transition ${
+                active === c.id
+                  ? "bg-cci-graphite text-white"
+                  : "bg-cci-paper text-cci-slate hover:bg-cci-line"
+              }`}
+            >
+              <span className="font-mono">{c.n}</span> {c.label}
+            </a>
+          ))}
+        </div>
+      </div>
+    </nav>
+  );
+}
+
+// ---- Kicker de capítulo (guión naranjo, estándar del sitio) ------------
+
+function Kicker({ children, dark = false }: { children: React.ReactNode; dark?: boolean }) {
+  return (
+    <div
+      className={`mb-2 flex items-center gap-2 text-sm font-700 uppercase tracking-wide ${
+        dark ? "text-cci-orange-light" : "text-cci-orange"
+      }`}
+    >
+      <span className="h-[2px] w-6 bg-cci-orange" />
+      {children}
+    </div>
+  );
+}
+
+// ---- Datos curados de los capítulos ------------------------------------
+
+const CASOS = [
+  {
+    empresa: "Baumax",
+    proyecto: "Paneles de hormigón en cinco edificios",
+    metrics: ["+35% productividad (m²/hd)", "−60% residuos", "−80% retrabajos"],
+  },
+  {
+    empresa: "Socovesa Sur · BIM Lab · Spoerer",
+    proyecto: "Coordinación BIM en Olimpia II",
+    metrics: ["−60% tiempo de coordinación", "Adicionales de obra: 0,14% del contrato (vs 2-3% histórico)"],
+  },
+  {
+    empresa: "Boetsch · Spoerer Ingenieros",
+    proyecto: "Optimización estructural temprana",
+    metrics: ["0,92% de ahorro del costo directo desde el diseño"],
+  },
+];
+
+const MEDICION = [
+  { label: "Productividad laboral IPLC", unit: "m²/persona-día", obligatorio: true },
+  { label: "Desviación de plazos", unit: "%", obligatorio: true },
+  { label: "Residuos", unit: "m³/m²", obligatorio: true },
+  { label: "Costos", unit: "%", obligatorio: false },
+  { label: "Uso de MMC", unit: "métodos modernos de construcción", obligatorio: false },
+  { label: "Nivel BIM", unit: "madurez del modelo", obligatorio: false },
+];
+
+// ---- Componente principal ----------------------------------------------
+
+export function DataStory({
+  deficit,
+  meta,
+  empresas,
+  tipologias,
+  studiesInternacionales,
+}: {
+  deficit?: Indicator;
+  meta?: Indicator;
+  empresas?: Indicator;
+  tipologias?: Indicator;
+  studiesInternacionales: Study[];
+}) {
+  const reduced = usePrefersReducedMotion();
+  const [active, setActive] = useState("cap1");
+  const storyRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const sections = CHAPTERS.map((c) => document.getElementById(c.id)).filter(
+      (el): el is HTMLElement => Boolean(el)
+    );
+    if (sections.length === 0 || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) setActive(e.target.id);
+        });
+      },
+      // La banda central de la pantalla define el capítulo activo.
+      { rootMargin: "-45% 0px -50% 0px", threshold: 0 }
+    );
+    sections.forEach((s) => io.observe(s));
+    return () => io.disconnect();
+  }, []);
+
+  return (
+    <div ref={storyRef}>
+      <ChapterNav active={active} />
+
+      {/* ============================ CAP 01 ============================ */}
+      <section id="cap1" className="scroll-mt-[160px] bg-white">
+        <div className="container-cci py-16 md:py-20">
+          <Reveal reduced={reduced}>
+            <Kicker>01 · La oportunidad</Kicker>
+            <h2 className="max-w-3xl font-display text-2xl font-900 leading-tight text-cci-ink md:text-4xl">
+              Chile tiene una meta habitacional histórica por delante
+            </h2>
+          </Reveal>
+
+          <div className="mt-10 grid gap-5 md:grid-cols-2">
+            {deficit && (
+              <Reveal reduced={reduced}>
+                <MetricCard indicator={deficit} />
+              </Reveal>
+            )}
+            {meta && (
+              <Reveal reduced={reduced} delay={80}>
+                <MetricCard indicator={meta} />
+              </Reveal>
+            )}
+          </div>
+
+          <div className="mt-12 grid items-center gap-8 lg:grid-cols-[1fr_1.1fr]">
+            <Reveal reduced={reduced}>
+              <PotencialGauge reduced={reduced} />
+            </Reveal>
+            <Reveal reduced={reduced} delay={80}>
+              <p className="font-display text-xl font-800 leading-snug text-cci-ink md:text-2xl">
+                La construcción industrializada permite responder con velocidad, calidad y menos
+                pérdidas.
+              </p>
+            </Reveal>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================ CAP 02 (grafito) ============================ */}
+      <section id="cap2" className="scroll-mt-[160px] bg-cci-graphite-dark">
+        <div className="container-cci py-16 md:py-20">
+          <Reveal reduced={reduced}>
+            <Kicker dark>02 · El desafío de Chile</Kicker>
+            <h2 className="max-w-3xl font-display text-2xl font-900 leading-tight text-white md:text-4xl">
+              Durante décadas, la productividad del sector se mantuvo plana
+            </h2>
+            <p className="mt-4 max-w-2xl leading-relaxed text-white/75">
+              No es un problema de personas ni de empresas: es un desafío sistémico del proceso
+              productivo. La brecha con los estándares internacionales se mide, y es grande.
+            </p>
+          </Reveal>
+
+          <Reveal reduced={reduced} className="mt-10 max-w-2xl rounded-2xl border border-white/10 bg-white/[0.04] p-7">
+            <BarDuel
+              title="Productividad laboral (m²/persona-día)"
+              items={[
+                { label: "Chile", value: 0.24 },
+                { label: "Estándar internacional", value: 0.37, highlight: true },
+              ]}
+              decimals={2}
+              chip="brecha de +53%"
+              reduced={reduced}
+              dark
+            />
+            <p className="mt-5 border-t border-white/10 pt-4 text-[11px] leading-relaxed text-white/50">
+              Fuente: Matrix Consulting (2020), «Impulsar la productividad de la industria de la
+              Construcción en Chile a estándares mundiales»; reproducido en el{" "}
+              <a href={IPLC_URL} target="_blank" rel="noopener noreferrer" className="underline hover:text-white">
+                Estudio IPLC 2025 (Observatorio de Productividad CChC · CDT)
+              </a>
+              .
+            </p>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ============================ CAP 03 ============================ */}
+      <section id="cap3" className="scroll-mt-[160px] bg-white">
+        <div className="container-cci py-16 md:py-20">
+          <Reveal reduced={reduced}>
+            <Kicker>03 · Por qué ocurre</Kicker>
+            <h2 className="max-w-3xl font-display text-2xl font-900 leading-tight text-cci-ink md:text-4xl">
+              La distancia entre obras no es tecnológica: es de sistema productivo
+            </h2>
+          </Reveal>
+
+          <div className="mt-10 grid gap-5 sm:grid-cols-3">
+            <Reveal reduced={reduced}>
+              <StatCard
+                value={0.19}
+                decimals={2}
+                label="P10 — el 10% menos productivo (m²/persona-día)"
+                fuente="Estudio IPLC 2025"
+                fuenteUrl={IPLC_URL}
+                reduced={reduced}
+              />
+            </Reveal>
+            <Reveal reduced={reduced} delay={80}>
+              <StatCard
+                value={0.33}
+                decimals={2}
+                label="P90 — el 10% más productivo (m²/persona-día)"
+                fuente="Estudio IPLC 2025"
+                fuenteUrl={IPLC_URL}
+                reduced={reduced}
+              />
+            </Reveal>
+            <Reveal reduced={reduced} delay={160}>
+              <StatCard
+                value={74}
+                prefix="+"
+                suffix="%"
+                label="Brecha entre el mejor y el peor decil de obras"
+                fuente="Estudio IPLC 2025"
+                fuenteUrl={IPLC_URL}
+                reduced={reduced}
+              />
+            </Reveal>
+          </div>
+
+          <div className="mt-10 grid gap-8 lg:grid-cols-2">
+            <Reveal reduced={reduced}>
+              <h3 className="font-display text-lg font-800 text-cci-ink">Las causas de raíz</h3>
+              <ul className="mt-4 space-y-3">
+                {[
+                  "Fragmentación entre los actores del proyecto",
+                  "Baja integración entre diseño y ejecución",
+                  "Escasa estandarización de procesos y componentes",
+                ].map((c) => (
+                  <li key={c} className="flex gap-3 text-cci-slate">
+                    <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-cci-orange" />
+                    {c}
+                  </li>
+                ))}
+              </ul>
+            </Reveal>
+
+            <Reveal reduced={reduced} delay={80}>
+              <blockquote className="rounded-2xl border-l-4 border-cci-orange bg-cci-orange-soft p-7">
+                <p className="font-display text-lg font-800 leading-snug text-cci-graphite md:text-xl">
+                  «La respuesta metodológica ya está escrita: Integración Temprana — todos los actores
+                  del proyecto, coordinados desde su génesis.»
+                </p>
+                <Link
+                  href={GUIA_HREF}
+                  className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-cci-orange-dark hover:text-cci-orange"
+                >
+                  Ver la Guía de Integración Temprana
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </Link>
+              </blockquote>
+            </Reveal>
+          </div>
+
+          <p className="mt-8 text-[11px] leading-relaxed text-cci-slate-light">
+            Fuentes: Estudio IPLC 2025; Matrix Consulting (2020); Guía Práctica de Integración
+            Temprana en Construcción Industrializada, CCI (2024).
+          </p>
+        </div>
+      </section>
+
+      {/* ============================ CAP 04 (grafito, estrella) ============================ */}
+      <section id="cap4" className="scroll-mt-[160px] bg-cci-graphite-dark">
+        <div className="container-cci py-16 md:py-20">
+          <Reveal reduced={reduced}>
+            <Kicker dark>04 · La respuesta: industrializar</Kicker>
+            <h2 className="max-w-3xl font-display text-2xl font-900 leading-tight text-white md:text-4xl">
+              Cuando el proceso se industrializa, los resultados se miden — y se notan
+            </h2>
+          </Reveal>
+
+          {/* 4 tarjetas de cifra */}
+          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              { value: 23, prefix: "+", suffix: "%", label: "Productividad con métodos modernos de construcción (MMC)" },
+              { value: 30, prefix: "−", suffix: "%", label: "Residuos de obra con MMC" },
+              { value: 3, suffix: "×", label: "Menos obras que terminan fuera de plazo" },
+              { value: 21, prefix: "+", suffix: "%", label: "Productividad con coordinación BIM" },
+            ].map((c, i) => (
+              <Reveal key={c.label} reduced={reduced} delay={i * 70}>
+                <StatCard
+                  value={c.value}
+                  prefix={c.prefix}
+                  suffix={c.suffix}
+                  label={c.label}
+                  fuente="Estudio IPLC 2025"
+                  fuenteUrl={IPLC_URL}
+                  reduced={reduced}
+                />
+              </Reveal>
+            ))}
+          </div>
+
+          {/* 3 duelos de barras */}
+          <div className="mt-8 grid gap-6 md:grid-cols-3">
+            <Reveal reduced={reduced} className="rounded-2xl border border-white/10 bg-white/[0.04] p-6">
+              <BarDuel
+                title="Productividad (m²/persona-día)"
+                hint="Más es mejor."
+                items={[
+                  { label: "Sin MMC", value: 0.22 },
+                  { label: "Con MMC", value: 0.27, highlight: true },
+                ]}
+                decimals={2}
+                reduced={reduced}
+                dark
+              />
+            </Reveal>
+            <Reveal reduced={reduced} delay={80} className="rounded-2xl border border-white/10 bg-white/[0.04] p-6">
+              <BarDuel
+                title="Residuos (m³/m²)"
+                hint="Menos es mejor."
+                items={[
+                  { label: "Sin MMC", value: 0.33 },
+                  { label: "Con MMC", value: 0.23, highlight: true },
+                ]}
+                decimals={2}
+                reduced={reduced}
+                dark
+              />
+            </Reveal>
+            <Reveal reduced={reduced} delay={160} className="rounded-2xl border border-white/10 bg-white/[0.04] p-6">
+              <BarDuel
+                title="Obras fuera de plazo"
+                hint="Menos es mejor."
+                items={[
+                  { label: "Sin MMC", value: 30, suffix: "%" },
+                  { label: "Con MMC", value: 10, suffix: "%", highlight: true },
+                ]}
+                reduced={reduced}
+                dark
+              />
+            </Reveal>
+          </div>
+
+          <p className="mt-6 max-w-3xl text-[11px] leading-relaxed text-white/50">
+            Fuente:{" "}
+            <a href={IPLC_URL} target="_blank" rel="noopener noreferrer" className="underline hover:text-white">
+              Estudio IPLC 2025
+            </a>{" "}
+            — Observatorio de Productividad CChC · CDT · Construye2025; 74 proyectos de edificación en
+            altura 2023-2024. Gráficos de elaboración propia.
+          </p>
+
+          {/* Evidencia internacional (migrada desde /evidencia) */}
+          {studiesInternacionales.length > 0 && (
+            <div className="mt-14">
+              <Reveal reduced={reduced}>
+                <h3 className="font-display text-xl font-800 text-white md:text-2xl">
+                  Lo que dice la investigación internacional
+                </h3>
+                <p className="mt-2 max-w-2xl text-sm text-white/70">
+                  Estudios internacionales sobre construcción industrializada off-site. Cada tarjeta
+                  enlaza a su fuente.
+                </p>
+              </Reveal>
+              <div className="mt-6 grid gap-5 md:grid-cols-2">
+                {studiesInternacionales.map((s, i) => (
+                  <Reveal key={s.id} reduced={reduced} delay={(i % 2) * 80}>
+                    <StudyCard study={s} />
+                  </Reveal>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* ============================ CAP 05 ============================ */}
+      <section id="cap5" className="scroll-mt-[160px] bg-white">
+        <div className="container-cci py-16 md:py-20">
+          <Reveal reduced={reduced}>
+            <Kicker>05 · Chile ya avanza</Kicker>
+            <h2 className="max-w-3xl font-display text-2xl font-900 leading-tight text-cci-ink md:text-4xl">
+              No es una promesa: el país ya se está midiendo — y mejorando
+            </h2>
+          </Reveal>
+
+          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            <Reveal reduced={reduced}>
+              <StatCard
+                value={8}
+                prefix="+"
+                suffix="%"
+                label="Productividad sectorial desde 2020 (0,24 → 0,26 m²/persona-día)"
+                fuente="Estudio IPLC 2025"
+                fuenteUrl={IPLC_URL}
+                reduced={reduced}
+              />
+            </Reveal>
+            <Reveal reduced={reduced} delay={70}>
+              <StatCard
+                value={17}
+                prefix="+"
+                suffix="%"
+                label="Productividad en empresas re-medidas"
+                fuente="Construye2025"
+                fuenteUrl="https://construye2025.cl/"
+                reduced={reduced}
+              />
+            </Reveal>
+            <Reveal reduced={reduced} delay={140}>
+              <StatCard
+                value={Number(empresas?.value ?? 24)}
+                label="Empresas industrializadoras certificadas por la DITEC"
+                fuente={`MINVU · DITEC${empresas?.lastUpdated ? " · jun. 2026" : ""}`}
+                fuenteUrl={empresas?.source?.url}
+                reduced={reduced}
+              />
+            </Reveal>
+            <Reveal reduced={reduced} delay={210}>
+              <StatCard
+                value={Number(tipologias?.value ?? 42)}
+                label="Tipologías VIT aprobadas por la DITEC"
+                fuente={`MINVU · DITEC${tipologias?.lastUpdated ? " · jun. 2026" : ""}`}
+                fuenteUrl={tipologias?.source?.url}
+                reduced={reduced}
+              />
+            </Reveal>
+          </div>
+
+          <div className="mt-10 grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+            <Reveal reduced={reduced}>
+              <div className="flex h-full flex-col rounded-2xl border border-cci-blue/20 bg-cci-blue-soft p-7">
+                <span className="w-fit rounded-full bg-cci-blue px-2.5 py-1 text-[11px] font-700 uppercase tracking-wide text-white">
+                  Hito normativo · NCh3744:2023
+                </span>
+                <h3 className="mt-4 font-display text-xl font-800 text-cci-ink">
+                  Chile ya tiene norma oficial de construcción industrializada
+                </h3>
+                <p className="mt-3 text-sm leading-relaxed text-cci-slate">
+                  La norma NCh3744:2023, oficializada por el Instituto Nacional de Normalización (INN),
+                  nació de un anteproyecto impulsado por el CCI, Construye2025 y el MINVU. Fija el
+                  lenguaje común del sector.
+                </p>
+                <span className="mt-auto pt-4 text-[11px] font-600 text-cci-slate-light">
+                  Fuente: INN · NCh3744:2023
+                </span>
+              </div>
+            </Reveal>
+
+            <Reveal reduced={reduced} delay={80}>
+              <blockquote className="flex h-full flex-col justify-center rounded-2xl border-l-4 border-cci-orange bg-cci-orange-soft p-7">
+                <p className="font-display text-lg font-800 leading-snug text-cci-graphite md:text-xl">
+                  «Medir es el primer paso para mejorar: la industria chilena ya se mide bajo el
+                  estándar del Manual IPLC.»
+                </p>
+              </blockquote>
+            </Reveal>
+          </div>
+
+          <p className="mt-8 text-[11px] leading-relaxed text-cci-slate-light">
+            Los residuos sectoriales bajaron de 0,27 a 0,25 m³/m² entre 2020 y 2025. Fuente:{" "}
+            <a href={IPLC_URL} target="_blank" rel="noopener noreferrer" className="underline hover:text-cci-orange-dark">
+              Estudio IPLC 2025
+            </a>
+            .
+          </p>
+        </div>
+      </section>
+
+      {/* ============================ CAP 06 ============================ */}
+      <section id="cap6" className="scroll-mt-[160px] bg-cci-paper">
+        <div className="container-cci py-16 md:py-20">
+          <Reveal reduced={reduced}>
+            <Kicker>06 · La evidencia</Kicker>
+            <p className="max-w-3xl font-display text-xl font-800 leading-snug text-cci-ink md:text-2xl">
+              La evidencia parte por casa: resultados documentados por socios del CCI en su Guía de
+              Integración Temprana. Y el siguiente nivel ya está definido: casos medidos bajo el
+              estándar nacional IPLC. Evidencia, no publicidad.
+            </p>
+          </Reveal>
+
+          <div className="mt-10 grid gap-5 md:grid-cols-3">
+            {CASOS.map((caso, i) => (
+              <Reveal key={caso.empresa} reduced={reduced} delay={i * 80}>
+                <div className="flex h-full flex-col rounded-2xl border border-cci-line bg-white p-6 shadow-card">
+                  <span className="w-fit rounded-full bg-cci-orange-soft px-2.5 py-1 text-[10px] font-700 uppercase tracking-wide text-cci-orange-dark">
+                    Caso documentado · Guía CCI 2024
+                  </span>
+                  <h3 className="mt-4 font-display text-lg font-800 leading-snug text-cci-ink">
+                    {caso.empresa}
+                  </h3>
+                  <p className="mt-1 text-sm text-cci-slate">{caso.proyecto}</p>
+                  <ul className="mt-4 space-y-2 border-t border-cci-line pt-4">
+                    {caso.metrics.map((m) => (
+                      <li key={m} className="flex gap-2 text-sm font-600 text-cci-graphite">
+                        <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-cci-orange" />
+                        {m}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+
+          <p className="mt-5 text-[11px] font-600 text-cci-slate-light">
+            Fuente:{" "}
+            <Link href={GUIA_HREF} className="underline hover:text-cci-orange-dark">
+              Guía Práctica de Integración Temprana, CCI (2024)
+            </Link>
+            .
+          </p>
+
+          {/* Ficha "siguiente nivel" — estándar IPLC */}
+          <Reveal reduced={reduced} className="mt-12">
+            <div className="rounded-2xl border-2 border-dashed border-cci-line bg-white p-7 md:p-9">
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div>
+                  <span className="w-fit rounded-full bg-cci-graphite px-3 py-1 text-[11px] font-700 uppercase tracking-wide text-white">
+                    Estándar IPLC · Validación CCI
+                  </span>
+                  <h3 className="mt-4 font-display text-xl font-800 text-cci-ink">
+                    El siguiente nivel: casos medidos bajo el estándar nacional
+                  </h3>
+                </div>
+              </div>
+              <div className="mt-6 grid gap-6 md:grid-cols-2">
+                <div>
+                  <div className="text-[11px] font-700 uppercase tracking-wide text-cci-orange">
+                    Campos obligatorios
+                  </div>
+                  <ul className="mt-3 space-y-2 text-sm text-cci-slate">
+                    {["m²/persona-día", "Desviación de plazos", "Residuos"].map((f) => (
+                      <li key={f} className="flex items-center justify-between border-b border-cci-line pb-2">
+                        <span className="font-600 text-cci-ink">{f}</span>
+                        <span className="font-mono text-cci-slate-light">—</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <div className="text-[11px] font-700 uppercase tracking-wide text-cci-slate">
+                    Campos opcionales
+                  </div>
+                  <ul className="mt-3 space-y-2 text-sm text-cci-slate">
+                    {["Costos", "Uso de MMC", "Nivel BIM"].map((f) => (
+                      <li key={f} className="flex items-center justify-between border-b border-cci-line pb-2">
+                        <span className="font-600 text-cci-ink">{f}</span>
+                        <span className="font-mono text-cci-slate-light">—</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+              <p className="mt-6 text-sm text-cci-slate">
+                Esta ficha se publicará con los primeros 2-3 casos medidos bajo el estándar IPLC.
+              </p>
+              <Link href="/hazte-socio" className="btn-primary mt-6">
+                ¿Tu proyecto puede ser el primero? Conversemos
+              </Link>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ============================ CAP 07 ============================ */}
+      <section id="cap7" className="scroll-mt-[160px] bg-white">
+        <div className="container-cci py-16 md:py-20">
+          <Reveal reduced={reduced}>
+            <Kicker>07 · Lo que estamos midiendo</Kicker>
+            <h2 className="max-w-3xl font-display text-2xl font-900 leading-tight text-cci-ink md:text-4xl">
+              Los indicadores del estándar nacional
+            </h2>
+          </Reveal>
+
+          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {MEDICION.map((m, i) => (
+              <Reveal key={m.label} reduced={reduced} delay={(i % 3) * 70}>
+                <div className="flex h-full flex-col rounded-2xl border border-cci-line bg-white p-6 shadow-card">
+                  <span
+                    className={`w-fit rounded-full px-2.5 py-1 text-[10px] font-700 uppercase tracking-wide ${
+                      m.obligatorio
+                        ? "bg-cci-orange-soft text-cci-orange-dark"
+                        : "bg-cci-paper text-cci-slate"
+                    }`}
+                  >
+                    {m.obligatorio ? "Obligatorio" : "Opcional"}
+                  </span>
+                  <h3 className="mt-4 font-display text-lg font-800 leading-snug text-cci-ink">
+                    {m.label}
+                  </h3>
+                  <p className="mt-1 font-mono text-xs text-cci-slate-light">{m.unit}</p>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+
+          <div className="mt-8 inline-flex flex-wrap items-center gap-2 rounded-xl border-2 border-dashed border-cci-line bg-cci-paper px-4 py-3 text-sm text-cci-slate">
+            <span className="h-2 w-2 rounded-full bg-cci-orange" />
+            Datos IPLC: edificación en altura · 74 proyectos 2023-2024 · 25 empresas
+          </div>
+
+          <p className="mt-8 max-w-3xl text-[11px] leading-relaxed text-cci-slate-light">
+            Crédito: Manual para la medición y análisis de Indicadores de Productividad Laboral de la
+            Construcción (CDT · Construye2025 · Compromiso PRO · CChC).
+          </p>
+        </div>
+      </section>
+    </div>
+  );
+}

@@ -77,9 +77,9 @@ export default async function Home() {
 
       {/* RADAR — instrumentos destacados: abre la portada con las cifras */}
       <section className="container-cci py-14">
-        <SectionHeader kicker="Radar" title="La industrialización en cifras" />
+        <SectionHeader kicker="CCI Data" title="La industrialización en cifras" />
         <RadarKpisPreview />
-        <VerMasLink href="/data">Ver todas las cifras en CCI Data</VerMasLink>
+        <VerMasLink href="/data">Explorar CCI Data</VerMasLink>
       </section>
 
       {/* QUIÉNES SOMOS — presentación compacta del CCI (detalle vive en /nosotros) */}
@@ -208,7 +208,7 @@ export default async function Home() {
       {/* EVIDENCIA destacada */}
       <section className="bg-cci-graphite-dark py-14">
         <div className="container-cci">
-          <SectionHeader kicker="Evidencia" title="Qué dice la investigación" href="/evidencia" dark />
+          <SectionHeader kicker="Evidencia" title="Qué dice la investigación" href="/data/#cap4" hrefLabel="Ver la evidencia" dark />
           <div className="grid gap-5 md:grid-cols-3">
             {studies.slice(0, 3).map((s) => (
               <a key={s.id} href={s.url} target="_blank" rel="noopener noreferrer" className="card-rise group relative flex flex-col gap-3 overflow-hidden rounded-xl border border-white/10 bg-white/5 p-6">

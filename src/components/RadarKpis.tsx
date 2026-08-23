@@ -315,7 +315,7 @@ export function RadarKpis() {
 // Envuelven GaugeCard con la configuración de cada KPI, para usarlos en más de
 // un lugar sin duplicar el cableado de props.
 
-function PotencialGauge({ reduced }: { reduced: boolean }) {
+export function PotencialGauge({ reduced }: { reduced: boolean }) {
   return (
     <GaugeCard
       label={potencial.label}
