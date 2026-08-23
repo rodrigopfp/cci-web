@@ -174,7 +174,19 @@ const EMPRESA_VITRINA_FIELDS = `
   anioDesde,
   proyectosDestacados[]{ titulo, descripcion, imagen },
   vigenteHasta,
-  activo
+  activo,
+  actorTypes,
+  solutions,
+  materials,
+  capabilities,
+  regions,
+  coverageType,
+  cciRelationship,
+  minvuStatus,
+  validationStatus,
+  certificaciones,
+  direccionPlantas,
+  lastVerifiedAt
 `;
 
 export const empresasVitrinaQuery = `*[_type == "empresaVitrina"] | order(nombre asc){${EMPRESA_VITRINA_FIELDS}}`;

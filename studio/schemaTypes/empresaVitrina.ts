@@ -34,6 +34,131 @@ export const CATEGORIAS_VITRINA = [
 
 export const ZONAS_VITRINA = ["Norte", "Centro", "Sur", "Austral", "Todo Chile", "Internacional"];
 
+// ============================================================================
+// TAXONOMÍA MULTIATRIBUTO (Fase 2 · paso 2)
+// ⚠️ FUENTE ÚNICA: src/lib/datos/taxonomia-vitrina.ts (en el repo del sitio).
+// Estas listas son una COPIA MANUAL de ese archivo (el Studio es un paquete
+// aparte y no puede importarlo). Si cambias una lista allá, replícala aquí.
+// ============================================================================
+const TIPOS_ACTOR = [
+  { title: "Industrializador", value: "industrializador" },
+  { title: "Constructora", value: "constructora" },
+  { title: "Inmobiliaria / Mandante", value: "inmobiliaria_mandante" },
+  { title: "Proveedor de materiales", value: "proveedor_materiales" },
+  { title: "Proveedor de componentes", value: "proveedor_componentes" },
+  { title: "Ingeniería", value: "ingenieria" },
+  { title: "Arquitectura", value: "arquitectura" },
+  { title: "Tecnología / Software", value: "tecnologia_software" },
+  { title: "Logística y transporte", value: "logistica_transporte" },
+  { title: "Montaje", value: "montaje" },
+  { title: "Academia", value: "academia" },
+  { title: "Centro tecnológico", value: "centro_tecnologico" },
+  { title: "Institución pública", value: "institucion_publica" },
+  { title: "Asociación / Gremio", value: "asociacion_gremio" },
+  { title: "Consultoría", value: "consultoria" },
+];
+
+const SOLUCIONES = [
+  { title: "Panelizado 2D", value: "panelizado_2d" },
+  { title: "Módulos 3D", value: "modulos_3d" },
+  { title: "Prefabricados estructurales", value: "prefabricados_estructurales" },
+  { title: "Estructuras industrializadas", value: "estructuras_industrializadas" },
+  { title: "Fachadas y envolventes", value: "fachadas_envolventes" },
+  { title: "Cubiertas", value: "cubiertas" },
+  { title: "Instalaciones prefabricadas", value: "instalaciones_prefabricadas" },
+  { title: "Baños / Pods", value: "banos_pods" },
+  { title: "Componentes y subensambles", value: "componentes_subensambles" },
+  { title: "Soluciones híbridas", value: "soluciones_hibridas" },
+  { title: "Automatización y maquinaria", value: "automatizacion_maquinaria" },
+  { title: "Software y datos", value: "software_datos" },
+  { title: "Diseño y coordinación", value: "diseno_coordinacion" },
+  { title: "Transporte y montaje", value: "transporte_montaje" },
+  { title: "Llave en mano", value: "llave_en_mano" },
+];
+
+const MATERIALES = [
+  { title: "Madera", value: "madera" },
+  { title: "Acero", value: "acero" },
+  { title: "Hormigón", value: "hormigon" },
+  { title: "Fibrocemento", value: "fibrocemento" },
+  { title: "Yeso", value: "yeso" },
+  { title: "Compuestos", value: "compuestos" },
+  { title: "Híbrido", value: "hibrido" },
+  { title: "Independiente del material", value: "independiente_del_material" },
+  { title: "Otros", value: "otros" },
+];
+
+const CAPACIDADES = [
+  { title: "Evaluación", value: "evaluacion" },
+  { title: "Diseño", value: "diseno" },
+  { title: "Ingeniería", value: "ingenieria" },
+  { title: "BIM", value: "bim" },
+  { title: "DfMA", value: "dfma" },
+  { title: "Fabricación", value: "fabricacion" },
+  { title: "Abastecimiento", value: "abastecimiento" },
+  { title: "Transporte", value: "transporte" },
+  { title: "Montaje", value: "montaje" },
+  { title: "Terminaciones", value: "terminaciones" },
+  { title: "Puesta en marcha", value: "puesta_en_marcha" },
+  { title: "Operación y mantenimiento", value: "operacion_mantenimiento" },
+  { title: "Certificación y ensayos", value: "certificacion_ensayos" },
+  { title: "Medición y datos", value: "medicion_datos" },
+];
+
+const REGIONES = [
+  { title: "Arica y Parinacota", value: "arica_parinacota" },
+  { title: "Tarapacá", value: "tarapaca" },
+  { title: "Antofagasta", value: "antofagasta" },
+  { title: "Atacama", value: "atacama" },
+  { title: "Coquimbo", value: "coquimbo" },
+  { title: "Valparaíso", value: "valparaiso" },
+  { title: "Metropolitana", value: "metropolitana" },
+  { title: "O'Higgins", value: "ohiggins" },
+  { title: "Maule", value: "maule" },
+  { title: "Ñuble", value: "nuble" },
+  { title: "Biobío", value: "biobio" },
+  { title: "La Araucanía", value: "araucania" },
+  { title: "Los Ríos", value: "los_rios" },
+  { title: "Los Lagos", value: "los_lagos" },
+  { title: "Aysén", value: "aysen" },
+  { title: "Magallanes", value: "magallanes" },
+  { title: "Macrozona Norte", value: "norte" },
+  { title: "Macrozona Centro", value: "centro" },
+  { title: "Macrozona Sur", value: "sur" },
+  { title: "Macrozona Austral", value: "austral" },
+  { title: "Todo Chile", value: "todo_chile" },
+  { title: "Latinoamérica", value: "latam" },
+  { title: "Internacional", value: "internacional" },
+];
+
+const TIPOS_COBERTURA = [
+  { title: "Regional", value: "regional" },
+  { title: "Macrozona", value: "macrozona" },
+  { title: "Nacional", value: "nacional" },
+  { title: "Latinoamérica", value: "latam" },
+  { title: "Internacional", value: "internacional" },
+];
+
+const RELACIONES_CCI = [
+  { title: "Socio Oro", value: "socio_oro" },
+  { title: "Socio Plata", value: "socio_plata" },
+  { title: "Socio Bronce", value: "socio_bronce" },
+  { title: "Academia", value: "academia" },
+  { title: "Profesional", value: "profesional" },
+  { title: "Patrocinador", value: "patrocinador" },
+  { title: "Aliado", value: "aliado" },
+  { title: "No socio (publicado)", value: "no_socio_publicado" },
+  { title: "Industrializador MINVU", value: "industrializador_minvu" },
+];
+
+const ESTADOS_VALIDACION = [
+  { title: "Validado por la organización", value: "validado_por_organizacion" },
+  { title: "Fuente oficial", value: "fuente_oficial" },
+  { title: "Revisado por el CCI", value: "revisado_por_cci" },
+  { title: "En actualización", value: "en_actualizacion" },
+  { title: "Pendiente", value: "pendiente" },
+];
+
 export const empresaVitrina = defineType({
   name: "empresaVitrina",
   title: "Empresa en Vitrina",
@@ -147,6 +272,102 @@ export const empresaVitrina = defineType({
       description: "Solo relevante para el nivel «Pagada»: al pasar esta fecha, la ficha deja de mostrarse.",
       type: "date",
     }),
+
+    // ---- Taxonomía multiatributo (Fase 2 · paso 2) ----
+    // NOTA: los campos de contacto de la taxonomía (website / publicEmail /
+    // phone) se resuelven con los campos existentes sitioWeb / emailContacto /
+    // telefono; no se duplican para no tener dos fuentes de verdad.
+    defineField({
+      name: "actorTypes",
+      title: "Tipo de actor (D1)",
+      description: "Multiatributo. No inventar: dejar vacío si no está verificado.",
+      type: "array",
+      of: [{ type: "string" }],
+      options: { list: TIPOS_ACTOR },
+    }),
+    defineField({
+      name: "solutions",
+      title: "Soluciones (D2)",
+      type: "array",
+      of: [{ type: "string" }],
+      options: { list: SOLUCIONES },
+    }),
+    defineField({
+      name: "materials",
+      title: "Materiales (D3)",
+      type: "array",
+      of: [{ type: "string" }],
+      options: { list: MATERIALES },
+    }),
+    defineField({
+      name: "capabilities",
+      title: "Capacidades de la cadena de valor (D4)",
+      type: "array",
+      of: [{ type: "string" }],
+      options: { list: CAPACIDADES },
+    }),
+    defineField({
+      name: "regions",
+      title: "Cobertura — regiones/macrozonas (D5)",
+      type: "array",
+      of: [{ type: "string" }],
+      options: { list: REGIONES },
+    }),
+    defineField({
+      name: "coverageType",
+      title: "Tipo de cobertura (D5)",
+      type: "string",
+      options: { list: TIPOS_COBERTURA, layout: "dropdown" },
+    }),
+    defineField({
+      name: "cciRelationship",
+      title: "Relación con el CCI (D6)",
+      description: "El nivel de membresía técnico vive aquí; el campo «Nivel» controla el orden/visualización.",
+      type: "array",
+      of: [{ type: "string" }],
+      options: { list: RELACIONES_CCI },
+    }),
+    defineField({
+      name: "minvuStatus",
+      title: "Registro oficial DITEC / MINVU",
+      description: "Se completa con el registro oficial en la validación humana. Dejar vacío si no aplica.",
+      type: "object",
+      fields: [
+        { name: "approvedCompany", title: "Empresa aprobada (industrializador)", type: "boolean" },
+        { name: "resolutions", title: "Resoluciones", type: "array", of: [{ type: "string" }] },
+        { name: "plants", title: "Plantas", type: "array", of: [{ type: "string" }] },
+        { name: "vitCount", title: "N.º de tipologías VIT", type: "number" },
+      ],
+      options: { collapsible: true, collapsed: true },
+    }),
+    defineField({
+      name: "validationStatus",
+      title: "Estado de validación (D7)",
+      type: "string",
+      options: { list: ESTADOS_VALIDACION, layout: "dropdown" },
+      initialValue: "en_actualizacion",
+    }),
+    defineField({
+      name: "certificaciones",
+      title: "Certificaciones",
+      description: "Una por línea. Ej.: «ISO 9001», «CES». No inventar.",
+      type: "array",
+      of: [{ type: "string" }],
+    }),
+    defineField({
+      name: "direccionPlantas",
+      title: "Dirección o plantas",
+      description: "Direcciones o ubicaciones de plantas, una por entrada.",
+      type: "array",
+      of: [{ type: "string" }],
+    }),
+    defineField({
+      name: "lastVerifiedAt",
+      title: "Última verificación",
+      description: "Fecha y hora de la última validación humana del perfil.",
+      type: "datetime",
+    }),
+
     defineField({
       name: "activo",
       title: "Activo",

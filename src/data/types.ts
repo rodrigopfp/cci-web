@@ -200,6 +200,14 @@ export interface VitrinaProyecto {
   imagen?: string;
 }
 
+/** Registro oficial DITEC/MINVU (se llena en la validación humana). */
+export interface MinvuStatus {
+  approvedCompany?: boolean;
+  resolutions: string[];
+  plants: string[];
+  vitCount?: number;
+}
+
 export interface EmpresaVitrina {
   id: string;
   slug: string;
@@ -220,6 +228,24 @@ export interface EmpresaVitrina {
   /** ISO date (YYYY-MM-DD). Solo relevante para nivel "pagada". */
   vigenteHasta?: string;
   activo: boolean;
+
+  // --- Taxonomía multiatributo (Fase 2 · paso 2) ---
+  // Valores de src/lib/datos/taxonomia-vitrina.ts. Arreglos vacíos cuando no se
+  // ha clasificado (nunca se adivina). Los tipos se mantienen como string[] para
+  // no acoplar el dominio a las uniones, pero los valores provienen del catálogo.
+  actorTypes: string[];
+  solutions: string[];
+  materials: string[];
+  capabilities: string[];
+  regions: string[];
+  coverageType?: string;
+  cciRelationship: string[];
+  minvuStatus?: MinvuStatus;
+  validationStatus?: string;
+  certificaciones: string[];
+  direccionPlantas: string[];
+  /** ISO datetime de la última verificación humana del perfil. */
+  lastVerifiedAt?: string;
 }
 
 export type HitoTipo = "normativa" | "obra" | "gremial" | "dato";

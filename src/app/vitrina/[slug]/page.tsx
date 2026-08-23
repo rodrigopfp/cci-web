@@ -4,14 +4,56 @@ import { getEmpresaVitrinaBySlug, getEmpresaVitrinaSlugs } from "@/sanity/fetch"
 import { VitrinaLogo, NivelBadge } from "@/components/VitrinaCard";
 import { mailtoContacto } from "@/lib/vitrina";
 import { formatDate } from "@/lib/format";
+import {
+  ETIQUETAS_ACTOR,
+  ETIQUETAS_SOLUCION,
+  ETIQUETAS_MATERIAL,
+  ETIQUETAS_CAPACIDAD,
+  ETIQUETAS_REGION,
+  ETIQUETAS_COBERTURA,
+  ETIQUETAS_RELACION,
+  ETIQUETAS_VALIDACION,
+  etiqueta,
+} from "@/lib/datos/taxonomia-vitrina";
 
 export async function generateStaticParams() {
   const slugs = await getEmpresaVitrinaSlugs();
-  // Con output: "export", un segmento dinámico exige al menos una ruta. Mientras
-  // no haya empresas publicadas, generamos un slug centinela que la página
-  // resuelve como 404 (nadie lo enlaza: la Vitrina está en su estado vacío).
   if (slugs.length === 0) return [{ slug: "_sin-empresas" }];
   return slugs.map((slug) => ({ slug }));
+}
+
+// Grupo de "pastillas" para una dimensión de la taxonomía. No renderiza nada si
+// la lista viene vacía (regla dura: campos vacíos no se muestran).
+function Grupo({
+  titulo,
+  valores,
+  mapa,
+  tono = "orange",
+}: {
+  titulo: string;
+  valores: string[];
+  mapa: Record<string, string>;
+  tono?: "orange" | "blue" | "slate";
+}) {
+  if (!valores || valores.length === 0) return null;
+  const cls =
+    tono === "blue"
+      ? "bg-cci-blue-soft text-cci-blue"
+      : tono === "slate"
+      ? "bg-cci-paper text-cci-slate"
+      : "bg-cci-orange-soft text-cci-orange-dark";
+  return (
+    <div>
+      <h2 className="mb-3 text-sm font-700 uppercase tracking-wide text-cci-slate">{titulo}</h2>
+      <div className="flex flex-wrap gap-2">
+        {valores.map((v) => (
+          <span key={v} className={`rounded-full px-3 py-1 text-sm font-600 ${cls}`}>
+            {etiqueta(mapa, v)}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 export default async function EmpresaVitrinaPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -19,9 +61,24 @@ export default async function EmpresaVitrinaPage({ params }: { params: Promise<{
   const empresa = await getEmpresaVitrinaBySlug(slug);
   if (!empresa) notFound();
 
-  // Nivel "bronce": ficha reducida (sin galería ni proyectos, aunque existan).
   const fichaCompleta = empresa.nivel !== "bronce";
   const esPagada = empresa.nivel === "pagada";
+
+  // Un perfil está "en actualización" mientras la organización no lo valide.
+  const enActualizacion =
+    !empresa.validationStatus ||
+    empresa.validationStatus === "en_actualizacion" ||
+    empresa.validationStatus === "pendiente";
+
+  // mailto para que la propia organización solicite validar su perfil.
+  const mailtoValidar = `mailto:cci@cdt.cl?subject=${encodeURIComponent(
+    `Validación de perfil Vitrina — ${empresa.nombre}`
+  )}&body=${encodeURIComponent(
+    `Hola CCI,\n\nSoy de ${empresa.nombre} y quiero validar y actualizar nuestro perfil en la Vitrina.\n\nPerfil: /vitrina/${empresa.slug}\n\nDatos a actualizar o confirmar:\n- \n\nGracias.`
+  )}`;
+
+  const cobertura =
+    empresa.coverageType ? etiqueta(ETIQUETAS_COBERTURA, empresa.coverageType) : undefined;
 
   return (
     <article className="container-cci max-w-4xl py-10">
@@ -39,14 +96,19 @@ export default async function EmpresaVitrinaPage({ params }: { params: Promise<{
       <header className="flex flex-col gap-5 sm:flex-row sm:items-start">
         <VitrinaLogo empresa={empresa} size={88} />
         <div className="flex-1">
-          <div className="mb-2">
+          <div className="mb-2 flex flex-wrap items-center gap-2">
             <NivelBadge nivel={empresa.nivel} />
+            {empresa.cciRelationship
+              .filter((r) => !r.startsWith("socio_") && r !== "profesional" && r !== "academia")
+              .map((r) => (
+                <span key={r} className="rounded-md bg-cci-paper px-2 py-0.5 text-[10px] font-700 uppercase tracking-wide text-cci-slate">
+                  {etiqueta(ETIQUETAS_RELACION, r)}
+                </span>
+              ))}
           </div>
           <h1 className="font-display text-3xl font-900 leading-tight text-cci-ink md:text-4xl">{empresa.nombre}</h1>
           {empresa.titular && <p className="mt-2 text-lg text-cci-slate">{empresa.titular}</p>}
-          {empresa.anioDesde && (
-            <p className="mt-1 text-sm text-cci-slate-light">Opera desde {empresa.anioDesde}</p>
-          )}
+          {empresa.anioDesde && <p className="mt-1 text-sm text-cci-slate-light">Opera desde {empresa.anioDesde}</p>}
         </div>
       </header>
 
@@ -66,33 +128,45 @@ export default async function EmpresaVitrinaPage({ params }: { params: Promise<{
         </section>
       )}
 
-      {/* CATEGORÍAS Y ZONAS */}
-      {(empresa.categorias.length > 0 || empresa.zonas.length > 0) && (
-        <section className="mt-8 grid gap-6 sm:grid-cols-2">
-          {empresa.categorias.length > 0 && (
+      {/* CLASIFICACIÓN (taxonomía) */}
+      {(empresa.actorTypes.length > 0 ||
+        empresa.solutions.length > 0 ||
+        empresa.materials.length > 0 ||
+        empresa.capabilities.length > 0 ||
+        empresa.regions.length > 0 ||
+        cobertura) && (
+        <section className="mt-8 grid gap-6 border-t border-cci-line pt-8 sm:grid-cols-2">
+          <Grupo titulo="Tipo de actor" valores={empresa.actorTypes} mapa={ETIQUETAS_ACTOR} />
+          <Grupo titulo="Soluciones" valores={empresa.solutions} mapa={ETIQUETAS_SOLUCION} />
+          <Grupo titulo="Materiales" valores={empresa.materials} mapa={ETIQUETAS_MATERIAL} tono="slate" />
+          <Grupo titulo="Capacidades" valores={empresa.capabilities} mapa={ETIQUETAS_CAPACIDAD} tono="slate" />
+          {(empresa.regions.length > 0 || cobertura) && (
             <div>
-              <h2 className="mb-3 text-sm font-700 uppercase tracking-wide text-cci-slate">Soluciones</h2>
+              <h2 className="mb-3 text-sm font-700 uppercase tracking-wide text-cci-slate">Cobertura</h2>
               <div className="flex flex-wrap gap-2">
-                {empresa.categorias.map((c) => (
-                  <span key={c} className="rounded-full bg-cci-orange-soft px-3 py-1 text-sm font-600 capitalize text-cci-orange-dark">
-                    {c}
+                {cobertura && (
+                  <span className="rounded-full bg-cci-graphite px-3 py-1 text-sm font-600 text-white">{cobertura}</span>
+                )}
+                {empresa.regions.map((r) => (
+                  <span key={r} className="rounded-full bg-cci-blue-soft px-3 py-1 text-sm font-600 text-cci-blue">
+                    {etiqueta(ETIQUETAS_REGION, r)}
                   </span>
                 ))}
               </div>
             </div>
           )}
-          {empresa.zonas.length > 0 && (
-            <div>
-              <h2 className="mb-3 text-sm font-700 uppercase tracking-wide text-cci-slate">Dónde opera</h2>
-              <div className="flex flex-wrap gap-2">
-                {empresa.zonas.map((z) => (
-                  <span key={z} className="rounded-full bg-cci-blue-soft px-3 py-1 text-sm font-600 text-cci-blue">
-                    {z}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
+        </section>
+      )}
+
+      {/* DIRECCIÓN / PLANTAS */}
+      {empresa.direccionPlantas.length > 0 && (
+        <section className="mt-8 border-t border-cci-line pt-8">
+          <h2 className="mb-3 text-sm font-700 uppercase tracking-wide text-cci-slate">Dirección y plantas</h2>
+          <ul className="space-y-1 text-cci-ink/90">
+            {empresa.direccionPlantas.map((d, i) => (
+              <li key={i}>{d}</li>
+            ))}
+          </ul>
         </section>
       )}
 
@@ -136,29 +210,73 @@ export default async function EmpresaVitrinaPage({ params }: { params: Promise<{
         </section>
       )}
 
-      {/* CONTACTO */}
-      <section className="mt-10 flex flex-wrap items-center gap-3 border-t border-cci-line pt-8">
-        {empresa.emailContacto ? (
-          <a href={mailtoContacto(empresa.emailContacto, empresa.nombre)} className="btn-primary">
-            Contactar
-          </a>
+      {/* CERTIFICACIONES */}
+      {empresa.certificaciones.length > 0 && (
+        <section className="mt-8 border-t border-cci-line pt-8">
+          <h2 className="mb-3 text-sm font-700 uppercase tracking-wide text-cci-slate">Certificaciones</h2>
+          <div className="flex flex-wrap gap-2">
+            {empresa.certificaciones.map((c) => (
+              <span key={c} className="rounded-full bg-cci-paper px-3 py-1 text-sm font-600 text-cci-graphite">
+                {c}
+              </span>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* CONTACTO / VALIDACIÓN */}
+      <section className="mt-10 border-t border-cci-line pt-8">
+        {empresa.emailContacto || empresa.sitioWeb || empresa.telefono ? (
+          <div className="flex flex-wrap items-center gap-3">
+            {empresa.emailContacto && (
+              <a href={mailtoContacto(empresa.emailContacto, empresa.nombre)} className="btn-primary">
+                Contactar
+              </a>
+            )}
+            {empresa.sitioWeb && (
+              <a
+                href={empresa.sitioWeb}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-full border border-cci-line px-5 py-2.5 text-sm font-semibold text-cci-graphite transition hover:border-cci-graphite hover:bg-cci-paper"
+              >
+                Sitio web
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M7 17 17 7M7 7h10v10" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </a>
+            )}
+            {empresa.telefono && <span className="text-sm text-cci-slate">Tel: {empresa.telefono}</span>}
+          </div>
         ) : (
-          <span className="text-sm italic text-cci-slate-light">Contacto por confirmar</span>
+          // Contacto no validado: se oculta el campo y se ofrece validar el perfil.
+          <div className="rounded-xl border border-cci-line bg-cci-paper px-5 py-5">
+            <p className="font-600 text-cci-ink">Perfil en actualización</p>
+            <p className="mt-1 text-sm text-cci-slate">
+              Estamos completando y validando la información de esta organización con su equipo.
+            </p>
+            <a
+              href={mailtoValidar}
+              className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-cci-orange hover:text-cci-orange-dark"
+            >
+              ¿Eres esta organización? Solicita validar tu perfil
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </a>
+          </div>
         )}
-        {empresa.sitioWeb && (
-          <a
-            href={empresa.sitioWeb}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-full border border-cci-line px-5 py-2.5 text-sm font-semibold text-cci-graphite transition hover:border-cci-graphite hover:bg-cci-paper"
-          >
-            Sitio web
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M7 17 17 7M7 7h10v10" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </a>
-        )}
-        {empresa.telefono && <span className="text-sm text-cci-slate">Tel: {empresa.telefono}</span>}
+
+        {/* Estado de validación + fecha (discreto, no alarmista) */}
+        <p className="mt-5 text-xs text-cci-slate-light">
+          {empresa.validationStatus && (
+            <>Estado del perfil: {etiqueta(ETIQUETAS_VALIDACION, empresa.validationStatus)}.</>
+          )}
+          {empresa.lastVerifiedAt && <> Última actualización: {formatDate(empresa.lastVerifiedAt.slice(0, 10))}.</>}
+          {enActualizacion && !empresa.emailContacto && !empresa.sitioWeb && (
+            <> La información se está completando con la organización.</>
+          )}
+        </p>
       </section>
     </article>
   );

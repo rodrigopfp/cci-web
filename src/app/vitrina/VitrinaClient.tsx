@@ -1,15 +1,19 @@
 "use client";
-import { useMemo, useState } from "react";
-import Link from "next/link";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { EmpresaVitrina } from "@/data/types";
-import { VitrinaCard, VitrinaMiniCard } from "@/components/VitrinaCard";
-import { CATEGORIAS_VITRINA, ZONAS_VITRINA, NIVEL_INFO, ordenNivel } from "@/lib/vitrina";
+import { VitrinaCard } from "@/components/VitrinaCard";
+import { ordenNivel } from "@/lib/vitrina";
+import {
+  TIPOS_ACTOR,
+  SOLUCIONES,
+  MATERIALES,
+  CAPACIDADES,
+  REGIONES,
+  RELACIONES_CCI,
+  type OpcionTaxonomia,
+} from "@/lib/datos/taxonomia-vitrina";
 
-// ⚠️ TODO Rodrigo: reemplazar por el correo OFICIAL del CCI que debe recibir los
-// requerimientos de la Vitrina. El sitio es estático y no procesa formularios:
-// el botón abre el correo del visitante con estos datos pre-rellenados.
-// A futuro esto puede conectarse a un servicio de formularios (Formspree,
-// Netlify Forms, etc.) o al tipo "requerimiento" del panel vía un backend.
+// ⚠️ TODO Rodrigo: correo oficial del CCI para requerimientos de la Vitrina.
 const EMAIL_CCI = "contacto@construccionindustrializada.cl";
 
 function mailtoRequerimiento(): string {
@@ -31,14 +35,70 @@ function mailtoRequerimiento(): string {
   return `mailto:${EMAIL_CCI}?subject=${asunto}&body=${cuerpo}`;
 }
 
-function ordenar(a: EmpresaVitrina, b: EmpresaVitrina): number {
-  return ordenNivel(a.nivel) - ordenNivel(b.nivel) || a.nombre.localeCompare(b.nombre, "es");
+// --- Configuración de las 6 dimensiones filtrables (D1-D6) -------------------
+type FiltroKey = "actor" | "solucion" | "material" | "capacidad" | "region" | "relacion";
+
+const GRUPOS: { key: FiltroKey; label: string; opciones: readonly OpcionTaxonomia[] }[] = [
+  { key: "actor", label: "Tipo de actor", opciones: TIPOS_ACTOR },
+  { key: "solucion", label: "Solución", opciones: SOLUCIONES },
+  { key: "material", label: "Material", opciones: MATERIALES },
+  { key: "capacidad", label: "Capacidad", opciones: CAPACIDADES },
+  { key: "region", label: "Cobertura", opciones: REGIONES },
+  { key: "relacion", label: "Relación con el CCI", opciones: RELACIONES_CCI },
+];
+
+const CAMPO: Record<FiltroKey, (e: EmpresaVitrina) => string[]> = {
+  actor: (e) => e.actorTypes,
+  solucion: (e) => e.solutions,
+  material: (e) => e.materials,
+  capacidad: (e) => e.capabilities,
+  region: (e) => e.regions,
+  relacion: (e) => e.cciRelationship,
+};
+
+type Filtros = Record<FiltroKey, string[]>;
+const FILTROS_VACIOS: Filtros = { actor: [], solucion: [], material: [], capacidad: [], region: [], relacion: [] };
+
+type Orden = "relevancia" | "nombre" | "validacion";
+
+// Prioridad para el orden por estado de validación.
+const RANGO_VALIDACION: Record<string, number> = {
+  validado_por_organizacion: 0,
+  fuente_oficial: 1,
+  revisado_por_cci: 2,
+  en_actualizacion: 3,
+  pendiente: 4,
+};
+
+// --- Sincronización con la URL (sin router: history API) --------------------
+function leerURL(): { filtros: Filtros; orden: Orden } {
+  const filtros: Filtros = { actor: [], solucion: [], material: [], capacidad: [], region: [], relacion: [] };
+  let orden: Orden = "relevancia";
+  if (typeof window === "undefined") return { filtros, orden };
+  const p = new URLSearchParams(window.location.search);
+  (Object.keys(filtros) as FiltroKey[]).forEach((k) => {
+    const raw = p.get(k);
+    if (raw) filtros[k] = raw.split(",").filter(Boolean);
+  });
+  const o = p.get("orden");
+  if (o === "nombre" || o === "validacion") orden = o;
+  return { filtros, orden };
 }
 
-// Estilo de chip de filtro, idéntico para «solución» y «zona» (patrón Actualidad):
-// borde gris sobre blanco cuando está inactivo, oscuro cuando está activo.
+function escribirURL(filtros: Filtros, orden: Orden) {
+  if (typeof window === "undefined") return;
+  const p = new URLSearchParams();
+  (Object.keys(filtros) as FiltroKey[]).forEach((k) => {
+    if (filtros[k].length) p.set(k, filtros[k].join(","));
+  });
+  if (orden !== "relevancia") p.set("orden", orden);
+  const qs = p.toString();
+  const url = qs ? `?${qs}` : window.location.pathname;
+  window.history.replaceState(null, "", url);
+}
+
 function chipCls(active: boolean): string {
-  return `shrink-0 whitespace-nowrap rounded-full border px-3.5 py-1.5 text-xs font-semibold transition ${
+  return `shrink-0 whitespace-nowrap rounded-full border px-3.5 py-1.5 text-xs font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-cci-orange focus-visible:ring-offset-1 ${
     active
       ? "border-cci-graphite bg-cci-graphite text-white"
       : "border-cci-line bg-white text-cci-slate hover:border-cci-slate-light"
@@ -46,27 +106,83 @@ function chipCls(active: boolean): string {
 }
 
 export function VitrinaClient({ empresas }: { empresas: EmpresaVitrina[] }) {
-  const [cat, setCat] = useState<string>("Todas");
-  const [zona, setZona] = useState<string>("Todas");
+  const [filtros, setFiltros] = useState<Filtros>(FILTROS_VACIOS);
+  const [orden, setOrden] = useState<Orden>("relevancia");
+  const [panelOpen, setPanelOpen] = useState(false);
+  const panelRef = useRef<HTMLDivElement>(null);
 
-  const { destacados, resto, profesionales, academia, total } = useMemo(() => {
+  // Al montar, hidratar desde la URL (mejora progresiva: sin JS la lista sale entera).
+  useEffect(() => {
+    const { filtros: f, orden: o } = leerURL();
+    setFiltros(f);
+    setOrden(o);
+  }, []);
+
+  // Persistir en la URL cada cambio.
+  useEffect(() => {
+    escribirURL(filtros, orden);
+  }, [filtros, orden]);
+
+  // Cerrar el panel con Escape; enfocar el panel al abrir.
+  useEffect(() => {
+    if (!panelOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setPanelOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    panelRef.current?.focus();
+    return () => document.removeEventListener("keydown", onKey);
+  }, [panelOpen]);
+
+  const toggle = useCallback((key: FiltroKey, value: string) => {
+    setFiltros((prev) => {
+      const on = prev[key].includes(value);
+      return { ...prev, [key]: on ? prev[key].filter((v) => v !== value) : [...prev[key], value] };
+    });
+  }, []);
+
+  const limpiar = useCallback(() => setFiltros(FILTROS_VACIOS), []);
+
+  const activos = (Object.keys(filtros) as FiltroKey[]).reduce((n, k) => n + filtros[k].length, 0);
+
+  // Opciones presentes en los datos, con conteo (solo mostramos lo que existe).
+  const opcionesPresentes = useMemo(() => {
+    const conteos: Record<FiltroKey, Map<string, number>> = {
+      actor: new Map(), solucion: new Map(), material: new Map(),
+      capacidad: new Map(), region: new Map(), relacion: new Map(),
+    };
+    for (const e of empresas) {
+      (Object.keys(conteos) as FiltroKey[]).forEach((k) => {
+        for (const v of CAMPO[k](e)) conteos[k].set(v, (conteos[k].get(v) ?? 0) + 1);
+      });
+    }
+    return conteos;
+  }, [empresas]);
+
+  const resultados = useMemo(() => {
     const match = (e: EmpresaVitrina) =>
-      (cat === "Todas" || e.categorias.includes(cat)) && (zona === "Todas" || e.zonas.includes(zona));
-    const filtradas = empresas.filter(match);
-    const grilla = filtradas.filter((e) => NIVEL_INFO[e.nivel].enGrilla);
-    const destacados = grilla.filter((e) => e.nivel === "oro").slice(0, 6);
-    const destSet = new Set(destacados.map((e) => e.id));
-    const resto = grilla.filter((e) => !destSet.has(e.id)).sort(ordenar);
-    const profesionales = filtradas.filter((e) => e.nivel === "profesional").sort(ordenar);
-    const academia = filtradas.filter((e) => e.nivel === "academia").sort(ordenar);
-    return { destacados, resto, profesionales, academia, total: grilla.length };
-  }, [empresas, cat, zona]);
+      (Object.keys(filtros) as FiltroKey[]).every(
+        (k) => filtros[k].length === 0 || CAMPO[k](e).some((v) => filtros[k].includes(v))
+      );
+    const lista = empresas.filter(match);
+    const cmp =
+      orden === "nombre"
+        ? (a: EmpresaVitrina, b: EmpresaVitrina) => a.nombre.localeCompare(b.nombre, "es")
+        : orden === "validacion"
+        ? (a: EmpresaVitrina, b: EmpresaVitrina) =>
+            (RANGO_VALIDACION[a.validationStatus ?? "pendiente"] ?? 9) -
+              (RANGO_VALIDACION[b.validationStatus ?? "pendiente"] ?? 9) ||
+            a.nombre.localeCompare(b.nombre, "es")
+        : (a: EmpresaVitrina, b: EmpresaVitrina) =>
+            ordenNivel(a.nivel) - ordenNivel(b.nivel) || a.nombre.localeCompare(b.nombre, "es");
+    return [...lista].sort(cmp);
+  }, [empresas, filtros, orden]);
 
   const sinPublicar = empresas.length === 0;
 
   return (
     <>
-      {/* a) CABECERA — fondo claro */}
+      {/* a) CABECERA — fondo claro (se conserva) */}
       <section className="border-b border-cci-line bg-cci-paper">
         <div className="container-cci py-12 md:py-14">
           <div className="inline-flex w-fit items-center whitespace-nowrap border-l-4 border-cci-orange bg-cci-orange-soft py-2 pl-4 pr-3 text-[11px] font-700 uppercase leading-none tracking-[0.15em] text-cci-orange-dark md:text-xs">
@@ -76,101 +192,112 @@ export function VitrinaClient({ empresas }: { empresas: EmpresaVitrina[] }) {
             Quién construye industrializado en Chile
           </h1>
           <p className="mt-4 max-w-2xl text-cci-slate">
-            El directorio del ecosistema de la construcción industrializada: empresas socias por su nivel de
-            membresía y publicaciones de empresas no socias, siempre identificadas. Encuentra a tu proveedor
-            por tipo de solución y zona.
-          </p>
-          <p className="mt-3 max-w-2xl text-sm text-cci-slate-light">
-            Directorio en actualización: las descripciones y datos de contacto de cada empresa se están
-            completando.
+            El directorio del ecosistema de la construcción industrializada: filtra por tipo de actor,
+            solución, material, capacidad, cobertura y relación con el CCI.
           </p>
         </div>
       </section>
 
       {sinPublicar ? (
-        /* ESTADO VACÍO */
         <section className="container-cci py-16">
           <div className="mx-auto max-w-xl rounded-2xl border border-dashed border-cci-line bg-cci-paper px-8 py-16 text-center">
-            <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-cci-orange-soft text-cci-orange">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </div>
             <h2 className="font-display text-xl font-800 text-cci-ink">Vitrina en levantamiento</h2>
-            <p className="mt-2 text-cci-slate">
-              Estamos sumando a las empresas del ecosistema industrializado. Muy pronto podrás explorar el
-              directorio por tipo de solución y zona.
-            </p>
+            <p className="mt-2 text-cci-slate">Muy pronto podrás explorar el directorio del ecosistema.</p>
           </div>
         </section>
       ) : (
         <>
-          {/* b) FILTROS: dos filas de chips (solución y zona), scroll horizontal en móvil */}
-          <section className="border-b border-cci-line bg-white">
-            <div className="container-cci flex flex-col gap-3 py-4">
-              <div className="relative md:contents">
-                <div className="flex flex-nowrap gap-2 overflow-x-auto scrollbar-hide md:flex-wrap md:overflow-visible">
-                  {(["Todas", ...CATEGORIAS_VITRINA] as string[]).map((c) => (
-                    <button key={c} onClick={() => setCat(c)} className={`${chipCls(cat === c)} capitalize`}>
-                      {c}
-                    </button>
-                  ))}
-                </div>
-                <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-white to-transparent md:hidden" />
+          {/* b) TOOLBAR: botón Filtros + chips activos + orden + conteo */}
+          <section className="sticky top-[105px] z-20 border-b border-cci-line bg-white/95 backdrop-blur">
+            <div className="container-cci flex flex-wrap items-center gap-3 py-3">
+              <button
+                onClick={() => setPanelOpen(true)}
+                className="inline-flex items-center gap-2 rounded-full border border-cci-line bg-white px-4 py-2 text-sm font-semibold text-cci-graphite transition hover:border-cci-graphite focus:outline-none focus-visible:ring-2 focus-visible:ring-cci-orange focus-visible:ring-offset-1"
+                aria-haspopup="dialog"
+                aria-expanded={panelOpen}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M4 6h16M7 12h10M10 18h4" strokeLinecap="round" />
+                </svg>
+                Filtros
+                {activos > 0 && (
+                  <span className="ml-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-cci-orange px-1.5 text-[11px] font-700 text-white">
+                    {activos}
+                  </span>
+                )}
+              </button>
+
+              {/* chips activos removibles (contexto sin muro de chips) */}
+              <div className="flex flex-1 flex-wrap items-center gap-2">
+                {(Object.keys(filtros) as FiltroKey[]).flatMap((k) =>
+                  filtros[k].map((v) => {
+                    const grupo = GRUPOS.find((g) => g.key === k);
+                    const label = grupo?.opciones.find((o) => o.value === v)?.label ?? v;
+                    return (
+                      <button
+                        key={`${k}-${v}`}
+                        onClick={() => toggle(k, v)}
+                        className="inline-flex items-center gap-1.5 rounded-full bg-cci-graphite px-3 py-1 text-xs font-semibold text-white transition hover:bg-cci-graphite-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-cci-orange"
+                      >
+                        {label}
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                          <path d="M6 6l12 12M18 6L6 18" strokeLinecap="round" />
+                        </svg>
+                      </button>
+                    );
+                  })
+                )}
+                {activos > 0 && (
+                  <button
+                    onClick={limpiar}
+                    className="text-xs font-semibold text-cci-orange hover:text-cci-orange-dark focus:outline-none focus-visible:underline"
+                  >
+                    Limpiar
+                  </button>
+                )}
               </div>
-              <div className="relative md:contents">
-                <div className="flex flex-nowrap gap-2 overflow-x-auto scrollbar-hide md:flex-wrap md:overflow-visible">
-                  {(["Todas", ...ZONAS_VITRINA] as string[]).map((z) => (
-                    <button key={z} onClick={() => setZona(z)} className={chipCls(zona === z)}>
-                      {z === "Todas" ? "Todas las zonas" : z}
-                    </button>
-                  ))}
-                </div>
-                <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-white to-transparent md:hidden" />
-              </div>
+
+              <label className="ml-auto flex items-center gap-2 text-xs text-cci-slate">
+                <span className="hidden sm:inline">Ordenar</span>
+                <select
+                  value={orden}
+                  onChange={(e) => setOrden(e.target.value as Orden)}
+                  className="rounded-full border border-cci-line bg-white px-3 py-1.5 text-xs font-semibold text-cci-graphite focus:outline-none focus-visible:ring-2 focus-visible:ring-cci-orange"
+                >
+                  <option value="relevancia">Relevancia</option>
+                  <option value="nombre">Nombre (A–Z)</option>
+                  <option value="validacion">Estado de validación</option>
+                </select>
+              </label>
+              <span className="shrink-0 text-sm font-600 text-cci-slate-light" aria-live="polite">
+                {resultados.length} {resultados.length === 1 ? "resultado" : "resultados"}
+              </span>
             </div>
           </section>
 
-          {/* c) SOCIOS DESTACADOS (oro) — fondo oscuro */}
-          {destacados.length > 0 && (
-            <section className="bg-cci-graphite-dark py-12 md:py-14">
-              <div className="container-cci">
-                <h2 className="font-display text-2xl font-800 text-white md:text-3xl">Socios destacados</h2>
-                <p className="mt-2 max-w-2xl text-white/60">Empresas con membresía Oro del Consejo.</p>
-                <div className="mt-7 grid grid-cols-1 gap-5 md:grid-cols-3">
-                  {destacados.map((e) => (
-                    <VitrinaMiniCard key={e.id} empresa={e} />
-                  ))}
-                </div>
+          {/* c) RESULTADOS */}
+          <section className="container-cci py-10 md:py-12">
+            {resultados.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-cci-line bg-cci-paper py-20 text-center">
+                <p className="text-cci-slate">
+                  No hay resultados con esa combinación; prueba quitar un filtro.
+                </p>
+                {activos > 0 && (
+                  <button onClick={limpiar} className="btn-ghost mt-4">
+                    Limpiar filtros
+                  </button>
+                )}
               </div>
-            </section>
-          )}
-
-          {/* d) TODAS LAS EMPRESAS */}
-          <section className="container-cci py-12 md:py-14">
-            <div className="mb-6 flex items-end justify-between gap-4">
-              <h2 className="font-display text-2xl font-800 text-cci-ink md:text-3xl">Todas las empresas</h2>
-              <span className="shrink-0 text-sm text-cci-slate-light">
-                {total} {total === 1 ? "empresa" : "empresas"}
-              </span>
-            </div>
-
-            {resto.length === 0 && destacados.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-cci-line bg-cci-paper py-20 text-center text-cci-slate">
-                No hay empresas con esos criterios. Prueba con otra categoría o zona.
-              </div>
-            ) : resto.length > 0 ? (
+            ) : (
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {resto.map((e) => (
+                {resultados.map((e) => (
                   <VitrinaCard key={e.id} empresa={e} />
                 ))}
               </div>
-            ) : (
-              <p className="text-sm text-cci-slate">Las empresas de esta selección están en «Socios destacados».</p>
             )}
           </section>
 
-          {/* e) AVISO DE TRANSPARENCIA */}
+          {/* d) AVISO DE TRANSPARENCIA (se conserva) */}
           <section className="container-cci pb-4">
             <p className="rounded-lg border border-cci-line bg-cci-paper px-5 py-4 text-xs leading-relaxed text-cci-slate">
               Las publicaciones de empresas no socias están identificadas con la insignia{" "}
@@ -180,7 +307,7 @@ export function VitrinaClient({ empresas }: { empresas: EmpresaVitrina[] }) {
             </p>
           </section>
 
-          {/* f) CAPTACIÓN DE DEMANDA */}
+          {/* e) CAPTACIÓN DE DEMANDA (se conserva) */}
           <section className="border-y border-cci-line bg-cci-orange-soft">
             <div className="container-cci flex flex-col gap-4 py-7 sm:flex-row sm:items-center sm:justify-between">
               <div>
@@ -196,46 +323,78 @@ export function VitrinaClient({ empresas }: { empresas: EmpresaVitrina[] }) {
               </a>
             </div>
           </section>
-
-          {/* g) SOCIOS PROFESIONALES Y ACADEMIA — listado simple, dos columnas */}
-          {(profesionales.length > 0 || academia.length > 0) && (
-            <section className="bg-cci-paper py-12 md:py-14">
-              <div className="container-cci">
-                <h2 className="font-display text-2xl font-800 text-cci-ink md:text-3xl">Socios profesionales y academia</h2>
-
-                {profesionales.length > 0 && (
-                  <div className="mt-7">
-                    <h3 className="mb-2 text-sm font-700 uppercase tracking-wide text-cci-orange">Socios profesionales</h3>
-                    <ul className="grid gap-x-10 sm:grid-cols-2">
-                      {profesionales.map((e) => (
-                        <li
-                          key={e.id}
-                          className="flex flex-wrap items-baseline justify-between gap-x-3 border-b border-cci-line py-2.5"
-                        >
-                          <span className="font-600 text-cci-ink">{e.nombre}</span>
-                          {e.titular && <span className="text-sm text-cci-slate-light">{e.titular}</span>}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {academia.length > 0 && (
-                  <div className="mt-9">
-                    <h3 className="mb-2 text-sm font-700 uppercase tracking-wide text-cci-orange">Academia</h3>
-                    <ul className="grid gap-x-10 sm:grid-cols-2">
-                      {academia.map((e) => (
-                        <li key={e.id} className="border-b border-cci-line py-2.5">
-                          <span className="font-600 text-cci-ink">{e.nombre}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-            </section>
-          )}
         </>
+      )}
+
+      {/* DRAWER DE FILTROS — overlay para móvil y escritorio */}
+      {panelOpen && (
+        <div className="fixed inset-0 z-50 flex justify-end" role="dialog" aria-modal="true" aria-label="Filtros de la Vitrina">
+          <button
+            className="absolute inset-0 bg-cci-graphite-dark/50 motion-reduce:transition-none"
+            aria-label="Cerrar filtros"
+            onClick={() => setPanelOpen(false)}
+          />
+          <div
+            ref={panelRef}
+            tabIndex={-1}
+            className="relative flex h-full w-full max-w-md flex-col bg-white shadow-2xl outline-none"
+          >
+            <div className="flex items-center justify-between border-b border-cci-line px-6 py-4">
+              <h2 className="font-display text-lg font-800 text-cci-ink">Filtros</h2>
+              <button
+                onClick={() => setPanelOpen(false)}
+                className="rounded-full p-1.5 text-cci-slate hover:bg-cci-paper focus:outline-none focus-visible:ring-2 focus-visible:ring-cci-orange"
+                aria-label="Cerrar"
+              >
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M6 6l12 12M18 6L6 18" strokeLinecap="round" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-6 py-5">
+              {GRUPOS.map((g) => {
+                const presentes = g.opciones.filter((o) => (opcionesPresentes[g.key].get(o.value) ?? 0) > 0);
+                if (presentes.length === 0) return null;
+                return (
+                  <fieldset key={g.key} className="mb-6">
+                    <legend className="mb-2 text-sm font-700 uppercase tracking-wide text-cci-orange">
+                      {g.label}
+                    </legend>
+                    <div className="flex flex-wrap gap-2">
+                      {presentes.map((o) => {
+                        const n = opcionesPresentes[g.key].get(o.value) ?? 0;
+                        const active = filtros[g.key].includes(o.value);
+                        return (
+                          <button
+                            key={o.value}
+                            onClick={() => toggle(g.key, o.value)}
+                            aria-pressed={active}
+                            className={chipCls(active)}
+                          >
+                            {o.label} <span className={active ? "text-white/70" : "text-cci-slate-light"}>{n}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </fieldset>
+                );
+              })}
+            </div>
+
+            <div className="flex items-center justify-between gap-3 border-t border-cci-line px-6 py-4">
+              <button
+                onClick={limpiar}
+                className="text-sm font-semibold text-cci-slate hover:text-cci-orange-dark focus:outline-none focus-visible:underline"
+              >
+                Limpiar todo
+              </button>
+              <button onClick={() => setPanelOpen(false)} className="btn-primary">
+                Ver {resultados.length} {resultados.length === 1 ? "resultado" : "resultados"}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );

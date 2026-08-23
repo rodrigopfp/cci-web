@@ -501,7 +501,29 @@ type EmpresaVitrinaDoc = {
   proyectosDestacados?: { titulo?: string; descripcion?: string; imagen?: ImagenDoc }[];
   vigenteHasta?: string;
   activo?: boolean;
+  actorTypes?: string[];
+  solutions?: string[];
+  materials?: string[];
+  capabilities?: string[];
+  regions?: string[];
+  coverageType?: string;
+  cciRelationship?: string[];
+  minvuStatus?: {
+    approvedCompany?: boolean;
+    resolutions?: string[];
+    plants?: string[];
+    vitCount?: number;
+  } | null;
+  validationStatus?: string;
+  certificaciones?: string[];
+  direccionPlantas?: string[];
+  lastVerifiedAt?: string;
 };
+
+// Devuelve un arreglo de strings solo con valores válidos (sin nulos ni vacíos).
+function limpiarLista(v: unknown): string[] {
+  return Array.isArray(v) ? v.filter((x): x is string => typeof x === "string" && x.length > 0) : [];
+}
 
 function toEmpresaVitrina(d: EmpresaVitrinaDoc): EmpresaVitrina {
   // Mismo patrón dual que las noticias: imagen subida a Sanity o URL externa.
@@ -541,6 +563,26 @@ function toEmpresaVitrina(d: EmpresaVitrinaDoc): EmpresaVitrina {
     proyectosDestacados,
     vigenteHasta: d.vigenteHasta,
     activo: d.activo !== false,
+    // Taxonomía multiatributo: arreglos vacíos cuando aún no se clasifica.
+    actorTypes: limpiarLista(d.actorTypes),
+    solutions: limpiarLista(d.solutions),
+    materials: limpiarLista(d.materials),
+    capabilities: limpiarLista(d.capabilities),
+    regions: limpiarLista(d.regions),
+    coverageType: d.coverageType || undefined,
+    cciRelationship: limpiarLista(d.cciRelationship),
+    minvuStatus: d.minvuStatus
+      ? {
+          approvedCompany: d.minvuStatus.approvedCompany,
+          resolutions: limpiarLista(d.minvuStatus.resolutions),
+          plants: limpiarLista(d.minvuStatus.plants),
+          vitCount: d.minvuStatus.vitCount,
+        }
+      : undefined,
+    validationStatus: d.validationStatus || undefined,
+    certificaciones: limpiarLista(d.certificaciones),
+    direccionPlantas: limpiarLista(d.direccionPlantas),
+    lastVerifiedAt: d.lastVerifiedAt || undefined,
   };
 }
 
