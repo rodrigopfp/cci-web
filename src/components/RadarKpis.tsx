@@ -10,9 +10,14 @@
 // El HTML estático contiene el valor final (útil sin JS); con JS se anima al
 // entrar al viewport; con prefers-reduced-motion queda fijo.
 
+import Image from "next/image";
 import { usePrefersReducedMotion, useInView, useCountUp } from "@/lib/counters";
 import { obtenerIndicadorConFuente } from "@/lib/datos/indice";
 import type { DataSource } from "@/lib/datos/tipos-indicadores";
+
+// Foto de cabecera opcional. Solo la pasa la portada (RadarKpisPreview); en CCI
+// Data las tarjetas van sin foto, idénticas a antes.
+type Foto = { src: string; alt: string };
 
 // ---- Piezas de presentación -------------------------------------------
 
@@ -36,25 +41,6 @@ function SourceLink({ source }: { source: DataSource }) {
     >
       {etiqueta}
     </a>
-  );
-}
-
-function Card({
-  children,
-  className = "",
-  innerRef,
-}: {
-  children: React.ReactNode;
-  className?: string;
-  innerRef?: React.Ref<HTMLElement>;
-}) {
-  return (
-    <article
-      ref={innerRef}
-      className={`flex flex-col rounded-2xl border border-cci-line bg-white p-6 shadow-card ${className}`}
-    >
-      {children}
-    </article>
   );
 }
 
@@ -88,6 +74,7 @@ function GaugeCard({
   ariaLabel,
   reduced,
   mirror = false,
+  foto,
 }: {
   label: string;
   note: string;
@@ -99,6 +86,7 @@ function GaugeCard({
   ariaLabel: string;
   reduced: boolean;
   mirror?: boolean;
+  foto?: Foto;
 }) {
   const { ref, inView } = useInView<HTMLElement>();
   const v = useCountUp(target, inView, reduced);
@@ -110,33 +98,43 @@ function GaugeCard({
   const [nx, ny] = polar(cx, cy, r - 8, A(v));
 
   return (
-    <Card innerRef={ref}>
-      <span className="text-xs font-700 uppercase tracking-wide text-cci-slate-light">{label}</span>
-      <div className={`mt-2 ${INSTRUMENT_AREA}`}>
-        <div className="w-full max-w-[200px]">
-          <svg viewBox="0 0 200 108" className="w-full" role="img" aria-label={ariaLabel}>
-            <path d={arcByAngle(cx, cy, r, A(0), A(scaleMax))} fill="none" stroke="#E6E4E2" strokeWidth={14} strokeLinecap="round" />
-            <path d={arcByAngle(cx, cy, r, A(band[0]), A(band[1]))} fill="none" stroke="#F6BA8C" strokeWidth={14} strokeLinecap="round" />
-            <path d={arcByAngle(cx, cy, r, A(0), A(Math.max(v, 0.01)))} fill="none" stroke="#E04E00" strokeWidth={14} strokeLinecap="round" />
-            <line x1={cx} y1={cy} x2={nx} y2={ny} stroke="#2B2B2B" strokeWidth={3} strokeLinecap="round" />
-            <circle cx={cx} cy={cy} r={7} fill="#2B2B2B" />
-          </svg>
-          <p className="mt-1 text-center font-display text-4xl font-900 leading-none text-cci-orange">
-            {format(v)}
-          </p>
+    <article
+      ref={ref}
+      className="flex flex-col overflow-hidden rounded-2xl border border-cci-line bg-white shadow-card"
+    >
+      {foto && (
+        <div className="relative h-[min(50vw,230px)] w-full overflow-hidden">
+          <Image src={foto.src} alt={foto.alt} fill className="object-cover" sizes="(min-width: 768px) 680px, 100vw" />
+        </div>
+      )}
+      <div className="flex flex-1 flex-col p-6">
+        <span className="text-xs font-700 uppercase tracking-wide text-cci-slate-light">{label}</span>
+        <div className={`mt-2 ${INSTRUMENT_AREA}`}>
+          <div className="w-full max-w-[200px]">
+            <svg viewBox="0 0 200 108" className="w-full" role="img" aria-label={ariaLabel}>
+              <path d={arcByAngle(cx, cy, r, A(0), A(scaleMax))} fill="none" stroke="#E6E4E2" strokeWidth={14} strokeLinecap="round" />
+              <path d={arcByAngle(cx, cy, r, A(band[0]), A(band[1]))} fill="none" stroke="#F6BA8C" strokeWidth={14} strokeLinecap="round" />
+              <path d={arcByAngle(cx, cy, r, A(0), A(Math.max(v, 0.01)))} fill="none" stroke="#E04E00" strokeWidth={14} strokeLinecap="round" />
+              <line x1={cx} y1={cy} x2={nx} y2={ny} stroke="#2B2B2B" strokeWidth={3} strokeLinecap="round" />
+              <circle cx={cx} cy={cy} r={7} fill="#2B2B2B" />
+            </svg>
+            <p className="mt-1 text-center font-display text-4xl font-900 leading-none text-cci-orange">
+              {format(v)}
+            </p>
+          </div>
+        </div>
+        <p className="mt-3 text-sm text-cci-slate">{note}</p>
+        <div className="mt-auto">
+          <SourceLink source={source} />
         </div>
       </div>
-      <p className="mt-3 text-sm text-cci-slate">{note}</p>
-      <div className="mt-auto">
-        <SourceLink source={source} />
-      </div>
-    </Card>
+    </article>
   );
 }
 
 // ---- Instrumentos reutilizables (portada + CCI Data), desde el registro ----
 
-export function PotencialGauge({ reduced }: { reduced: boolean }) {
+export function PotencialGauge({ reduced, foto }: { reduced: boolean; foto?: Foto }) {
   const { indicador, fuente } = obtenerIndicadorConFuente("potencial-productividad");
   const target = Number(indicador.value);
   const prefix = indicador.prefix ?? "";
@@ -152,11 +150,12 @@ export function PotencialGauge({ reduced }: { reduced: boolean }) {
       format={(v) => `${prefix}${Math.round(v)}${suffix}`}
       ariaLabel={`${prefix}${target}${suffix} — ${indicador.title}`}
       reduced={reduced}
+      foto={foto}
     />
   );
 }
 
-export function CalidadGauge({ reduced }: { reduced: boolean }) {
+export function CalidadGauge({ reduced, foto }: { reduced: boolean; foto?: Foto }) {
   const { indicador, fuente } = obtenerIndicadorConFuente("calidad-percepcion");
   const target = Number(indicador.value);
   const suffix = indicador.suffix ?? "%";
@@ -171,11 +170,12 @@ export function CalidadGauge({ reduced }: { reduced: boolean }) {
       format={(v) => `${Math.round(v)}${suffix}`}
       ariaLabel={`${target}${suffix} — ${indicador.title}`}
       reduced={reduced}
+      foto={foto}
     />
   );
 }
 
-export function ResiduosGauge({ reduced }: { reduced: boolean }) {
+export function ResiduosGauge({ reduced, foto }: { reduced: boolean; foto?: Foto }) {
   const { indicador, fuente } = obtenerIndicadorConFuente("residuos-reduccion");
   const target = Number(indicador.value);
   const prefix = indicador.prefix ?? "−";
@@ -192,21 +192,32 @@ export function ResiduosGauge({ reduced }: { reduced: boolean }) {
       format={(v) => `${prefix}${Math.round(v)}${suffix}`}
       ariaLabel={`${prefix}${target}${suffix} — ${indicador.title}`}
       reduced={reduced}
+      foto={foto}
     />
   );
 }
 
 /**
  * Avance para la portada: tres instrumentos (potencial · calidad · residuos),
- * mismos componentes y datos que en CCI Data, en una fila de 3 en escritorio.
+ * mismos componentes y datos que en CCI Data, cada uno con su foto real de
+ * cabecera (gentileza de socios CCI). En CCI Data los mismos gauges van sin foto.
  */
 export function RadarKpisPreview() {
   const reduced = usePrefersReducedMotion();
   return (
     <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-      <PotencialGauge reduced={reduced} />
-      <CalidadGauge reduced={reduced} />
-      <ResiduosGauge reduced={reduced} />
+      <PotencialGauge
+        reduced={reduced}
+        foto={{ src: "/img/portada/portada-productividad.jpg", alt: "Montaje de vivienda industrializada: panel con ventana instalada izado por grúa" }}
+      />
+      <CalidadGauge
+        reduced={reduced}
+        foto={{ src: "/img/portada/portada-calidad.jpg", alt: "Control de calidad en planta: operadora en estación CNC" }}
+      />
+      <ResiduosGauge
+        reduced={reduced}
+        foto={{ src: "/img/portada/portada-residuos.jpg", alt: "Montaje de elementos industrializados en obra" }}
+      />
     </div>
   );
 }

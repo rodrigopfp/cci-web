@@ -115,7 +115,8 @@ export default async function Home() {
       <section className="container-cci py-14">
         <SectionHeader kicker="CCI Data" title="La industrialización en cifras" />
         <RadarKpisPreview />
-        <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2">
+        <p className="mt-5 text-[11px] font-600 text-cci-slate-light">Fotos: gentileza de socios CCI</p>
+        <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2">
           <Link href="/data" className="inline-flex items-center gap-1.5 text-sm font-semibold text-cci-orange hover:text-cci-orange-dark">
             Explorar CCI Data
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" /></svg>
