@@ -33,8 +33,8 @@
 	redir /ecosistema /vitrina/ 301
 	redir /ecosistema/ /vitrina/ 301
 	# La Evidencia se fusionó en CCI Data, capítulo 4 (revisión 22/08, prompt 2).
-	redir /evidencia /data/#cap4 301
-	redir /evidencia/ /data/#cap4 301
+	redir /evidencia /data/#cap5 301
+	redir /evidencia/ /data/#cap5 301
 	# Los Recursos se fusionaron en la Biblioteca (/conocimiento) (paso 4).
 	redir /recursos /conocimiento/ 301
 	redir /recursos/ /conocimiento/ 301

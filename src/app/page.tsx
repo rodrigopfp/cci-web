@@ -19,6 +19,28 @@ import { NewsletterBox } from "@/components/Footer";
 import { HeroObra } from "@/components/HeroObra";
 import { formatDate } from "@/lib/format";
 import { SITE_URL } from "@/lib/site";
+import type { Indicator } from "@/data/types";
+import { obtenerIndicador } from "@/lib/datos/indice";
+
+// Unificación de origen (paso 4): las cifras de la grilla "ecosistema" que ya
+// viven en el registro toman su VALOR desde obtenerIndicador() (fuente única);
+// mismo valor y mismo diseño → sin efecto visual. `convenios` sigue en Sanity
+// (conteo oficial DITEC aún no migrado al registro).
+const REGISTRO_PORTADA: Record<string, string> = {
+  "deficit-radar": "deficit-habitacional",
+  empresas: "industrializadoras-certificadas",
+  tipologias: "tipologias-vit",
+};
+function formatoCL(n: number): string {
+  return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+function conValorDelRegistro(ind: Indicator): Indicator {
+  const slug = REGISTRO_PORTADA[ind.id];
+  if (!slug) return ind;
+  const v = obtenerIndicador(slug).value;
+  const value = typeof v === "number" ? formatoCL(v) : String(v);
+  return { ...ind, value };
+}
 
 export const metadata = {
   alternates: { canonical: `${SITE_URL}/` },
@@ -93,6 +115,25 @@ export default async function Home() {
         <SectionHeader kicker="CCI Data" title="La industrialización en cifras" />
         <RadarKpisPreview />
         <VerMasLink href="/data">Explorar CCI Data</VerMasLink>
+      </section>
+
+      {/* TEASER — Industrializar no es prefabricar (delta aprobado, paso 5) */}
+      <section className="relative overflow-hidden bg-cci-graphite-dark">
+        <div
+          className="absolute inset-0 opacity-[0.16]"
+          style={{ backgroundImage: "radial-gradient(circle at 88% 20%, #E04E00 0%, transparent 45%), radial-gradient(circle at 5% 90%, #5C5C5C 0%, transparent 45%)" }}
+        />
+        <div className="container-cci relative py-12 text-center md:py-14">
+          <h2 className="mx-auto max-w-2xl font-display text-2xl font-900 leading-tight text-white md:text-3xl">
+            Industrializar no es solo prefabricar
+          </h2>
+          <p className="mx-auto mt-3 max-w-2xl leading-relaxed text-white/75">
+            Es integrar diseño, ingeniería, producción, logística y montaje desde el inicio.
+          </p>
+          <div className="mt-6">
+            <Link href="/data/#cap4" className="btn-primary">Entender la metodología</Link>
+          </div>
+        </div>
       </section>
 
       {/* QUIÉNES SOMOS — presentación compacta del CCI (detalle vive en /nosotros) */}
@@ -210,7 +251,9 @@ export default async function Home() {
       <section className="container-cci py-14">
         <SectionHeader kicker="CCI Data" title="El ecosistema industrializado de Chile, hoy" href="/data" hrefLabel="Ver CCI Data completo" />
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {radarIndicators.map((i) => <MetricCard key={i.id} indicator={i} />)}
+          {radarIndicators.map((i) => (
+            <MetricCard key={i.id} indicator={conValorDelRegistro(i)} />
+          ))}
         </div>
         <p className="mt-6 max-w-3xl text-sm leading-relaxed text-cci-slate">
           Datos del listado oficial de la DITEC del MINVU. El Radar detalla empresa por empresa, con
@@ -221,7 +264,7 @@ export default async function Home() {
       {/* EVIDENCIA destacada */}
       <section className="bg-cci-graphite-dark py-14">
         <div className="container-cci">
-          <SectionHeader kicker="Evidencia" title="Qué dice la investigación" href="/data/#cap4" hrefLabel="Ver la evidencia" dark />
+          <SectionHeader kicker="Evidencia" title="Qué dice la investigación" href="/data/#cap5" hrefLabel="Ver la evidencia" dark />
           <div className="grid gap-5 md:grid-cols-3">
             {studies.slice(0, 3).map((s) => (
               <a key={s.id} href={s.url} target="_blank" rel="noopener noreferrer" className="card-rise group relative flex flex-col gap-3 overflow-hidden rounded-xl border border-white/10 bg-white/5 p-6">

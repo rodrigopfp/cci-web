@@ -31,7 +31,7 @@ export function Footer() {
           <ul className="space-y-2 text-sm text-cci-slate">
             <li><Link href="/noticias" className="hover:text-cci-orange-dark">Actualidad</Link></li>
             <li><Link href="/data" className="hover:text-cci-orange-dark">CCI Data</Link></li>
-            <li><Link href="/data/#cap4" className="hover:text-cci-orange-dark">Evidencia</Link></li>
+            <li><Link href="/data/#cap5" className="hover:text-cci-orange-dark">Evidencia</Link></li>
             <li><Link href="/vitrina" className="hover:text-cci-orange-dark">Vitrina</Link></li>
             <li><Link href="/voces" className="hover:text-cci-orange-dark">Voces</Link></li>
             <li><Link href="/conocimiento" className="hover:text-cci-orange-dark">Conocimiento</Link></li>
