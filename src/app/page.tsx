@@ -310,7 +310,7 @@ export default async function Home() {
               </span>
               <h2 className="mt-2 font-display text-2xl font-800 text-cci-ink">Recursos técnicos</h2>
             </div>
-            <Link href="/recursos" className="annot shrink-0 pb-1 text-cci-slate hover:text-cci-orange">
+            <Link href="/conocimiento" className="annot shrink-0 pb-1 text-cci-slate hover:text-cci-orange">
               Ver todo
             </Link>
           </div>

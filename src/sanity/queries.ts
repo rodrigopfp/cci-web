@@ -155,6 +155,40 @@ export const recursosQuery = `*[_type == "recurso"] | order(fecha desc){
   archivo{ asset->{ extension, size } }
 }`;
 
+// Biblioteca editorial (/conocimiento): campos completos del recurso.
+const RECURSO_BIBLIO_FIELDS = `
+  _id,
+  titulo,
+  "slug": slug.current,
+  categoria,
+  temas,
+  bajada,
+  descripcion,
+  portada,
+  autores,
+  institucion,
+  fechaPublicacion,
+  version,
+  paginas,
+  formato,
+  estadoRecurso,
+  requiereFormulario,
+  archivo{ asset->{ url, extension, size } },
+  enlaceExterno,
+  intro,
+  hallazgos,
+  cuerpo,
+  recursosRelacionados,
+  terminosGlosario,
+  indicadoresDestacados,
+  fecha,
+  fechaActualizacion
+`;
+
+export const recursosBiblioQuery = `*[_type == "recurso" && defined(slug.current)] | order(coalesce(fechaPublicacion, fecha) desc){${RECURSO_BIBLIO_FIELDS}}`;
+export const recursoBiblioBySlugQuery = `*[_type == "recurso" && slug.current == $slug][0]{${RECURSO_BIBLIO_FIELDS}}`;
+export const recursoBiblioSlugsQuery = `*[_type == "recurso" && defined(slug.current)]{"slug": slug.current}`;
+
 // --- Vitrina (empresas del directorio comercial) ------------------------
 const EMPRESA_VITRINA_FIELDS = `
   _id,

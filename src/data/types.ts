@@ -70,6 +70,45 @@ export interface Resource {
   date: string;
 }
 
+// ---- Biblioteca editorial (Fase 2 · paso 4) ----------------------------
+export type CategoriaRecurso =
+  | "guias" | "estudios" | "normativa" | "fichas" | "herramientas"
+  | "plantillas" | "casos" | "reportes" | "publicaciones_internacionales";
+
+export type EstadoRecurso =
+  | "disponible" | "actualizado" | "en_revision" | "en_preparacion" | "proximamente" | "archivado";
+
+export interface RecursoBiblioteca {
+  id: string;
+  titulo: string;
+  slug: string;
+  categoria?: CategoriaRecurso;
+  temas: string[];
+  bajada?: string;
+  portada?: string;
+  autores?: string;
+  institucion?: string;
+  fechaPublicacion?: string;
+  version?: string;
+  paginas?: number;
+  formato?: string;
+  estado: EstadoRecurso;
+  requiereFormulario: boolean;
+  /** URL de descarga resuelta: archivo de Sanity o enlace externo/interno. */
+  archivoUrl?: string;
+  archivoExt?: string;
+  enlaceExterno?: string;
+  esExterno: boolean;
+  intro?: PortableTextBlock[];
+  hallazgos: string[];
+  cuerpo?: PortableTextBlock[];
+  recursosRelacionados: string[];
+  terminosGlosario: string[];
+  /** Slugs del registro de indicadores (src/lib/datos) citados en la ficha. */
+  indicadoresDestacados: string[];
+  fechaActualizacion?: string;
+}
+
 export interface CCIEvent {
   id: string;
   title: string;

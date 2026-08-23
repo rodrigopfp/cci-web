@@ -480,6 +480,95 @@ export async function getResources(): Promise<Resource[]> {
   });
 }
 
+// --- Biblioteca editorial (/conocimiento) -------------------------------
+import type { RecursoBiblioteca, CategoriaRecurso, EstadoRecurso } from "@/data/types";
+import {
+  recursosBiblioQuery,
+  recursoBiblioBySlugQuery,
+  recursoBiblioSlugsQuery,
+} from "./queries";
+
+type RecursoBiblioDoc = {
+  _id: string;
+  titulo: string;
+  slug?: string;
+  categoria?: string;
+  temas?: string[];
+  bajada?: string;
+  descripcion?: string;
+  portada?: ImagenDoc;
+  autores?: string;
+  institucion?: string;
+  fechaPublicacion?: string;
+  version?: string;
+  paginas?: number;
+  formato?: string;
+  estadoRecurso?: string;
+  requiereFormulario?: boolean;
+  archivo?: { asset?: { url?: string; extension?: string; size?: number } };
+  enlaceExterno?: string;
+  intro?: PortableTextBlock[];
+  hallazgos?: string[];
+  cuerpo?: PortableTextBlock[];
+  recursosRelacionados?: string[];
+  terminosGlosario?: string[];
+  indicadoresDestacados?: string[];
+  fecha?: string;
+  fechaActualizacion?: string;
+};
+
+function toRecursoBiblio(d: RecursoBiblioDoc): RecursoBiblioteca {
+  const portada = d.portada?.asset?._ref
+    ? builder.image(d.portada).width(1200).fit("max").auto("format").url()
+    : undefined;
+  const archivoUrl = d.archivo?.asset?.url;
+  const enlaceExterno = d.enlaceExterno;
+  const esExterno = Boolean(enlaceExterno && /^https?:\/\//i.test(enlaceExterno));
+  return {
+    id: d._id,
+    titulo: d.titulo,
+    slug: d.slug ?? "",
+    categoria: d.categoria as CategoriaRecurso | undefined,
+    temas: Array.isArray(d.temas) ? d.temas : [],
+    bajada: d.bajada || d.descripcion || undefined,
+    portada,
+    autores: d.autores,
+    institucion: d.institucion,
+    fechaPublicacion: d.fechaPublicacion || d.fecha,
+    version: d.version,
+    paginas: d.paginas,
+    formato: d.formato,
+    estado: (d.estadoRecurso as EstadoRecurso) ?? "en_preparacion",
+    requiereFormulario: Boolean(d.requiereFormulario),
+    archivoUrl: archivoUrl || undefined,
+    archivoExt: d.archivo?.asset?.extension,
+    enlaceExterno,
+    esExterno,
+    intro: Array.isArray(d.intro) ? d.intro : undefined,
+    hallazgos: Array.isArray(d.hallazgos) ? d.hallazgos.filter(Boolean) : [],
+    cuerpo: Array.isArray(d.cuerpo) ? d.cuerpo : undefined,
+    recursosRelacionados: Array.isArray(d.recursosRelacionados) ? d.recursosRelacionados.filter(Boolean) : [],
+    terminosGlosario: Array.isArray(d.terminosGlosario) ? d.terminosGlosario.filter(Boolean) : [],
+    indicadoresDestacados: Array.isArray(d.indicadoresDestacados) ? d.indicadoresDestacados.filter(Boolean) : [],
+    fechaActualizacion: d.fechaActualizacion,
+  };
+}
+
+export async function getRecursosBiblioteca(): Promise<RecursoBiblioteca[]> {
+  const docs = await client.fetch<RecursoBiblioDoc[]>(recursosBiblioQuery);
+  return docs.map(toRecursoBiblio);
+}
+
+export async function getRecursoBiblioBySlug(slug: string): Promise<RecursoBiblioteca | null> {
+  const doc = await client.fetch<RecursoBiblioDoc | null>(recursoBiblioBySlugQuery, { slug });
+  return doc ? toRecursoBiblio(doc) : null;
+}
+
+export async function getRecursoBiblioSlugs(): Promise<string[]> {
+  const rows = await client.fetch<{ slug: string }[]>(recursoBiblioSlugsQuery);
+  return rows.map((r) => r.slug).filter(Boolean);
+}
+
 // --- Vitrina (directorio comercial) -------------------------------------
 type ImagenDoc = { asset?: { _ref?: string } };
 type EmpresaVitrinaDoc = {

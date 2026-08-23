@@ -19,7 +19,7 @@ import { usePrefersReducedMotion, useInView, useCountUp } from "@/lib/counters";
 import { obtenerIndicador, obtenerFuente, obtenerIndicadorConFuente } from "@/lib/datos/indice";
 import { formatDate } from "@/lib/format";
 
-const GUIA_HREF = "/recursos";
+const GUIA_HREF = "/conocimiento/guia-integracion-temprana-cci";
 
 // ---- Formato chileno ---------------------------------------------------
 /** 491904 → "491.904" · 0.26 → "0,26" · 0.14 → "0,14". */

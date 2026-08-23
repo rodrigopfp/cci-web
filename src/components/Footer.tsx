@@ -34,7 +34,7 @@ export function Footer() {
             <li><Link href="/data/#cap4" className="hover:text-cci-orange-dark">Evidencia</Link></li>
             <li><Link href="/vitrina" className="hover:text-cci-orange-dark">Vitrina</Link></li>
             <li><Link href="/voces" className="hover:text-cci-orange-dark">Voces</Link></li>
-            <li><Link href="/recursos" className="hover:text-cci-orange-dark">Recursos</Link></li>
+            <li><Link href="/conocimiento" className="hover:text-cci-orange-dark">Conocimiento</Link></li>
             <li><Link href="/glosario" className="hover:text-cci-orange-dark">Glosario</Link></li>
           </ul>
         </div>
