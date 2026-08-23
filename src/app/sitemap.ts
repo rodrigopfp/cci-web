@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/site";
 import { terminosPublicados } from "@/lib/datos/glosario";
 import { getRecursosBiblioteca } from "@/sanity/fetch";
+import { PAISES_LATAM } from "@/lib/datos/latam";
 
 // Sitemap del sitio. Con output: "export" se genera /sitemap.xml en build.
 // Los términos del glosario en BORRADOR no se incluyen; los recursos archivados
@@ -12,6 +13,7 @@ const RUTAS_PRINCIPALES = [
   "",
   "noticias",
   "data",
+  "data/latam",
   "vitrina",
   "eventos",
   "eici",
@@ -42,5 +44,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: r.fechaActualizacion || r.fechaPublicacion,
     }));
 
-  return [...base, ...glosario, ...recursos];
+  const latam = PAISES_LATAM.filter((p) => p.estadoFicha !== "en_levantamiento").map((p) => ({
+    url: `${SITE_URL}/data/latam/${p.codigo}/`,
+    lastModified: p.ultimaActualizacion,
+  }));
+
+  return [...base, ...glosario, ...recursos, ...latam];
 }

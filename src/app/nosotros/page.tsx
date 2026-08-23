@@ -80,6 +80,10 @@ export default async function NosotrosPage() {
               academia en torno a un objetivo común: elevar la productividad y la sustentabilidad de la
               construcción a través de la industrialización.
             </p>
+            <Link href="/data/latam" className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-cci-orange hover:text-cci-orange-dark">
+              Explora el Panorama LATAM
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            </Link>
           </div>
           <div className="flex justify-center lg:justify-end">
             {/* eslint-disable-next-line @next/next/no-img-element */}

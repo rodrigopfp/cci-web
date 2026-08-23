@@ -14,6 +14,7 @@ import { validarGlosario, TERMINOS } from "../src/lib/datos/glosario";
 import { INDICADORES_LISTA } from "../src/lib/datos/indicadores";
 import { FUENTES } from "../src/lib/datos/fuentes";
 import { SOURCE_TYPES, CATEGORIES, VERIFICATION_STATUSES } from "../src/lib/datos/tipos-indicadores";
+import { validarLatam, PAISES_LATAM } from "../src/lib/datos/latam";
 
 // Slugs que legítimamente pueden valer 0 (hoy ninguno). Whitelist explícita.
 const CERO_PERMITIDO = new Set<string>();
@@ -89,11 +90,17 @@ function main() {
   const erroresGlosario = validarGlosario();
   const publicados = TERMINOS.filter((t) => t.publicado).length;
   const { errores: erroresInd, avisos } = validarIndicadores();
+  const erroresLatam = validarLatam();
 
   console.log(`Glosario: ${TERMINOS.length} términos (${publicados} publicados, ${TERMINOS.length - publicados} borradores).`);
   console.log(`Indicadores: ${INDICADORES_LISTA.length} · Fuentes: ${Object.keys(FUENTES).length}.`);
+  console.log(`Panorama LATAM: ${PAISES_LATAM.length} países (${PAISES_LATAM.filter((p) => p.estadoFicha !== "en_levantamiento").length} con contenido).`);
 
-  const errores = [...erroresGlosario.map((e) => `[glosario] ${e}`), ...erroresInd.map((e) => `[indicadores] ${e}`)];
+  const errores = [
+    ...erroresGlosario.map((e) => `[glosario] ${e}`),
+    ...erroresInd.map((e) => `[indicadores] ${e}`),
+    ...erroresLatam.map((e) => `[latam] ${e}`),
+  ];
 
   if (avisos.length > 0) {
     console.warn(`\n⚠ ${avisos.length} aviso(s):`);

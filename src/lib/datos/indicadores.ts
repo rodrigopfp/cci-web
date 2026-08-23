@@ -423,6 +423,23 @@ const LISTA: DataIndicator[] = [
     nextReviewAt: REVIEW_DITEC,
   }),
   mk({
+    slug: "convenios-ditec",
+    title: "Industrializadoras en convenio con DITEC",
+    shortTitle: "Convenios DITEC",
+    description: "Empresas industrializadoras en convenio con la DITEC del MINVU.",
+    value: 6,
+    geography: "Chile",
+    cutoffDate: "2026-06-03",
+    category: "adopcion",
+    tags: ["ditec", "convenios", "minvu"],
+    sourceId: "ditec-minvu",
+    sourceType: "official_chile",
+    scope: "Registro oficial DITEC — convenios con industrializadoras.",
+    visualizationType: "contador",
+    lastVerifiedAt: "2026-08-23",
+    nextReviewAt: REVIEW_DITEC,
+  }),
+  mk({
     slug: "nch3744",
     title: "Norma oficial de construcción industrializada",
     description:

@@ -733,6 +733,13 @@ export function DataStory({ studiesInternacionales }: { studiesInternacionales: 
               "residuos-sectorial-2020",
             ]}
           />
+
+          <div className="mt-8">
+            <Link href="/data/latam" className="inline-flex items-center gap-1.5 text-sm font-semibold text-cci-orange hover:text-cci-orange-dark">
+              Panorama LATAM
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            </Link>
+          </div>
         </div>
       </section>
 

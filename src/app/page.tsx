@@ -30,6 +30,7 @@ const REGISTRO_PORTADA: Record<string, string> = {
   "deficit-radar": "deficit-habitacional",
   empresas: "industrializadoras-certificadas",
   tipologias: "tipologias-vit",
+  convenios: "convenios-ditec",
 };
 function formatoCL(n: number): string {
   return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
@@ -114,7 +115,15 @@ export default async function Home() {
       <section className="container-cci py-14">
         <SectionHeader kicker="CCI Data" title="La industrialización en cifras" />
         <RadarKpisPreview />
-        <VerMasLink href="/data">Explorar CCI Data</VerMasLink>
+        <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2">
+          <Link href="/data" className="inline-flex items-center gap-1.5 text-sm font-semibold text-cci-orange hover:text-cci-orange-dark">
+            Explorar CCI Data
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+          </Link>
+          <Link href="/data/latam" className="inline-flex items-center gap-1.5 text-sm font-semibold text-cci-slate hover:text-cci-orange-dark">
+            Panorama LATAM
+          </Link>
+        </div>
       </section>
 
       {/* TEASER — Industrializar no es prefabricar (delta aprobado, paso 5) */}
