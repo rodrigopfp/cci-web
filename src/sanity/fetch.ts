@@ -439,6 +439,7 @@ type EventoDoc = {
   lugar: string;
   modalidad: CCIEvent["modality"];
   descripcion?: string;
+  inscripcionUrl?: string;
 };
 
 export async function getEvents(): Promise<CCIEvent[]> {
@@ -450,6 +451,7 @@ export async function getEvents(): Promise<CCIEvent[]> {
     location: d.lugar,
     modality: d.modalidad,
     description: d.descripcion ?? "",
+    inscripcionUrl: d.inscripcionUrl || undefined,
   }));
 }
 

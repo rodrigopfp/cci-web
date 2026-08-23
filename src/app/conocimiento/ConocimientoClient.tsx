@@ -131,6 +131,35 @@ export function ConocimientoClient({ recursos }: { recursos: RecursoBiblioteca[]
           </section>
         </>
       )}
+
+      {/* BANDA DE CIERRE — membresía (nivel 1) + aporta (nivel 3) */}
+      <section className="relative overflow-hidden bg-cci-graphite-dark">
+        <div
+          className="absolute inset-0 opacity-[0.16]"
+          style={{ backgroundImage: "radial-gradient(circle at 88% 20%, #E04E00 0%, transparent 45%), radial-gradient(circle at 5% 90%, #5C5C5C 0%, transparent 45%)" }}
+        />
+        <div className="container-cci relative py-14 text-center md:py-16">
+          <h2 className="mx-auto max-w-3xl font-display text-2xl font-900 leading-tight text-white md:text-3xl">
+            El conocimiento del sector se construye entre todos
+          </h2>
+          <p className="mx-auto mt-3 max-w-2xl leading-relaxed text-white/75">
+            Sé parte del CCI para acceder primero, o aporta un caso, un dato o un estudio a la biblioteca.
+          </p>
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+            <Link href="/hazte-socio" data-cta="hazte-socio" data-ubicacion="cierre-conocimiento" className="btn-primary">
+              Postula a ser socio CCI
+            </Link>
+            <Link
+              href="/aporta"
+              data-cta="aporta"
+              data-ubicacion="cierre-conocimiento"
+              className="inline-flex items-center justify-center gap-2 rounded-full border border-white/25 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10"
+            >
+              Aporta un caso o dato
+            </Link>
+          </div>
+        </div>
+      </section>
     </>
   );
 }

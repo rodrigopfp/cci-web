@@ -46,8 +46,18 @@ export default async function DataPage() {
             Las empresas e instituciones que están transformando la construcción en Chile ya son parte
             del CCI. Suma a tu organización a ese ecosistema.
           </p>
-          <div className="mt-8">
-            <Link href="/hazte-socio" className="btn-primary">Postula a ser socio CCI</Link>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+            <Link href="/hazte-socio" data-cta="hazte-socio" data-ubicacion="cierre-data" className="btn-primary">
+              Postula a ser socio CCI
+            </Link>
+            <Link
+              href="/aporta"
+              data-cta="aporta"
+              data-ubicacion="cierre-data"
+              className="inline-flex items-center justify-center gap-2 rounded-full border border-white/25 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10"
+            >
+              Aporta un caso o dato
+            </Link>
           </div>
         </div>
       </section>

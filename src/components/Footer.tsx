@@ -41,9 +41,10 @@ export function Footer() {
         <div>
           <h4 className="mb-3 text-sm font-700 uppercase tracking-wide text-cci-graphite">Comercial</h4>
           <ul className="space-y-2 text-sm text-cci-slate">
-            <li><Link href="/publica" className="hover:text-cci-orange-dark">Publica con nosotros</Link></li>
+            <li><Link href="/publica" data-cta="envia-noticia" data-ubicacion="footer" className="hover:text-cci-orange-dark">Publica con nosotros</Link></li>
             <li><Link href="/media-kit" className="hover:text-cci-orange-dark">Media Kit</Link></li>
-            <li><Link href="/hazte-socio" className="hover:text-cci-orange-dark">Hazte socio</Link></li>
+            <li><Link href="/aporta" data-cta="aporta" data-ubicacion="footer" className="hover:text-cci-orange-dark">Aporta un caso o dato</Link></li>
+            <li><Link href="/hazte-socio" data-cta="hazte-socio" data-ubicacion="footer" className="hover:text-cci-orange-dark">Hazte socio</Link></li>
           </ul>
         </div>
         <div>

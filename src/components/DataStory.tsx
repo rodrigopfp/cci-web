@@ -821,7 +821,7 @@ export function DataStory({ studiesInternacionales }: { studiesInternacionales: 
               <p className="mt-6 text-sm text-cci-slate">
                 Esta ficha se publicará con los primeros 2-3 casos medidos bajo el estándar IPLC.
               </p>
-              <Link href="/hazte-socio" className="btn-primary mt-6">
+              <Link href="/hazte-socio" data-cta="hazte-socio" data-ubicacion="cap-evidencia-data" className="btn-primary mt-6">
                 ¿Tu proyecto puede ser el primero? Conversemos
               </Link>
             </div>

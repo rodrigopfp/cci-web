@@ -1,5 +1,6 @@
 "use client";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import type { EmpresaVitrina } from "@/data/types";
 import { VitrinaCard } from "@/components/VitrinaCard";
 import { ordenNivel } from "@/lib/vitrina";
@@ -318,9 +319,38 @@ export function VitrinaClient({ empresas }: { empresas: EmpresaVitrina[] }) {
                   Cuéntanos qué necesitas y te orientamos con las empresas del ecosistema que pueden resolverlo.
                 </p>
               </div>
-              <a href={mailtoRequerimiento()} className="btn-primary shrink-0 self-start whitespace-nowrap sm:self-auto">
+              <a href={mailtoRequerimiento()} data-cta="requerimiento" data-ubicacion="vitrina" className="btn-primary shrink-0 self-start whitespace-nowrap sm:self-auto">
                 Publicar mi requerimiento
               </a>
+            </div>
+          </section>
+
+          {/* f) BANDA DE CIERRE — membresía (nivel 1) + validar perfil (contextual) */}
+          <section className="relative overflow-hidden bg-cci-graphite-dark">
+            <div
+              className="absolute inset-0 opacity-[0.16]"
+              style={{ backgroundImage: "radial-gradient(circle at 88% 20%, #E04E00 0%, transparent 45%), radial-gradient(circle at 5% 90%, #5C5C5C 0%, transparent 45%)" }}
+            />
+            <div className="container-cci relative py-14 text-center md:py-16">
+              <h2 className="mx-auto max-w-3xl font-display text-2xl font-900 leading-tight text-white md:text-3xl">
+                ¿Tu organización construye industrializado?
+              </h2>
+              <p className="mx-auto mt-3 max-w-2xl leading-relaxed text-white/75">
+                Postula a ser socio del CCI, o valida y actualiza el perfil de tu organización en la Vitrina.
+              </p>
+              <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+                <Link href="/hazte-socio" data-cta="hazte-socio" data-ubicacion="cierre-vitrina" className="btn-primary">
+                  Postula a ser socio CCI
+                </Link>
+                <a
+                  href={`mailto:cci@cdt.cl?subject=${encodeURIComponent("Validación de perfil Vitrina")}&body=${encodeURIComponent("Hola CCI,\n\nQuiero validar y actualizar el perfil de mi organización en la Vitrina.\n\nOrganización:\nContacto:\nDatos a actualizar:\n\nGracias.")}`}
+                  data-cta="valida-perfil"
+                  data-ubicacion="cierre-vitrina"
+                  className="inline-flex items-center justify-center gap-2 rounded-full border border-white/25 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10"
+                >
+                  Valida el perfil de tu organización
+                </a>
+              </div>
             </div>
           </section>
         </>

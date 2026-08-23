@@ -136,13 +136,15 @@ export function CTASection() {
       desc: "Hitos, lanzamientos y casos de tu empresa, con revisión editorial previa.",
       label: "Enviar noticia",
       href: "/publica",
+      cta: "envia-noticia",
     },
     {
       annot: "Para el observatorio",
       title: "Aporta un dato",
       desc: "Proyectos y métricas verificables que ayuden a cerrar los vacíos del Radar.",
       label: "Cómo aportar",
-      href: "/publica",
+      href: "/aporta",
+      cta: "aporta",
     },
     {
       annot: "Para el ecosistema",
@@ -150,6 +152,7 @@ export function CTASection() {
       desc: "Suma visibilidad editorial y participa en los grupos técnicos del Consejo.",
       label: "Quiero asociarme",
       href: "/hazte-socio",
+      cta: "hazte-socio",
     },
   ];
 
@@ -165,6 +168,8 @@ export function CTASection() {
           <Link
             key={c.title}
             href={c.href}
+            data-cta={c.cta}
+            data-ubicacion="portada-cta"
             className={`group flex flex-col gap-3 p-8 transition-colors hover:bg-white/[0.04] md:p-9 ${
               i > 0 ? "border-t border-white/10 md:border-l md:border-t-0" : ""
             }`}

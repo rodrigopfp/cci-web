@@ -318,7 +318,7 @@ export default async function NosotrosPage() {
             Suma a tu organización a ese ecosistema.
           </p>
           <div className="mt-8">
-            <Link href="/hazte-socio" className="btn-primary">
+            <Link href="/hazte-socio" data-cta="hazte-socio" data-ubicacion="cierre-nosotros" className="btn-primary">
               Postular a socio CCI
             </Link>
           </div>

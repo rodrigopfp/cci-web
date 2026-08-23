@@ -26,9 +26,9 @@ export function Header() {
             Consejo de Construcción Industrializada · Datos y evidencia de la industrialización en Chile
           </span>
           <div className="flex items-center gap-4">
-            <Link href="/publica" className="text-white/80 hover:text-white">Envía tu noticia</Link>
+            <Link href="/publica" data-cta="envia-noticia" data-ubicacion="header-top" className="text-white/80 hover:text-white">Envía tu noticia</Link>
             <span className="text-white/30">|</span>
-            <Link href="/hazte-socio" className="font-semibold text-cci-orange-light hover:text-white">Hazte socio</Link>
+            <Link href="/hazte-socio" data-cta="hazte-socio" data-ubicacion="header-top" className="font-semibold text-cci-orange-light hover:text-white">Hazte socio</Link>
           </div>
         </div>
       </div>
@@ -45,7 +45,7 @@ export function Header() {
         </nav>
 
         <div className="hidden lg:block">
-          <Link href="/hazte-socio" className="btn-primary">Hazte socio</Link>
+          <Link href="/hazte-socio" data-cta="hazte-socio" data-ubicacion="header" className="btn-primary">Hazte socio</Link>
         </div>
 
         <button aria-label="Abrir menu" className="lg:hidden" onClick={() => setOpen((v) => !v)}>
@@ -58,7 +58,7 @@ export function Header() {
       {open && (
         <nav className="border-t border-cci-line bg-white lg:hidden">
           <div className="container-cci flex flex-col py-2">
-            <Link href="/hazte-socio" onClick={() => setOpen(false)} className="btn-primary mb-2 mt-3 w-full">Hazte socio</Link>
+            <Link href="/hazte-socio" onClick={() => setOpen(false)} data-cta="hazte-socio" data-ubicacion="menu-movil" className="btn-primary mb-2 mt-3 w-full">Hazte socio</Link>
             {nav.map((item) => (
               <Link key={item.href} href={item.href} onClick={() => setOpen(false)} className="border-b border-cci-line/60 py-3 text-sm font-medium text-cci-ink">
                 {item.label}

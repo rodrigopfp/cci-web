@@ -109,7 +109,7 @@ export default async function HazteSocioPage() {
             y de quienes la están midiendo.
           </p>
           <div className="mt-8">
-            <a href={MAILTO} className="btn-primary">Postula por correo</a>
+            <a href={MAILTO} data-cta="hazte-socio" data-ubicacion="hazte-socio" className="btn-primary">Postula por correo</a>
           </div>
         </div>
       </section>
@@ -161,7 +161,7 @@ export default async function HazteSocioPage() {
             alcances de cada categoría.
           </p>
           <div className="mt-6">
-            <a href={MAILTO} className="btn-primary">Conversemos por correo</a>
+            <a href={MAILTO} data-cta="hazte-socio" data-ubicacion="hazte-socio" className="btn-primary">Conversemos por correo</a>
           </div>
         </div>
       </section>
@@ -239,7 +239,7 @@ export default async function HazteSocioPage() {
             Cuéntanos brevemente quiénes son y por qué quieren ser parte. Conversemos.
           </p>
           <div className="mt-8">
-            <a href={MAILTO} className="btn-primary">Postula por correo</a>
+            <a href={MAILTO} data-cta="hazte-socio" data-ubicacion="hazte-socio" className="btn-primary">Postula por correo</a>
           </div>
           <p className="mt-4 text-sm text-white/50">La postulación se gestiona por correo: cci@cdt.cl</p>
         </div>

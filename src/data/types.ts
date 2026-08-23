@@ -116,6 +116,8 @@ export interface CCIEvent {
   location: string;
   modality: "Presencial" | "Online" | "Híbrido";
   description: string;
+  /** Solo se muestra "Inscríbete" si existe un mecanismo real (URL o mailto). */
+  inscripcionUrl?: string;
 }
 
 // ---- Gobernanza del dato (puntos 9, 10, 53, 57 del prompt maestro) ----

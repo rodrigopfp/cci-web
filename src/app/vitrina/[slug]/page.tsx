@@ -257,6 +257,8 @@ export default async function EmpresaVitrinaPage({ params }: { params: Promise<{
             </p>
             <a
               href={mailtoValidar}
+              data-cta="valida-perfil"
+              data-ubicacion="ficha-vitrina"
               className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-cci-orange hover:text-cci-orange-dark"
             >
               ¿Eres esta organización? Solicita validar tu perfil

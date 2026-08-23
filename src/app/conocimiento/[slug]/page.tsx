@@ -260,7 +260,7 @@ export default async function RecursoPage({ params }: { params: Promise<{ slug: 
         <p className="mx-auto mt-3 max-w-xl text-white/75">
           Accede primero al conocimiento, los datos y la red que está transformando la construcción en Chile.
         </p>
-        <Link href="/hazte-socio" className="btn-primary mt-6">Postula a ser socio CCI</Link>
+        <Link href="/hazte-socio" data-cta="hazte-socio" data-ubicacion="ficha-conocimiento" className="btn-primary mt-6">Postula a ser socio CCI</Link>
       </section>
 
       <div className="mt-8">
