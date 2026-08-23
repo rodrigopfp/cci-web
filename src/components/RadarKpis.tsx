@@ -1,42 +1,40 @@
 "use client";
 
-// "La industrialización en cifras" — panel de KPIs del Radar.
+// Velocímetros "La industrialización en cifras".
 //
-// Un tablero de control (dashboard) con instrumentos variados: gauge
-// semicircular, contadores animados, barras comparativas, una dona y barras
-// por país. Todo en SVG + React + Tailwind, sin dependencias nuevas.
+// Instrumentos semicirculares SVG + React, sin dependencias nuevas. Los VALORES,
+// textos y fuentes salen del registro único (src/lib/datos), vía
+// obtenerIndicadorConFuente(slug). La configuración visual (escala, banda, espejo)
+// vive aquí por ser presentación, no dato.
 //
-// Animaciones al entrar al viewport (IntersectionObserver) y respetando
-// prefers-reduced-motion. Regla editorial: cada instrumento muestra su fuente.
+// El HTML estático contiene el valor final (útil sin JS); con JS se anima al
+// entrar al viewport; con prefers-reduced-motion queda fijo.
 
-import {
-  velocidad,
-  costo,
-  manoDeObra,
-  potencial,
-  calidad,
-  residuos,
-  productividad,
-  mundo,
-  type KpiSource,
-  type KpiCounter,
-  type KpiProductividad,
-  type KpiMundo,
-} from "@/data/kpis";
 import { usePrefersReducedMotion, useInView, useCountUp } from "@/lib/counters";
+import { obtenerIndicadorConFuente } from "@/lib/datos/indice";
+import type { DataSource } from "@/lib/datos/tipos-indicadores";
 
 // ---- Piezas de presentación -------------------------------------------
 
-function SourceLink({ source }: { source: KpiSource }) {
+function anioDe(fecha?: string): string {
+  return fecha ? String(fecha).slice(0, 4) : "";
+}
+
+function SourceLink({ source }: { source: DataSource }) {
+  const etiqueta = `Fuente: ${source.organization}${source.publicationDate ? ` (${anioDe(source.publicationDate)})` : ""}`;
+  if (!source.url) {
+    return <span className="mt-4 inline-block text-[11px] font-600 leading-snug text-cci-slate-light">{etiqueta}</span>;
+  }
+  const externo = source.url.startsWith("http");
   return (
     <a
       href={source.url}
-      target="_blank"
-      rel="noopener noreferrer"
-      title={`${source.title} (${source.year})`}
+      target={externo ? "_blank" : undefined}
+      rel={externo ? "noopener noreferrer" : undefined}
+      title={`${source.title}${source.publicationDate ? ` (${anioDe(source.publicationDate)})` : ""}`}
       className="mt-4 inline-block text-[11px] font-600 leading-snug text-cci-slate-light transition hover:text-cci-orange"
     >
-      Fuente: {source.name} ({source.year})
+      {etiqueta}
     </a>
   );
 }
@@ -67,10 +65,6 @@ function polar(cx: number, cy: number, r: number, angleDeg: number): [number, nu
   return [cx + r * Math.cos(a), cy - r * Math.sin(a)];
 }
 
-/** Arco sobre el semicírculo superior entre dos ángulos (grados; 0°=derecha,
- *  180°=izquierda). El sentido (sweep) se elige para recorrer siempre el arco
- *  de arriba, tanto de izquierda→derecha (normal) como de derecha→izquierda
- *  (espejado). */
 function arcByAngle(cx: number, cy: number, r: number, a0: number, a1: number): string {
   const [x0, y0] = polar(cx, cy, r, a0);
   const [x1, y1] = polar(cx, cy, r, a1);
@@ -79,17 +73,10 @@ function arcByAngle(cx: number, cy: number, r: number, a0: number, a1: number): 
   return `M ${x0} ${y0} A ${r} ${r} 0 ${large} ${sweep} ${x1} ${y1}`;
 }
 
-/** Altura fija del área del instrumento (gauge/dona), para que los tres
- *  gráficos de la primera fila queden centrados a la misma altura. */
 const INSTRUMENT_AREA = "flex h-[160px] items-center justify-center";
 
-// ---- Instrumentos ------------------------------------------------------
+// ---- Velocímetro genérico ---------------------------------------------
 
-/**
- * Velocímetro genérico: semicírculo con aguja y un número grande bajo el arco.
- * Lo comparten VELOCIDAD DE OBRA y POTENCIAL DE PRODUCTIVIDAD, para que la
- * primera fila tenga instrumentos consistentes.
- */
 function GaugeCard({
   label,
   note,
@@ -104,15 +91,13 @@ function GaugeCard({
 }: {
   label: string;
   note: string;
-  source: KpiSource;
+  source: DataSource;
   scaleMax: number;
   band: [number, number];
   target: number;
   format: (v: number) => string;
   ariaLabel: string;
   reduced: boolean;
-  /** Espeja el instrumento: el arco se llena de derecha a izquierda y la aguja
-   *  cae hacia el lado izquierdo. Se usa para comunicar reducción (residuos). */
   mirror?: boolean;
 }) {
   const { ref, inView } = useInView<HTMLElement>();
@@ -120,29 +105,19 @@ function GaugeCard({
   const cx = 100;
   const cy = 100;
   const r = 78;
-  // Ángulo de un valor. Normal: 0→180°(izq), scaleMax→0°(der). Espejado al revés,
-  // de modo que el llenado y la aguja avancen de derecha a izquierda.
   const A = (value: number) =>
     mirror ? (value / scaleMax) * 180 : 180 - (value / scaleMax) * 180;
   const [nx, ny] = polar(cx, cy, r - 8, A(v));
 
   return (
     <Card innerRef={ref}>
-      <span className="text-xs font-700 uppercase tracking-wide text-cci-slate-light">
-        {label}
-      </span>
-      {/* Área del instrumento con altura fija: arco + número (velocímetro
-          clásico, el número vive bajo la línea base, nunca toca la aguja). */}
+      <span className="text-xs font-700 uppercase tracking-wide text-cci-slate-light">{label}</span>
       <div className={`mt-2 ${INSTRUMENT_AREA}`}>
         <div className="w-full max-w-[200px]">
           <svg viewBox="0 0 200 108" className="w-full" role="img" aria-label={ariaLabel}>
-            {/* pista */}
             <path d={arcByAngle(cx, cy, r, A(0), A(scaleMax))} fill="none" stroke="#E6E4E2" strokeWidth={14} strokeLinecap="round" />
-            {/* banda del rango destacado */}
             <path d={arcByAngle(cx, cy, r, A(band[0]), A(band[1]))} fill="none" stroke="#F6BA8C" strokeWidth={14} strokeLinecap="round" />
-            {/* progreso animado */}
             <path d={arcByAngle(cx, cy, r, A(0), A(Math.max(v, 0.01)))} fill="none" stroke="#E04E00" strokeWidth={14} strokeLinecap="round" />
-            {/* aguja */}
             <line x1={cx} y1={cy} x2={nx} y2={ny} stroke="#2B2B2B" strokeWidth={3} strokeLinecap="round" />
             <circle cx={cx} cy={cy} r={7} fill="#2B2B2B" />
           </svg>
@@ -159,215 +134,71 @@ function GaugeCard({
   );
 }
 
-function CounterCard({ kpi, reduced }: { kpi: KpiCounter; reduced: boolean }) {
-  const { ref, inView } = useInView<HTMLElement>();
-  const v = useCountUp(kpi.value, inView, reduced);
-  return (
-    <Card innerRef={ref}>
-      <span className="text-xs font-700 uppercase tracking-wide text-cci-slate-light">
-        {kpi.label}
-      </span>
-      <div className="mt-3 font-display text-5xl font-900 leading-none text-cci-orange md:text-6xl">
-        {kpi.prefix}
-        {Math.round(v)}
-        {kpi.suffix}
-      </div>
-      <p className="mt-3 text-sm text-cci-slate">{kpi.note}</p>
-      <div className="mt-auto">
-        <SourceLink source={kpi.source} />
-      </div>
-    </Card>
-  );
-}
-
-function ProductividadCard({ kpi, reduced }: { kpi: KpiProductividad; reduced: boolean }) {
-  const { ref, inView } = useInView<HTMLElement>();
-  const active = inView || reduced;
-  const maxScale = Math.max(...kpi.series.map((s) => s.value));
-  return (
-    <Card innerRef={ref} className="sm:col-span-2 lg:col-span-2">
-      <span className="text-xs font-700 uppercase tracking-wide text-cci-slate-light">
-        {kpi.label}
-      </span>
-      <p className="mt-2 max-w-2xl text-sm text-cci-slate">{kpi.note}</p>
-      <div className="mt-5 space-y-4">
-        {kpi.series.map((s) => (
-          <div key={s.name}>
-            <div className="mb-1 flex items-baseline justify-between gap-3">
-              <span className={`text-sm font-600 ${s.highlight ? "text-cci-orange" : "text-cci-ink"}`}>
-                {s.name}
-              </span>
-              <span className="font-mono text-sm font-600 text-cci-slate">+{s.value}%</span>
-            </div>
-            <div className="h-3 w-full overflow-hidden rounded-full bg-cci-paper">
-              <div
-                className="h-full rounded-full transition-[width] duration-1000 ease-out"
-                style={{
-                  width: active ? `${(s.value / maxScale) * 100}%` : "0%",
-                  backgroundColor: s.color,
-                }}
-              />
-            </div>
-          </div>
-        ))}
-      </div>
-      <div className="mt-5 rounded-xl border border-cci-orange/30 bg-cci-orange-soft px-4 py-3">
-        <p className="text-sm text-cci-graphite">
-          {kpi.drop.label}{" "}
-          <span className="font-display text-lg font-900 text-cci-orange">{kpi.drop.value}%</span>.
-        </p>
-      </div>
-      <SourceLink source={kpi.source} />
-      <span className="mt-1 text-[11px] text-cci-slate-light">
-        Crecimiento anual 2000–2022 · construcción, economía mundial y manufactura.
-      </span>
-    </Card>
-  );
-}
-
-function MundoCard({ kpi, reduced }: { kpi: KpiMundo; reduced: boolean }) {
-  const { ref, inView } = useInView<HTMLElement>();
-  const active = inView || reduced;
-  const maxScale = Math.max(...kpi.countries.map((c) => c.value));
-  return (
-    <Card innerRef={ref}>
-      <span className="text-xs font-700 uppercase tracking-wide text-cci-slate-light">
-        {kpi.label}
-      </span>
-      <p className="mt-2 text-sm text-cci-slate">{kpi.note}</p>
-      <div className="mt-5 space-y-4">
-        {kpi.countries.map((c) => (
-          <div key={c.name}>
-            <div className="mb-1 flex items-baseline justify-between gap-3">
-              <span className="text-sm font-600 text-cci-ink">{c.name}</span>
-              <span className="font-mono text-sm font-700 text-cci-slate">
-                {c.lessThan ? "<" : ""}
-                {c.value}%
-              </span>
-            </div>
-            <div className="h-3 w-full overflow-hidden rounded-full bg-cci-paper">
-              <div
-                className="h-full rounded-full transition-[width] duration-1000 ease-out"
-                style={{
-                  width: active ? `${(c.value / maxScale) * 100}%` : "0%",
-                  backgroundColor: c.color,
-                }}
-              />
-            </div>
-          </div>
-        ))}
-      </div>
-      <div className="mt-auto">
-        <SourceLink source={kpi.source} />
-      </div>
-    </Card>
-  );
-}
-
-// ---- Sección completa --------------------------------------------------
-
-export function RadarKpis() {
-  const reduced = usePrefersReducedMotion();
-  return (
-    <section className="bg-cci-paper py-14">
-      <div className="container-cci">
-        <div className="mb-2 flex items-center gap-2 text-sm font-700 uppercase tracking-wide text-cci-orange">
-          <span className="h-[2px] w-6 bg-cci-orange" />
-          Datos internacionales
-        </div>
-        <h2 className="font-display text-2xl font-800 text-cci-ink md:text-3xl">
-          La industrialización en cifras
-        </h2>
-        <p className="mt-2 max-w-2xl text-cci-slate">
-          Lo que muestran los datos internacionales. Cifras de referencia sobre el impacto de la
-          construcción industrializada; cada instrumento enlaza a su fuente.
-        </p>
-        <p className="mt-1 max-w-2xl text-xs text-cci-slate-light">
-          Los estudios internacionales citados miden construcción industrializada off-site.
-        </p>
-
-        <div className="mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          <GaugeCard
-            label={velocidad.label}
-            note={velocidad.note}
-            source={velocidad.source}
-            scaleMax={100}
-            band={[velocidad.rangeMin, velocidad.rangeMax]}
-            target={velocidad.rangeMax}
-            format={(v) => `${Math.round(v)}%`}
-            ariaLabel={velocidad.display}
-            reduced={reduced}
-          />
-          <ResiduosGauge reduced={reduced} />
-          <PotencialGauge reduced={reduced} />
-          <ProductividadCard kpi={productividad} reduced={reduced} />
-          <CalidadGauge reduced={reduced} />
-          <CounterCard kpi={costo} reduced={reduced} />
-          <CounterCard kpi={manoDeObra} reduced={reduced} />
-          <MundoCard kpi={mundo} reduced={reduced} />
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ---- Instrumentos reutilizables (Radar + portada) ----------------------
-// Envuelven GaugeCard con la configuración de cada KPI, para usarlos en más de
-// un lugar sin duplicar el cableado de props.
+// ---- Instrumentos reutilizables (portada + CCI Data), desde el registro ----
 
 export function PotencialGauge({ reduced }: { reduced: boolean }) {
+  const { indicador, fuente } = obtenerIndicadorConFuente("potencial-productividad");
+  const target = Number(indicador.value);
+  const prefix = indicador.prefix ?? "";
+  const suffix = indicador.suffix ?? "";
   return (
     <GaugeCard
-      label={potencial.label}
-      note={potencial.note}
-      source={potencial.source}
+      label={indicador.title}
+      note={indicador.description}
+      source={fuente}
       scaleMax={12}
       band={[5, 10]}
-      target={potencial.value}
-      format={(v) => `${potencial.prefix ?? ""}${Math.round(v)}${potencial.suffix ?? ""}`}
-      ariaLabel={potencial.label}
+      target={target}
+      format={(v) => `${prefix}${Math.round(v)}${suffix}`}
+      ariaLabel={`${prefix}${target}${suffix} — ${indicador.title}`}
       reduced={reduced}
     />
   );
 }
 
-function ResiduosGauge({ reduced }: { reduced: boolean }) {
+export function CalidadGauge({ reduced }: { reduced: boolean }) {
+  const { indicador, fuente } = obtenerIndicadorConFuente("calidad-percepcion");
+  const target = Number(indicador.value);
+  const suffix = indicador.suffix ?? "%";
   return (
     <GaugeCard
-      label={residuos.label}
-      note={residuos.note}
-      source={residuos.source}
+      label={indicador.title}
+      note={indicador.description}
+      source={fuente}
       scaleMax={100}
-      band={[0, residuos.value]}
-      target={residuos.value}
+      band={[0, target]}
+      target={target}
+      format={(v) => `${Math.round(v)}${suffix}`}
+      ariaLabel={`${target}${suffix} — ${indicador.title}`}
+      reduced={reduced}
+    />
+  );
+}
+
+export function ResiduosGauge({ reduced }: { reduced: boolean }) {
+  const { indicador, fuente } = obtenerIndicadorConFuente("residuos-reduccion");
+  const target = Number(indicador.value);
+  const prefix = indicador.prefix ?? "−";
+  const suffix = indicador.suffix ?? "%";
+  return (
+    <GaugeCard
+      label={indicador.title}
+      note={indicador.description}
+      source={fuente}
+      scaleMax={100}
+      band={[0, target]}
+      target={target}
       mirror
-      format={(v) => `-${Math.round(v)}%`}
-      ariaLabel={`${residuos.value}% menos residuos`}
-      reduced={reduced}
-    />
-  );
-}
-
-function CalidadGauge({ reduced }: { reduced: boolean }) {
-  return (
-    <GaugeCard
-      label={calidad.label}
-      note={calidad.note}
-      source={calidad.source}
-      scaleMax={100}
-      band={[0, calidad.value]}
-      target={calidad.value}
-      format={(v) => `${Math.round(v)}%`}
-      ariaLabel={`${calidad.value}% ${calidad.label}`}
+      format={(v) => `${prefix}${Math.round(v)}${suffix}`}
+      ariaLabel={`${prefix}${target}${suffix} — ${indicador.title}`}
       reduced={reduced}
     />
   );
 }
 
 /**
- * Avance para la portada: tres instrumentos (potencial · calidad · residuos)
- * reutilizando los mismos componentes y datos, con la fila alineada igual que en
- * el Radar (3 columnas en desktop; apiladas y parejas en móvil).
+ * Avance para la portada: tres instrumentos (potencial · calidad · residuos),
+ * mismos componentes y datos que en CCI Data, en una fila de 3 en escritorio.
  */
 export function RadarKpisPreview() {
   const reduced = usePrefersReducedMotion();

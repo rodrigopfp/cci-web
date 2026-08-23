@@ -1,55 +1,33 @@
 import Link from "next/link";
-import { getRadarIndicators, getStudies } from "@/sanity/fetch";
-import type { Indicator } from "@/data/types";
+import { getStudies } from "@/sanity/fetch";
 import { DataStory } from "@/components/DataStory";
+import { SITE_URL } from "@/lib/site";
+
+const DESCRIPCION =
+  "Scroll-story del Consejo de Construcción Industrializada: la oportunidad habitacional, el desafío de productividad, la respuesta de la industrialización y la evidencia — nacional e internacional —, con cada cifra y su fuente.";
 
 export const metadata = {
   title: "CCI Data · La industrialización de Chile, con datos y evidencia",
-  description:
-    "Scroll-story del Consejo de Construcción Industrializada: la oportunidad habitacional, el desafío de productividad, la respuesta de la industrialización y la evidencia — nacional e internacional —, con cada cifra y su fuente.",
-};
-
-// Meta oficial del Plan de Emergencia Habitacional (MINVU, gobierno 2022-2026).
-// Dato verificado en minvu.gob.cl. Se modela como Indicator para reutilizar la
-// misma tarjeta oficial (MetricCard) que el déficit habitacional del Radar.
-const metaPlan: Indicator = {
-  id: "meta-peh",
-  value: "260.000",
-  unit: "viviendas",
-  label: "Meta del Plan de Emergencia Habitacional",
-  note: "Viviendas que el Estado se comprometió a entregar en el período de gobierno 2022-2026 para reducir el déficit habitacional.",
-  status: "real",
-  sourceType: "oficial",
-  geography: "Chile",
-  source: {
-    id: "src-peh",
-    title: "Plan de Emergencia Habitacional",
-    organization: "MINVU",
-    year: 2022,
-    url: "https://www.minvu.gob.cl/plan-de-emergencia-habitacional/",
-    sourceType: "oficial",
+  description: DESCRIPCION,
+  alternates: { canonical: `${SITE_URL}/data/` },
+  openGraph: {
+    type: "website",
+    title: "CCI Data · La industrialización de Chile, con datos y evidencia",
+    description: DESCRIPCION,
+    url: `${SITE_URL}/data/`,
+    siteName: "CCI",
   },
 };
 
 export default async function DataPage() {
-  const [radarIndicators, studies] = await Promise.all([getRadarIndicators(), getStudies()]);
-
-  // Reutilizamos los datos verificados que ya viven en el Radar del sitio.
-  const byId = (id: string) => radarIndicators.find((i) => i.id === id);
-  const deficit = byId("deficit-radar");
-  const empresas = byId("empresas");
-  const tipologias = byId("tipologias");
+  // Las cifras salen del registro único (src/lib/datos). De Sanity solo se traen
+  // las tarjetas de estudios internacionales (evidencia cualitativa del cap 04).
+  const studies = await getStudies();
   const studiesInternacionales = studies.filter((s) => s.geography === "Internacional");
 
   return (
     <>
-      <DataStory
-        deficit={deficit}
-        meta={metaPlan}
-        empresas={empresas}
-        tipologias={tipologias}
-        studiesInternacionales={studiesInternacionales}
-      />
+      <DataStory studiesInternacionales={studiesInternacionales} />
 
       {/* BANDA DE CIERRE — postulación a socio (honor y pertenencia) */}
       <section className="relative overflow-hidden bg-cci-graphite-dark">

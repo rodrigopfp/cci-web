@@ -318,9 +318,9 @@ export default async function NosotrosPage() {
             Suma a tu organización a ese ecosistema.
           </p>
           <div className="mt-8">
-            <a href="mailto:cci@cdt.cl?subject=Postulaci%C3%B3n%20a%20socio%20CCI" className="btn-primary">
+            <Link href="/hazte-socio" className="btn-primary">
               Postular a socio CCI
-            </a>
+            </Link>
           </div>
         </div>
       </section>

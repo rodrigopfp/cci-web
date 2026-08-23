@@ -18,6 +18,19 @@ import { MetricCard } from "@/components/MetricCard";
 import { NewsletterBox } from "@/components/Footer";
 import { HeroObra } from "@/components/HeroObra";
 import { formatDate } from "@/lib/format";
+import { SITE_URL } from "@/lib/site";
+
+export const metadata = {
+  alternates: { canonical: `${SITE_URL}/` },
+  openGraph: {
+    type: "website",
+    url: `${SITE_URL}/`,
+    siteName: "CCI",
+    title: "CCI · Datos y evidencia de la construcción industrializada en Chile",
+    description:
+      "La plataforma del Consejo de Construcción Industrializada: noticias, evidencia, datos y ecosistema de la industrialización en Chile y LATAM. Cada cifra, con su fuente.",
+  },
+};
 
 export default async function Home() {
   const [articles, partners, resources, events, radarIndicators, studies, voces, empresasVitrina] =

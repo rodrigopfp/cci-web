@@ -5,7 +5,10 @@
 // seguridad: si el IntersectionObserver no dispara (algunos entornos headless,
 // quirks del navegador), el valor final se muestra igual.
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+
+// useLayoutEffect en cliente; useEffect en servidor (evita el warning de SSR).
+const useIsoLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 export function usePrefersReducedMotion(): boolean {
   const [reduced, setReduced] = useState(false);
@@ -52,20 +55,34 @@ export function useInView<T extends Element>() {
   return { ref, inView };
 }
 
-/** Contador que sube de 0 al objetivo con easing (easeOutCubic), una vez activo. */
+/**
+ * Contador con easing (easeOutCubic) que respeta el render de servidor:
+ *  - SSR y primer render de cliente devuelven el VALOR FINAL, de modo que el
+ *    HTML estático contiene la cifra real y se ve sin JS.
+ *  - Tras hidratar, un layout-effect pone el valor en 0 ANTES del primer pintado
+ *    (sin parpadeo) para poder animar; la animación arranca cuando `active`.
+ *  - Con prefers-reduced-motion no hay animación: queda fijo en el valor final.
+ */
 export function useCountUp(
   target: number,
   active: boolean,
   reduced: boolean,
   duration = 1400
 ): number {
-  const [val, setVal] = useState(0);
+  // Inicial = target: coincide en SSR e hidratación (sin mismatch).
+  const [val, setVal] = useState(target);
+
+  // Antes del primer pintado en cliente: si vamos a animar, partir de 0.
+  useIsoLayoutEffect(() => {
+    if (!reduced) setVal(0);
+  }, [reduced]);
+
   useEffect(() => {
-    if (!active) return;
     if (reduced) {
       setVal(target);
       return;
     }
+    if (!active) return;
     let raf = 0;
     let start: number | null = null;
     const tick = (t: number) => {
@@ -78,5 +95,6 @@ export function useCountUp(
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
   }, [active, reduced, target, duration]);
+
   return val;
 }

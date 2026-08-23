@@ -2,33 +2,26 @@
 
 // CCI Data — scroll-story de 7 capítulos que fusiona el Radar y la Evidencia.
 //
-// Reutiliza EXCLUSIVAMENTE los tokens y componentes que ya existen en el sitio:
-// · MetricCard (tarjeta de dato oficial con chip "Fuente oficial" de barra azul)
-// · StudyCard (tarjeta de estudio con enlace a fuente)
-// · PotencialGauge (velocímetro "5 a 10x" del Radar)
-// · hooks de counters.ts (viewport + count-up + prefers-reduced-motion)
-//
-// Todas las cifras protagonistas se animan al entrar al viewport y respetan
-// prefers-reduced-motion. Formato chileno: miles con punto, decimales con coma.
+// TODAS las cifras, unidades, textos de fuente y fechas provienen del registro
+// único (src/lib/datos) vía obtenerIndicador(slug): no hay números duros en el
+// JSX de esta vista. El HTML estático contiene el valor final (se ve sin JS); el
+// conteo anima como mejora progresiva y respeta prefers-reduced-motion.
+// Cada bloque conserva su línea "Fuente:" y suma un <details> "Ver fuente y
+// metodología" (nativo, funciona sin JS y con teclado).
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import type { Indicator, Study } from "@/data/types";
+import type { Indicator, SourceType, Study } from "@/data/types";
 import { MetricCard } from "@/components/MetricCard";
 import { StudyCard } from "@/components/StudyCard";
 import { PotencialGauge } from "@/components/RadarKpis";
 import { usePrefersReducedMotion, useInView, useCountUp } from "@/lib/counters";
+import { obtenerIndicador, obtenerFuente, obtenerIndicadorConFuente } from "@/lib/datos/indice";
+import { formatDate } from "@/lib/format";
 
-// URL pública del Estudio IPLC 2025 en la Biblioteca Técnica de la CDT. No se
-// aloja el PDF: solo se enlaza a su página oficial.
-const IPLC_URL =
-  "https://www.cdt.cl/bibliotecatecnica/estudio-y-analisis-del-indicador-de-productividad-laboral-de-la-construccion-2025";
-// La Guía de Integración Temprana es publicación propia del CCI y vive como
-// recurso descargable en /recursos.
 const GUIA_HREF = "/recursos";
 
 // ---- Formato chileno ---------------------------------------------------
-
 /** 491904 → "491.904" · 0.26 → "0,26" · 0.14 → "0,14". */
 function formatCL(n: number, decimals = 0): string {
   const fixed = n.toFixed(decimals);
@@ -37,9 +30,38 @@ function formatCL(n: number, decimals = 0): string {
   return dec ? `${miles},${dec}` : miles;
 }
 
-// ---- Piezas de animación ----------------------------------------------
+const val = (slug: string): number => Number(obtenerIndicador(slug).value);
+const decimalsDe = (n: number): number => (Number.isInteger(n) ? 0 : 2);
 
-/** Aparición suave (fade + translate). Con reduced-motion, estado final directo. */
+// Adaptador registro → Indicator (tipo del sitio) para reutilizar MetricCard.
+const SOURCE_TYPE_MAP: Record<string, SourceType> = {
+  official_chile: "oficial",
+  cci_data: "cci",
+  academic: "académica",
+  international: "internacional",
+  documented_case: "empresa",
+  survey: "internacional",
+  estimate: "estimación",
+};
+function metricFromIndicador(slug: string): Indicator {
+  const { indicador: i, fuente: f } = obtenerIndicadorConFuente(slug);
+  const st = SOURCE_TYPE_MAP[i.sourceType] ?? "oficial";
+  const year = Number(String(f.publicationDate ?? "").slice(0, 4)) || new Date(i.cutoffDate).getFullYear();
+  return {
+    id: i.slug,
+    value: formatCL(Number(i.value), 0),
+    unit: i.unit,
+    label: i.title,
+    note: i.description,
+    status: "real",
+    sourceType: st,
+    source: { id: f.id, title: f.title, organization: f.organization, year, url: f.url, sourceType: st },
+    lastUpdated: i.lastVerifiedAt,
+    geography: (i.geography === "Chile" ? "Chile" : "Internacional") as Indicator["geography"],
+  };
+}
+
+// ---- Piezas de animación ----------------------------------------------
 function Reveal({
   children,
   reduced,
@@ -96,10 +118,7 @@ function StatCard({
   const { ref, inView } = useInView<HTMLDivElement>();
   const v = useCountUp(value, inView, reduced, 1500);
   return (
-    <div
-      ref={ref}
-      className="flex h-full flex-col rounded-2xl border border-cci-line bg-white px-5 py-6 shadow-card"
-    >
+    <div ref={ref} className="flex h-full flex-col rounded-2xl border border-cci-line bg-white px-5 py-6 shadow-card">
       <div className="font-display text-4xl font-900 leading-none tabular-nums text-cci-orange sm:text-5xl">
         {prefix}
         {formatCL(v, decimals)}
@@ -122,15 +141,40 @@ function StatCard({
   );
 }
 
+/** Tarjeta de cifra alimentada por un slug del registro. */
+function StatIndicador({
+  slug,
+  label,
+  reduced,
+  decimals,
+}: {
+  slug: string;
+  label?: string;
+  reduced: boolean;
+  decimals?: number;
+}) {
+  const { indicador: i, fuente: f } = obtenerIndicadorConFuente(slug);
+  const value = Number(i.value);
+  return (
+    <StatCard
+      value={value}
+      decimals={decimals ?? decimalsDe(value)}
+      prefix={i.prefix ?? ""}
+      suffix={i.suffix ?? ""}
+      label={label ?? i.title}
+      fuente={f.shortLabel ?? f.organization}
+      fuenteUrl={f.url}
+      reduced={reduced}
+    />
+  );
+}
+
 interface DuelItem {
   label: string;
   value: number;
   suffix?: string;
   highlight?: boolean;
 }
-
-/** Duelo de barras de elaboración propia: se llenan al entrar en pantalla, con
- *  leve delay escalonado. La barra destacada va en naranjo. */
 function BarDuel({
   title,
   hint,
@@ -156,36 +200,22 @@ function BarDuel({
       <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
         <span className={`text-sm font-700 ${dark ? "text-white" : "text-cci-ink"}`}>{title}</span>
         {chip && (
-          <span className="rounded-full bg-cci-orange px-2.5 py-0.5 text-[11px] font-700 text-white">
-            {chip}
-          </span>
+          <span className="rounded-full bg-cci-orange px-2.5 py-0.5 text-[11px] font-700 text-white">{chip}</span>
         )}
       </div>
       <div className="space-y-3">
         {items.map((it) => (
           <div key={it.label}>
             <div className="mb-1 flex items-baseline justify-between gap-3">
-              <span
-                className={`text-sm font-600 ${
-                  it.highlight ? "text-cci-orange" : dark ? "text-white/80" : "text-cci-slate"
-                }`}
-              >
+              <span className={`text-sm font-600 ${it.highlight ? "text-cci-orange" : dark ? "text-white/80" : "text-cci-slate"}`}>
                 {it.label}
               </span>
-              <span
-                className={`font-mono text-sm font-700 tabular-nums ${
-                  it.highlight ? "text-cci-orange" : dark ? "text-white/70" : "text-cci-slate"
-                }`}
-              >
+              <span className={`font-mono text-sm font-700 tabular-nums ${it.highlight ? "text-cci-orange" : dark ? "text-white/70" : "text-cci-slate"}`}>
                 {formatCL(it.value, decimals)}
                 {it.suffix ?? ""}
               </span>
             </div>
-            <div
-              className={`h-3.5 w-full overflow-hidden rounded-full ${
-                dark ? "bg-white/10" : "bg-cci-paper"
-              }`}
-            >
+            <div className={`h-3.5 w-full overflow-hidden rounded-full ${dark ? "bg-white/10" : "bg-cci-paper"}`}>
               <div
                 className={`h-full rounded-full ${reduced ? "" : "transition-[width] duration-1000 ease-out"} ${
                   it.highlight ? "bg-cci-orange" : dark ? "bg-white/40" : "bg-cci-graphite"
@@ -198,15 +228,61 @@ function BarDuel({
           </div>
         ))}
       </div>
-      {hint && (
-        <p className={`mt-2 text-[11px] ${dark ? "text-white/50" : "text-cci-slate-light"}`}>{hint}</p>
-      )}
+      {hint && <p className={`mt-2 text-[11px] ${dark ? "text-white/50" : "text-cci-slate-light"}`}>{hint}</p>}
     </div>
   );
 }
 
-// ---- Navegación por capítulos (pills sticky + scrollspy) ---------------
+// ---- "Ver fuente y metodología" (nativo <details>, sin JS, con teclado) -----
+function FuenteDetalle({ slugs, dark = false }: { slugs: string[]; dark?: boolean }) {
+  // Una entrada por fuente única, con un indicador representativo para el alcance.
+  const porFuente = new Map<string, { fuente: ReturnType<typeof obtenerFuente>; rep: ReturnType<typeof obtenerIndicador> }>();
+  for (const slug of slugs) {
+    const rep = obtenerIndicador(slug);
+    if (!porFuente.has(rep.sourceId)) porFuente.set(rep.sourceId, { fuente: obtenerFuente(rep.sourceId), rep });
+  }
+  const linkCls = dark ? "text-cci-orange-light hover:text-white" : "text-cci-orange hover:text-cci-orange-dark";
+  const dim = dark ? "text-white/60" : "text-cci-slate";
+  const strong = dark ? "text-white/90" : "text-cci-ink";
 
+  return (
+    <details className={`group mt-3 rounded-lg border px-4 py-2.5 ${dark ? "border-white/10 bg-white/[0.03]" : "border-cci-line bg-cci-paper"}`}>
+      <summary className={`cursor-pointer list-none text-[11px] font-700 uppercase tracking-wide ${dark ? "text-white/70" : "text-cci-slate"}`}>
+        Ver fuente y metodología
+      </summary>
+      <div className="mt-3 space-y-4">
+        {[...porFuente.values()].map(({ fuente: f, rep }) => (
+          <div key={f.id} className={`space-y-1 text-[12px] leading-relaxed ${dim}`}>
+            <div>
+              <span className={`font-700 ${strong}`}>{f.organization}</span> — {f.title}
+            </div>
+            {f.url && (
+              <div>
+                <a
+                  href={f.url}
+                  target={f.url.startsWith("http") ? "_blank" : undefined}
+                  rel={f.url.startsWith("http") ? "noopener noreferrer" : undefined}
+                  className={`font-600 ${linkCls}`}
+                >
+                  Ir a la fuente
+                </a>
+              </div>
+            )}
+            {f.publicationDate && <div>Publicación: {f.publicationDate}</div>}
+            <div>Fecha de corte del dato: {formatDate(rep.cutoffDate)}</div>
+            <div>Alcance: {rep.scope}</div>
+            {rep.methodology && <div>Metodología: {rep.methodology}</div>}
+            {rep.caveat && <div>Nota: {rep.caveat}</div>}
+            {f.notes && !rep.caveat && <div>Nota: {f.notes}</div>}
+            <div>Última verificación: {formatDate(rep.lastVerifiedAt)}</div>
+          </div>
+        ))}
+      </div>
+    </details>
+  );
+}
+
+// ---- Navegación por capítulos (pills sticky + scrollspy) ---------------
 const CHAPTERS = [
   { id: "cap1", n: "01", label: "Oportunidad" },
   { id: "cap2", n: "02", label: "El desafío" },
@@ -227,9 +303,7 @@ function ChapterNav({ active }: { active: string }) {
               key={c.id}
               href={`#${c.id}`}
               className={`shrink-0 whitespace-nowrap rounded-full px-3.5 py-1.5 text-xs font-semibold transition ${
-                active === c.id
-                  ? "bg-cci-graphite text-white"
-                  : "bg-cci-paper text-cci-slate hover:bg-cci-line"
+                active === c.id ? "bg-cci-graphite text-white" : "bg-cci-paper text-cci-slate hover:bg-cci-line"
               }`}
             >
               <span className="font-mono">{c.n}</span> {c.label}
@@ -241,40 +315,47 @@ function ChapterNav({ active }: { active: string }) {
   );
 }
 
-// ---- Kicker de capítulo (guión naranjo, estándar del sitio) ------------
-
 function Kicker({ children, dark = false }: { children: React.ReactNode; dark?: boolean }) {
   return (
-    <div
-      className={`mb-2 flex items-center gap-2 text-sm font-700 uppercase tracking-wide ${
-        dark ? "text-cci-orange-light" : "text-cci-orange"
-      }`}
-    >
+    <div className={`mb-2 flex items-center gap-2 text-sm font-700 uppercase tracking-wide ${dark ? "text-cci-orange-light" : "text-cci-orange"}`}>
       <span className="h-[2px] w-6 bg-cci-orange" />
       {children}
     </div>
   );
 }
 
-// ---- Datos curados de los capítulos ------------------------------------
-
+// ---- Casos documentados (cap 06): metrica = slug del registro + etiqueta ----
 const CASOS = [
   {
     empresa: "Baumax",
     proyecto: "Paneles de hormigón en cinco edificios",
-    metrics: ["+35% productividad (m²/hd)", "−60% residuos", "−80% retrabajos"],
+    metrics: [
+      { slug: "caso-baumax-productividad", etiqueta: "productividad (m²/hd)" },
+      { slug: "caso-baumax-residuos", etiqueta: "residuos" },
+      { slug: "caso-baumax-retrabajos", etiqueta: "retrabajos" },
+    ],
   },
   {
     empresa: "Socovesa Sur · BIM Lab · Spoerer",
     proyecto: "Coordinación BIM en Olimpia II",
-    metrics: ["−60% tiempo de coordinación", "Adicionales de obra: 0,14% del contrato (vs 2-3% histórico)"],
+    metrics: [
+      { slug: "caso-socovesa-coordinacion", etiqueta: "tiempo de coordinación" },
+      { slug: "caso-socovesa-adicionales", etiqueta: "de adicionales de obra (vs 2-3% histórico)" },
+    ],
   },
   {
     empresa: "Boetsch · Spoerer Ingenieros",
     proyecto: "Optimización estructural temprana",
-    metrics: ["0,92% de ahorro del costo directo desde el diseño"],
+    metrics: [{ slug: "caso-boetsch-ahorro", etiqueta: "de ahorro del costo directo desde el diseño" }],
   },
 ];
+const CASOS_SLUGS = CASOS.flatMap((c) => c.metrics.map((m) => m.slug));
+
+function metricaTexto(slug: string): string {
+  const i = obtenerIndicador(slug);
+  const n = Number(i.value);
+  return `${i.prefix ?? ""}${formatCL(n, decimalsDe(n))}${i.suffix ?? ""}`;
+}
 
 const MEDICION = [
   { label: "Productividad laboral IPLC", unit: "m²/persona-día", obligatorio: true },
@@ -286,20 +367,7 @@ const MEDICION = [
 ];
 
 // ---- Componente principal ----------------------------------------------
-
-export function DataStory({
-  deficit,
-  meta,
-  empresas,
-  tipologias,
-  studiesInternacionales,
-}: {
-  deficit?: Indicator;
-  meta?: Indicator;
-  empresas?: Indicator;
-  tipologias?: Indicator;
-  studiesInternacionales: Study[];
-}) {
+export function DataStory({ studiesInternacionales }: { studiesInternacionales: Study[] }) {
   const reduced = usePrefersReducedMotion();
   const [active, setActive] = useState("cap1");
   const storyRef = useRef<HTMLDivElement>(null);
@@ -310,17 +378,28 @@ export function DataStory({
     );
     if (sections.length === 0 || typeof IntersectionObserver === "undefined") return;
     const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) setActive(e.target.id);
-        });
-      },
-      // La banda central de la pantalla define el capítulo activo.
+      (entries) => entries.forEach((e) => e.isIntersecting && setActive(e.target.id)),
       { rootMargin: "-45% 0px -50% 0px", threshold: 0 }
     );
     sections.forEach((s) => io.observe(s));
     return () => io.disconnect();
   }, []);
+
+  // Derivados de cap 04 (un registro consumido dos veces: duelo + tarjeta %).
+  const prodSin = val("iplc-productividad-sin-mmc");
+  const prodCon = val("iplc-productividad-con-mmc");
+  const resSin = val("iplc-residuos-sin-mmc");
+  const resCon = val("iplc-residuos-con-mmc");
+  const atrSin = val("iplc-atrasos-sin-mmc");
+  const atrCon = val("iplc-atrasos-con-mmc");
+  const deltaProd = Math.round(((prodCon - prodSin) / prodSin) * 100); // +23
+  const deltaRes = Math.round(((resCon - resSin) / resSin) * 100); // -30
+  const factorAtr = Math.round(atrSin / atrCon); // 3
+  const iplc = obtenerFuente("iplc-2025");
+
+  const r20 = obtenerIndicador("residuos-sectorial-2020");
+  const r25 = obtenerIndicador("residuos-sectorial-2025");
+  const nch = obtenerIndicador("nch3744");
 
   return (
     <div ref={storyRef}>
@@ -337,16 +416,12 @@ export function DataStory({
           </Reveal>
 
           <div className="mt-10 grid gap-5 md:grid-cols-2">
-            {deficit && (
-              <Reveal reduced={reduced}>
-                <MetricCard indicator={deficit} />
-              </Reveal>
-            )}
-            {meta && (
-              <Reveal reduced={reduced} delay={80}>
-                <MetricCard indicator={meta} />
-              </Reveal>
-            )}
+            <Reveal reduced={reduced}>
+              <MetricCard indicator={metricFromIndicador("deficit-habitacional")} />
+            </Reveal>
+            <Reveal reduced={reduced} delay={80}>
+              <MetricCard indicator={metricFromIndicador("meta-habitacional")} />
+            </Reveal>
           </div>
 
           <div className="mt-12 grid items-center gap-8 lg:grid-cols-[1fr_1.1fr]">
@@ -355,11 +430,12 @@ export function DataStory({
             </Reveal>
             <Reveal reduced={reduced} delay={80}>
               <p className="font-display text-xl font-800 leading-snug text-cci-ink md:text-2xl">
-                La construcción industrializada permite responder con velocidad, calidad y menos
-                pérdidas.
+                La construcción industrializada permite responder con velocidad, calidad y menos pérdidas.
               </p>
             </Reveal>
           </div>
+
+          <FuenteDetalle slugs={["deficit-habitacional", "meta-habitacional", "potencial-productividad"]} />
         </div>
       </section>
 
@@ -381,22 +457,18 @@ export function DataStory({
             <BarDuel
               title="Productividad laboral (m²/persona-día)"
               items={[
-                { label: "Chile", value: 0.24 },
-                { label: "Estándar internacional", value: 0.37, highlight: true },
+                { label: "Chile", value: val("productividad-chile") },
+                { label: "Estándar internacional", value: val("productividad-internacional"), highlight: true },
               ]}
               decimals={2}
-              chip="brecha de +53%"
+              chip={`brecha de ${obtenerIndicador("brecha-productividad").prefix ?? ""}${val("brecha-productividad")}${obtenerIndicador("brecha-productividad").suffix ?? ""}`}
               reduced={reduced}
               dark
             />
             <p className="mt-5 border-t border-white/10 pt-4 text-[11px] leading-relaxed text-white/50">
-              Fuente: Matrix Consulting (2020), «Impulsar la productividad de la industria de la
-              Construcción en Chile a estándares mundiales»; reproducido en el{" "}
-              <a href={IPLC_URL} target="_blank" rel="noopener noreferrer" className="underline hover:text-white">
-                Estudio IPLC 2025 (Observatorio de Productividad CChC · CDT)
-              </a>
-              .
+              Fuente: {obtenerFuente("matrix-2020").shortLabel}.
             </p>
+            <FuenteDetalle slugs={["productividad-chile", "productividad-internacional"]} dark />
           </Reveal>
         </div>
       </section>
@@ -413,35 +485,13 @@ export function DataStory({
 
           <div className="mt-10 grid gap-5 sm:grid-cols-3">
             <Reveal reduced={reduced}>
-              <StatCard
-                value={0.19}
-                decimals={2}
-                label="P10 — el 10% menos productivo (m²/persona-día)"
-                fuente="Estudio IPLC 2025"
-                fuenteUrl={IPLC_URL}
-                reduced={reduced}
-              />
+              <StatIndicador slug="iplc-p10" label="P10 — el 10% menos productivo (m²/persona-día)" reduced={reduced} />
             </Reveal>
             <Reveal reduced={reduced} delay={80}>
-              <StatCard
-                value={0.33}
-                decimals={2}
-                label="P90 — el 10% más productivo (m²/persona-día)"
-                fuente="Estudio IPLC 2025"
-                fuenteUrl={IPLC_URL}
-                reduced={reduced}
-              />
+              <StatIndicador slug="iplc-p90" label="P90 — el 10% más productivo (m²/persona-día)" reduced={reduced} />
             </Reveal>
             <Reveal reduced={reduced} delay={160}>
-              <StatCard
-                value={74}
-                prefix="+"
-                suffix="%"
-                label="Brecha entre el mejor y el peor decil de obras"
-                fuente="Estudio IPLC 2025"
-                fuenteUrl={IPLC_URL}
-                reduced={reduced}
-              />
+              <StatIndicador slug="iplc-brecha-deciles" label="Brecha entre el mejor y el peor decil de obras" reduced={reduced} />
             </Reveal>
           </div>
 
@@ -465,13 +515,10 @@ export function DataStory({
             <Reveal reduced={reduced} delay={80}>
               <blockquote className="rounded-2xl border-l-4 border-cci-orange bg-cci-orange-soft p-7">
                 <p className="font-display text-lg font-800 leading-snug text-cci-graphite md:text-xl">
-                  «La respuesta metodológica ya está escrita: Integración Temprana — todos los actores
-                  del proyecto, coordinados desde su génesis.»
+                  «La respuesta metodológica ya está escrita: Integración Temprana — todos los actores del
+                  proyecto, coordinados desde su génesis.»
                 </p>
-                <Link
-                  href={GUIA_HREF}
-                  className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-cci-orange-dark hover:text-cci-orange"
-                >
+                <Link href={GUIA_HREF} className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-cci-orange-dark hover:text-cci-orange">
                   Ver la Guía de Integración Temprana
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
@@ -481,10 +528,7 @@ export function DataStory({
             </Reveal>
           </div>
 
-          <p className="mt-8 text-[11px] leading-relaxed text-cci-slate-light">
-            Fuentes: Estudio IPLC 2025; Matrix Consulting (2020); Guía Práctica de Integración
-            Temprana en Construcción Industrializada, CCI (2024).
-          </p>
+          <FuenteDetalle slugs={["iplc-p10", "iplc-p90", "iplc-brecha-deciles"]} />
         </div>
       </section>
 
@@ -498,26 +542,20 @@ export function DataStory({
             </h2>
           </Reveal>
 
-          {/* 4 tarjetas de cifra */}
+          {/* 4 tarjetas de cifra (3 derivadas de los duelos + BIM directo) */}
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              { value: 23, prefix: "+", suffix: "%", label: "Productividad con métodos modernos de construcción (MMC)" },
-              { value: 30, prefix: "−", suffix: "%", label: "Residuos de obra con MMC" },
-              { value: 3, suffix: "×", label: "Menos obras que terminan fuera de plazo" },
-              { value: 21, prefix: "+", suffix: "%", label: "Productividad con coordinación BIM" },
-            ].map((c, i) => (
-              <Reveal key={c.label} reduced={reduced} delay={i * 70}>
-                <StatCard
-                  value={c.value}
-                  prefix={c.prefix}
-                  suffix={c.suffix}
-                  label={c.label}
-                  fuente="Estudio IPLC 2025"
-                  fuenteUrl={IPLC_URL}
-                  reduced={reduced}
-                />
-              </Reveal>
-            ))}
+            <Reveal reduced={reduced}>
+              <StatCard value={Math.abs(deltaProd)} prefix={deltaProd >= 0 ? "+" : "−"} suffix="%" label="Productividad con métodos modernos de construcción (MMC)" fuente={iplc.shortLabel ?? iplc.organization} fuenteUrl={iplc.url} reduced={reduced} />
+            </Reveal>
+            <Reveal reduced={reduced} delay={70}>
+              <StatCard value={Math.abs(deltaRes)} prefix={deltaRes >= 0 ? "+" : "−"} suffix="%" label="Residuos de obra con MMC" fuente={iplc.shortLabel ?? iplc.organization} fuenteUrl={iplc.url} reduced={reduced} />
+            </Reveal>
+            <Reveal reduced={reduced} delay={140}>
+              <StatCard value={factorAtr} suffix="×" label="Menos obras que terminan fuera de plazo" fuente={iplc.shortLabel ?? iplc.organization} fuenteUrl={iplc.url} reduced={reduced} />
+            </Reveal>
+            <Reveal reduced={reduced} delay={210}>
+              <StatIndicador slug="iplc-productividad-bim" label="Productividad con coordinación BIM" reduced={reduced} />
+            </Reveal>
           </div>
 
           {/* 3 duelos de barras */}
@@ -527,8 +565,8 @@ export function DataStory({
                 title="Productividad (m²/persona-día)"
                 hint="Más es mejor."
                 items={[
-                  { label: "Sin MMC", value: 0.22 },
-                  { label: "Con MMC", value: 0.27, highlight: true },
+                  { label: "Sin MMC", value: prodSin },
+                  { label: "Con MMC", value: prodCon, highlight: true },
                 ]}
                 decimals={2}
                 reduced={reduced}
@@ -540,8 +578,8 @@ export function DataStory({
                 title="Residuos (m³/m²)"
                 hint="Menos es mejor."
                 items={[
-                  { label: "Sin MMC", value: 0.33 },
-                  { label: "Con MMC", value: 0.23, highlight: true },
+                  { label: "Sin MMC", value: resSin },
+                  { label: "Con MMC", value: resCon, highlight: true },
                 ]}
                 decimals={2}
                 reduced={reduced}
@@ -553,8 +591,8 @@ export function DataStory({
                 title="Obras fuera de plazo"
                 hint="Menos es mejor."
                 items={[
-                  { label: "Sin MMC", value: 30, suffix: "%" },
-                  { label: "Con MMC", value: 10, suffix: "%", highlight: true },
+                  { label: "Sin MMC", value: atrSin, suffix: "%" },
+                  { label: "Con MMC", value: atrCon, suffix: "%", highlight: true },
                 ]}
                 reduced={reduced}
                 dark
@@ -563,24 +601,17 @@ export function DataStory({
           </div>
 
           <p className="mt-6 max-w-3xl text-[11px] leading-relaxed text-white/50">
-            Fuente:{" "}
-            <a href={IPLC_URL} target="_blank" rel="noopener noreferrer" className="underline hover:text-white">
-              Estudio IPLC 2025
-            </a>{" "}
-            — Observatorio de Productividad CChC · CDT · Construye2025; 74 proyectos de edificación en
-            altura 2023-2024. Gráficos de elaboración propia.
+            Fuente: {iplc.shortLabel} — {iplc.organization}. Gráficos de elaboración propia.
           </p>
+          <FuenteDetalle slugs={["iplc-productividad-con-mmc", "iplc-residuos-con-mmc", "iplc-atrasos-con-mmc", "iplc-productividad-bim"]} dark />
 
-          {/* Evidencia internacional (migrada desde /evidencia) */}
+          {/* Evidencia internacional (estudios de Sanity) */}
           {studiesInternacionales.length > 0 && (
             <div className="mt-14">
               <Reveal reduced={reduced}>
-                <h3 className="font-display text-xl font-800 text-white md:text-2xl">
-                  Lo que dice la investigación internacional
-                </h3>
+                <h3 className="font-display text-xl font-800 text-white md:text-2xl">Lo que dice la investigación internacional</h3>
                 <p className="mt-2 max-w-2xl text-sm text-white/70">
-                  Estudios internacionales sobre construcción industrializada off-site. Cada tarjeta
-                  enlaza a su fuente.
+                  Estudios internacionales sobre construcción industrializada off-site. Cada tarjeta enlaza a su fuente.
                 </p>
               </Reveal>
               <div className="mt-6 grid gap-5 md:grid-cols-2">
@@ -607,44 +638,20 @@ export function DataStory({
 
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             <Reveal reduced={reduced}>
-              <StatCard
-                value={8}
-                prefix="+"
-                suffix="%"
-                label="Productividad sectorial desde 2020 (0,24 → 0,26 m²/persona-día)"
-                fuente="Estudio IPLC 2025"
-                fuenteUrl={IPLC_URL}
+              <StatIndicador
+                slug="productividad-sectorial-crecimiento"
+                label={`Productividad sectorial desde 2020 (${obtenerIndicador("productividad-sectorial-crecimiento").description})`}
                 reduced={reduced}
               />
             </Reveal>
             <Reveal reduced={reduced} delay={70}>
-              <StatCard
-                value={17}
-                prefix="+"
-                suffix="%"
-                label="Productividad en empresas re-medidas"
-                fuente="Construye2025"
-                fuenteUrl="https://construye2025.cl/"
-                reduced={reduced}
-              />
+              <StatIndicador slug="productividad-empresas-remedidas" label="Productividad en empresas re-medidas" reduced={reduced} />
             </Reveal>
             <Reveal reduced={reduced} delay={140}>
-              <StatCard
-                value={Number(empresas?.value ?? 24)}
-                label="Empresas industrializadoras certificadas por la DITEC"
-                fuente={`MINVU · DITEC${empresas?.lastUpdated ? " · jun. 2026" : ""}`}
-                fuenteUrl={empresas?.source?.url}
-                reduced={reduced}
-              />
+              <StatIndicador slug="industrializadoras-certificadas" label="Empresas industrializadoras certificadas por la DITEC" reduced={reduced} />
             </Reveal>
             <Reveal reduced={reduced} delay={210}>
-              <StatCard
-                value={Number(tipologias?.value ?? 42)}
-                label="Tipologías VIT aprobadas por la DITEC"
-                fuente={`MINVU · DITEC${tipologias?.lastUpdated ? " · jun. 2026" : ""}`}
-                fuenteUrl={tipologias?.source?.url}
-                reduced={reduced}
-              />
+              <StatIndicador slug="tipologias-vit" label="Tipologías VIT aprobadas por la DITEC" reduced={reduced} />
             </Reveal>
           </div>
 
@@ -652,18 +659,14 @@ export function DataStory({
             <Reveal reduced={reduced}>
               <div className="flex h-full flex-col rounded-2xl border border-cci-blue/20 bg-cci-blue-soft p-7">
                 <span className="w-fit rounded-full bg-cci-blue px-2.5 py-1 text-[11px] font-700 uppercase tracking-wide text-white">
-                  Hito normativo · NCh3744:2023
+                  Hito normativo · {nch.value}
                 </span>
                 <h3 className="mt-4 font-display text-xl font-800 text-cci-ink">
                   Chile ya tiene norma oficial de construcción industrializada
                 </h3>
-                <p className="mt-3 text-sm leading-relaxed text-cci-slate">
-                  La norma NCh3744:2023, oficializada por el Instituto Nacional de Normalización (INN),
-                  nació de un anteproyecto impulsado por el CCI, Construye2025 y el MINVU. Fija el
-                  lenguaje común del sector.
-                </p>
+                <p className="mt-3 text-sm leading-relaxed text-cci-slate">{nch.description}</p>
                 <span className="mt-auto pt-4 text-[11px] font-600 text-cci-slate-light">
-                  Fuente: INN · NCh3744:2023
+                  Fuente: {obtenerFuente(nch.sourceId).shortLabel}
                 </span>
               </div>
             </Reveal>
@@ -671,20 +674,24 @@ export function DataStory({
             <Reveal reduced={reduced} delay={80}>
               <blockquote className="flex h-full flex-col justify-center rounded-2xl border-l-4 border-cci-orange bg-cci-orange-soft p-7">
                 <p className="font-display text-lg font-800 leading-snug text-cci-graphite md:text-xl">
-                  «Medir es el primer paso para mejorar: la industria chilena ya se mide bajo el
-                  estándar del Manual IPLC.»
+                  «Medir es el primer paso para mejorar: la industria chilena ya se mide bajo el estándar del Manual IPLC.»
                 </p>
               </blockquote>
             </Reveal>
           </div>
 
           <p className="mt-8 text-[11px] leading-relaxed text-cci-slate-light">
-            Los residuos sectoriales bajaron de 0,27 a 0,25 m³/m² entre 2020 y 2025. Fuente:{" "}
-            <a href={IPLC_URL} target="_blank" rel="noopener noreferrer" className="underline hover:text-cci-orange-dark">
-              Estudio IPLC 2025
-            </a>
-            .
+            Los residuos sectoriales bajaron de {formatCL(Number(r20.value), 2)} a {formatCL(Number(r25.value), 2)} {r20.unit} entre 2020 y 2025.
           </p>
+          <FuenteDetalle
+            slugs={[
+              "productividad-sectorial-crecimiento",
+              "productividad-empresas-remedidas",
+              "industrializadoras-certificadas",
+              "nch3744",
+              "residuos-sectorial-2020",
+            ]}
+          />
         </div>
       </section>
 
@@ -695,8 +702,8 @@ export function DataStory({
             <Kicker>06 · La evidencia</Kicker>
             <p className="max-w-3xl font-display text-xl font-800 leading-snug text-cci-ink md:text-2xl">
               La evidencia parte por casa: resultados documentados por socios del CCI en su Guía de
-              Integración Temprana. Y el siguiente nivel ya está definido: casos medidos bajo el
-              estándar nacional IPLC. Evidencia, no publicidad.
+              Integración Temprana. Y el siguiente nivel ya está definido: casos medidos bajo el estándar
+              nacional IPLC. Evidencia, no publicidad.
             </p>
           </Reveal>
 
@@ -707,15 +714,15 @@ export function DataStory({
                   <span className="w-fit rounded-full bg-cci-orange-soft px-2.5 py-1 text-[10px] font-700 uppercase tracking-wide text-cci-orange-dark">
                     Caso documentado · Guía CCI 2024
                   </span>
-                  <h3 className="mt-4 font-display text-lg font-800 leading-snug text-cci-ink">
-                    {caso.empresa}
-                  </h3>
+                  <h3 className="mt-4 font-display text-lg font-800 leading-snug text-cci-ink">{caso.empresa}</h3>
                   <p className="mt-1 text-sm text-cci-slate">{caso.proyecto}</p>
                   <ul className="mt-4 space-y-2 border-t border-cci-line pt-4">
                     {caso.metrics.map((m) => (
-                      <li key={m} className="flex gap-2 text-sm font-600 text-cci-graphite">
+                      <li key={m.slug} className="flex gap-2 text-sm font-600 text-cci-graphite">
                         <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-cci-orange" />
-                        {m}
+                        <span>
+                          <span className="font-800 text-cci-orange-dark">{metricaTexto(m.slug)}</span> {m.etiqueta}
+                        </span>
                       </li>
                     ))}
                   </ul>
@@ -731,6 +738,7 @@ export function DataStory({
             </Link>
             .
           </p>
+          <FuenteDetalle slugs={CASOS_SLUGS} />
 
           {/* Ficha "siguiente nivel" — estándar IPLC */}
           <Reveal reduced={reduced} className="mt-12">
@@ -747,9 +755,7 @@ export function DataStory({
               </div>
               <div className="mt-6 grid gap-6 md:grid-cols-2">
                 <div>
-                  <div className="text-[11px] font-700 uppercase tracking-wide text-cci-orange">
-                    Campos obligatorios
-                  </div>
+                  <div className="text-[11px] font-700 uppercase tracking-wide text-cci-orange">Campos obligatorios</div>
                   <ul className="mt-3 space-y-2 text-sm text-cci-slate">
                     {["m²/persona-día", "Desviación de plazos", "Residuos"].map((f) => (
                       <li key={f} className="flex items-center justify-between border-b border-cci-line pb-2">
@@ -760,9 +766,7 @@ export function DataStory({
                   </ul>
                 </div>
                 <div>
-                  <div className="text-[11px] font-700 uppercase tracking-wide text-cci-slate">
-                    Campos opcionales
-                  </div>
+                  <div className="text-[11px] font-700 uppercase tracking-wide text-cci-slate">Campos opcionales</div>
                   <ul className="mt-3 space-y-2 text-sm text-cci-slate">
                     {["Costos", "Uso de MMC", "Nivel BIM"].map((f) => (
                       <li key={f} className="flex items-center justify-between border-b border-cci-line pb-2">
@@ -798,18 +802,10 @@ export function DataStory({
             {MEDICION.map((m, i) => (
               <Reveal key={m.label} reduced={reduced} delay={(i % 3) * 70}>
                 <div className="flex h-full flex-col rounded-2xl border border-cci-line bg-white p-6 shadow-card">
-                  <span
-                    className={`w-fit rounded-full px-2.5 py-1 text-[10px] font-700 uppercase tracking-wide ${
-                      m.obligatorio
-                        ? "bg-cci-orange-soft text-cci-orange-dark"
-                        : "bg-cci-paper text-cci-slate"
-                    }`}
-                  >
+                  <span className={`w-fit rounded-full px-2.5 py-1 text-[10px] font-700 uppercase tracking-wide ${m.obligatorio ? "bg-cci-orange-soft text-cci-orange-dark" : "bg-cci-paper text-cci-slate"}`}>
                     {m.obligatorio ? "Obligatorio" : "Opcional"}
                   </span>
-                  <h3 className="mt-4 font-display text-lg font-800 leading-snug text-cci-ink">
-                    {m.label}
-                  </h3>
+                  <h3 className="mt-4 font-display text-lg font-800 leading-snug text-cci-ink">{m.label}</h3>
                   <p className="mt-1 font-mono text-xs text-cci-slate-light">{m.unit}</p>
                 </div>
               </Reveal>

@@ -433,6 +433,8 @@ export function ultimaActualizacion(): string | undefined {
 }
 
 // --- Validación (Paso 1: patrón de datos tipados) ---------------------------
+import { FUENTES } from "./fuentes";
+
 export function validarGlosario(terms: TerminoGlosario[] = TERMINOS): string[] {
   const errores: string[] = [];
   const vistos = new Set<string>();
@@ -450,6 +452,10 @@ export function validarGlosario(terms: TerminoGlosario[] = TERMINOS): string[] {
       if (!t.fechaRevision) errores.push(`"${t.slug}" está publicado pero no tiene fechaRevision.`);
       if (!t.definicionCorta?.trim())
         errores.push(`"${t.slug}" está publicado pero no tiene definicionCorta.`);
+      // Paso 1 · 4.2: las fuentes de un término publicado deben existir en fuentes.ts.
+      for (const fid of t.fuentes ?? [])
+        if (!FUENTES[fid])
+          errores.push(`"${t.slug}".fuentes apunta a una fuente inexistente: "${fid}".`);
     }
 
     for (const ref of t.noConfundirCon ?? [])

@@ -5,10 +5,12 @@
   "description": "Plataforma digital del Consejo de Construcción Industrializada (CCI): actualidad, radar de datos y evidencia.",
   "scripts": {
     "dev": "next dev",
+    "prebuild": "npx tsx scripts/validar-datos.ts",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "validar-datos": "npx tsx scripts/validar-datos.ts",
+    "auditar-enlaces": "npx tsx scripts/auditar-enlaces.ts",
     "check": "npm run build"
   },
   "dependencies": {
