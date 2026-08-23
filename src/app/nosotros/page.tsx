@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { NosotrosCifras } from "@/components/NosotrosCifras";
+import { MuroSocios } from "@/components/MuroSocios";
+import { getEmpresasVitrina } from "@/sanity/fetch";
 
 export const metadata = {
   title: "Quiénes somos · CCI",
@@ -58,7 +60,8 @@ const HITOS = [
   { anio: "2027", texto: "Próxima edición del EICI, los días 8, 9 y 10 de septiembre.", destacado: true, href: "/eici" },
 ];
 
-export default function NosotrosPage() {
+export default async function NosotrosPage() {
+  const empresas = await getEmpresasVitrina();
   return (
     <>
       {/* 1. HERO — fondo claro y sobrio */}
@@ -276,6 +279,23 @@ export default function NosotrosPage() {
             >
               Voces de la industrialización
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* 7b. MURO NUESTROS SOCIOS — institucional, por niveles (datos reales CMS) */}
+      <section id="socios" className="scroll-mt-[120px] border-t border-cci-line bg-white py-14 md:py-16">
+        <div className="container-cci">
+          <Kicker>Nuestros socios</Kicker>
+          <h2 className="font-display text-2xl font-800 text-cci-ink md:text-3xl">
+            Quiénes hacen posible al CCI
+          </h2>
+          <p className="mt-3 max-w-2xl leading-relaxed text-cci-slate">
+            El muro institucional de los socios del Consejo, por categoría. Sin elementos comerciales:
+            pertenencia.
+          </p>
+          <div className="mt-10">
+            <MuroSocios empresas={empresas} />
           </div>
         </div>
       </section>
