@@ -7,16 +7,11 @@ import { CCILogo } from "./Logo";
 const nav = [
   { href: "/", label: "Inicio" },
   { href: "/noticias", label: "Actualidad" },
-  { href: "/voces", label: "Voces" },
-  { href: "/radar", label: "Radar" },
-  { href: "/evidencia", label: "Evidencia" },
-  { href: "/socios", label: "Ecosistema" },
+  { href: "/data", label: "CCI Data" },
   { href: "/vitrina", label: "Vitrina" },
-  { href: "/recursos", label: "Recursos" },
   { href: "/eventos", label: "Eventos" },
   { href: "/eici", label: "EICI" },
   { href: "/nosotros", label: "Quiénes somos" },
-  { href: "/publica", label: "Publica" },
 ];
 
 export function Header() {
@@ -33,7 +28,7 @@ export function Header() {
           <div className="flex items-center gap-4">
             <Link href="/publica" className="text-white/80 hover:text-white">Envía tu noticia</Link>
             <span className="text-white/30">|</span>
-            <a href="#" className="font-semibold text-cci-orange-light hover:text-white">Hazte socio</a>
+            <Link href="/hazte-socio" className="font-semibold text-cci-orange-light hover:text-white">Hazte socio</Link>
           </div>
         </div>
       </div>
@@ -50,7 +45,7 @@ export function Header() {
         </nav>
 
         <div className="hidden lg:block">
-          <Link href="/publica" className="btn-primary">Publicar</Link>
+          <Link href="/hazte-socio" className="btn-primary">Hazte socio</Link>
         </div>
 
         <button aria-label="Abrir menu" className="lg:hidden" onClick={() => setOpen((v) => !v)}>
@@ -63,12 +58,12 @@ export function Header() {
       {open && (
         <nav className="border-t border-cci-line bg-white lg:hidden">
           <div className="container-cci flex flex-col py-2">
+            <Link href="/hazte-socio" onClick={() => setOpen(false)} className="btn-primary mb-2 mt-3 w-full">Hazte socio</Link>
             {nav.map((item) => (
               <Link key={item.href} href={item.href} onClick={() => setOpen(false)} className="border-b border-cci-line/60 py-3 text-sm font-medium text-cci-ink">
                 {item.label}
               </Link>
             ))}
-            <Link href="/publica" onClick={() => setOpen(false)} className="btn-primary my-3 w-full">Publicar</Link>
           </div>
         </nav>
       )}

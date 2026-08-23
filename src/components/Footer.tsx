@@ -30,9 +30,10 @@ export function Footer() {
           <h4 className="mb-3 text-sm font-700 uppercase tracking-wide text-cci-graphite">Plataforma</h4>
           <ul className="space-y-2 text-sm text-cci-slate">
             <li><Link href="/noticias" className="hover:text-cci-orange-dark">Actualidad</Link></li>
-            <li><Link href="/radar" className="hover:text-cci-orange-dark">Radar</Link></li>
+            <li><Link href="/data" className="hover:text-cci-orange-dark">CCI Data</Link></li>
             <li><Link href="/evidencia" className="hover:text-cci-orange-dark">Evidencia</Link></li>
-            <li><Link href="/socios" className="hover:text-cci-orange-dark">Ecosistema</Link></li>
+            <li><Link href="/vitrina" className="hover:text-cci-orange-dark">Vitrina</Link></li>
+            <li><Link href="/voces" className="hover:text-cci-orange-dark">Voces</Link></li>
             <li><Link href="/recursos" className="hover:text-cci-orange-dark">Recursos</Link></li>
           </ul>
         </div>
@@ -41,7 +42,7 @@ export function Footer() {
           <ul className="space-y-2 text-sm text-cci-slate">
             <li><Link href="/publica" className="hover:text-cci-orange-dark">Publica con nosotros</Link></li>
             <li><Link href="/media-kit" className="hover:text-cci-orange-dark">Media Kit</Link></li>
-            <li><a href="#" className="hover:text-cci-orange-dark">Hazte socio</a></li>
+            <li><Link href="/hazte-socio" className="hover:text-cci-orange-dark">Hazte socio</Link></li>
           </ul>
         </div>
         <div>

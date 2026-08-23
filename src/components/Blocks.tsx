@@ -61,7 +61,7 @@ export function PartnerCard({ partner }: { partner: Partner }) {
         </div>
       </div>
       <p className="text-sm leading-relaxed text-cci-slate">{partner.description}</p>
-      <Link href="/radar" className="mt-auto inline-flex items-center gap-1.5 text-sm font-semibold text-cci-orange hover:text-cci-orange-dark">Ver en el Radar<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" /></svg></Link>
+      <Link href="/data" className="mt-auto inline-flex items-center gap-1.5 text-sm font-semibold text-cci-orange hover:text-cci-orange-dark">Ver en CCI Data<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" /></svg></Link>
       <span className="sweep" />
     </div>
   );
@@ -149,7 +149,7 @@ export function CTASection() {
       title: "Hazte socio",
       desc: "Suma visibilidad editorial y participa en los grupos técnicos del Consejo.",
       label: "Quiero asociarme",
-      href: "#",
+      href: "/hazte-socio",
     },
   ];
 

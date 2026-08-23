@@ -25,6 +25,14 @@
 		-Server
 	}
 
+	# ---- Redirecciones permanentes (revisión 22/08) ----
+	# Rutas renombradas: el Radar pasó a llamarse CCI Data (/data) y la sección
+	# Ecosistema se unificó en la Vitrina (/vitrina). 301 para conservar el SEO.
+	redir /radar /data/ 301
+	redir /radar/ /data/ 301
+	redir /ecosistema /vitrina/ 301
+	redir /ecosistema/ /vitrina/ 301
+
 	# Los archivos versionados de Next nunca cambian de contenido: caché larga.
 	@nextStatic path /_next/static/*
 	header @nextStatic Cache-Control "public, max-age=31536000, immutable"

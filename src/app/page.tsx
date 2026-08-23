@@ -68,8 +68,8 @@ export default async function Home() {
               <span className="font-600 text-white"> Eso es industrializar.</span> Y no te pedimos que lo creas: miremos los datos.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/radar" className="btn-primary">Explorar el Radar</Link>
-              <Link href="/evidencia" className="inline-flex items-center justify-center gap-2 rounded-full border border-white/25 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10">Ver la evidencia</Link>
+              <Link href="/data" className="btn-primary">Ver la evidencia</Link>
+              <Link href="/nosotros" className="inline-flex items-center justify-center gap-2 rounded-full border border-white/25 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10">Conoce al CCI</Link>
             </div>
           </div>
         </div>
@@ -79,7 +79,7 @@ export default async function Home() {
       <section className="container-cci py-14">
         <SectionHeader kicker="Radar" title="La industrialización en cifras" />
         <RadarKpisPreview />
-        <VerMasLink href="/radar">Ver todas las cifras en el Radar</VerMasLink>
+        <VerMasLink href="/data">Ver todas las cifras en CCI Data</VerMasLink>
       </section>
 
       {/* QUIÉNES SOMOS — presentación compacta del CCI (detalle vive en /nosotros) */}
@@ -195,7 +195,7 @@ export default async function Home() {
 
       {/* RADAR: datos reales del ecosistema chileno */}
       <section className="container-cci py-14">
-        <SectionHeader kicker="Radar" title="El ecosistema industrializado de Chile, hoy" href="/radar" hrefLabel="Ver el Radar completo" />
+        <SectionHeader kicker="CCI Data" title="El ecosistema industrializado de Chile, hoy" href="/data" hrefLabel="Ver CCI Data completo" />
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {radarIndicators.map((i) => <MetricCard key={i.id} indicator={i} />)}
         </div>
@@ -348,6 +348,29 @@ export default async function Home() {
         <CTASection />
         <EditorialPolicyBlock />
         <NewsletterBox />
+      </section>
+
+      {/* BANDA DE CIERRE — postulación a socio (honor y pertenencia) */}
+      <section className="relative overflow-hidden bg-cci-graphite-dark">
+        <div
+          className="absolute inset-0 opacity-[0.18]"
+          style={{ backgroundImage: "radial-gradient(circle at 88% 20%, #E04E00 0%, transparent 45%), radial-gradient(circle at 5% 90%, #5C5C5C 0%, transparent 45%)" }}
+        />
+        <div className="container-cci relative py-16 text-center md:py-20">
+          <div className="mx-auto inline-flex w-fit items-center whitespace-nowrap border-l-4 border-cci-orange bg-white/[0.06] py-2 pl-4 pr-3 text-[11px] font-700 uppercase leading-none tracking-[0.15em] text-[#F5EEE6] md:text-xs">
+            Membresía
+          </div>
+          <h2 className="mx-auto mt-5 max-w-3xl font-display text-3xl font-900 leading-tight text-white md:text-4xl">
+            Postula a ser socio CCI
+          </h2>
+          <p className="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-white/75">
+            Las empresas e instituciones que están transformando la construcción en Chile ya son parte
+            del CCI. Suma a tu organización a ese ecosistema.
+          </p>
+          <div className="mt-8">
+            <Link href="/hazte-socio" className="btn-primary">Postula a ser socio CCI</Link>
+          </div>
+        </div>
       </section>
     </>
   );
