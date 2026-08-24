@@ -27,9 +27,10 @@ export default defineConfig({
               .id("eici-config")
               .child(S.document().schemaType("eici").documentId("eici-config")),
             S.divider(),
-            S.documentTypeListItem("empresaCertificada").title("Radar · Empresas certificadas"),
-            S.documentTypeListItem("indicador").title("Radar · Indicadores"),
-            S.documentTypeListItem("hito").title("Radar · Línea de tiempo"),
+            // Renombrado de etiqueta (Radar → CCI Data); mismo tipo de documento.
+            S.documentTypeListItem("empresaCertificada").title("CCI Data · Empresas certificadas"),
+            S.documentTypeListItem("indicador").title("CCI Data · Indicadores"),
+            S.documentTypeListItem("hito").title("CCI Data · Línea de tiempo"),
             S.divider(),
             S.documentTypeListItem("estudio").title("Evidencia · Estudios"),
             S.documentTypeListItem("fuente").title("Fuentes"),
@@ -37,6 +38,22 @@ export default defineConfig({
             S.documentTypeListItem("empresa").title("Ecosistema · Empresas"),
             S.documentTypeListItem("evento").title("Eventos"),
             S.documentTypeListItem("recurso").title("Recursos descargables"),
+            S.divider(),
+            // Bandeja de entrada del equipo: documentos creados por el
+            // microservicio de formularios (postulaciones, aportes, descargas).
+            // Se añade sin reordenar ni tocar las secciones existentes.
+            S.listItem()
+              .title("Bandeja de entrada")
+              .id("bandeja-entrada")
+              .child(
+                S.list()
+                  .title("Bandeja de entrada")
+                  .items([
+                    S.documentTypeListItem("postulacion").title("Postulaciones"),
+                    S.documentTypeListItem("aporte").title("Aportes"),
+                    S.documentTypeListItem("descargaLead").title("Descargas"),
+                  ])
+              ),
           ]),
     }),
     // Herramienta para consultar el contenido; útil para depurar.

@@ -93,6 +93,23 @@ export const descargaLead = defineType({
   preview: { select: { title: "recursoTitulo", subtitle: "organizacion" } },
 });
 
+// Tipos reales que llegan por el microservicio: los de /aporta, el aviso de
+// disponibilidad de recursos y los legados (dato/latam/general).
+const TIPOS_APORTE = [
+  { title: "Caso", value: "caso" },
+  { title: "Proyecto", value: "proyecto" },
+  { title: "Indicador o dato", value: "indicador" },
+  { title: "Estudio", value: "estudio" },
+  { title: "Fuente", value: "fuente" },
+  { title: "Corrección", value: "correccion" },
+  { title: "Información regional", value: "informacion_regional" },
+  { title: "Organización", value: "organizacion" },
+  { title: "Aviso de disponibilidad (recurso)", value: "aviso-recurso" },
+  { title: "Dato (legado)", value: "dato" },
+  { title: "LATAM", value: "latam" },
+  { title: "General (legado)", value: "general" },
+];
+
 export const aporte = defineType({
   name: "aporte",
   title: "Aporte / dato",
@@ -103,12 +120,20 @@ export const aporte = defineType({
     defineField({ name: "organizacion", title: "Organización", type: "string" }),
     defineField({
       name: "tipo", title: "Tipo", type: "string",
-      options: { list: ["dato", "latam", "general"] }, initialValue: "dato",
+      options: { list: TIPOS_APORTE, layout: "dropdown" }, initialValue: "dato",
     }),
     defineField({ name: "mensaje", title: "Mensaje", type: "text", rows: 4 }),
+    // Recurso asociado (aviso de disponibilidad). Lo envía el microservicio.
+    defineField({ name: "recursoSlug", title: "Recurso (slug)", type: "string" }),
+    defineField({ name: "recursoTitulo", title: "Recurso (título)", type: "string" }),
     defineField({ name: "estado", title: "Estado", type: "string", initialValue: "nueva" }),
     ...COMUNES,
   ],
   orderings: [{ title: "Más recientes", name: "fechaDesc", by: [{ field: "fecha", direction: "desc" }] }],
-  preview: { select: { title: "tipo", subtitle: "organizacion" } },
+  preview: {
+    select: { tipo: "tipo", organizacion: "organizacion", recurso: "recursoTitulo" },
+    prepare({ tipo, organizacion, recurso }) {
+      return { title: tipo || "aporte", subtitle: recurso ? `${recurso}` : organizacion || "" };
+    },
+  },
 });
