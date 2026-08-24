@@ -137,3 +137,86 @@ export const aporte = defineType({
     },
   },
 });
+
+// Solicitud de validación de un perfil de la Vitrina (Fase 3 · ajuste 4).
+// La crea el microservicio cuando una organización confirma o corrige su ficha.
+// PRECAUCIÓN: validar = la organización confirma sus datos; NO es un sello del CCI.
+export const solicitudValidacion = defineType({
+  name: "solicitudValidacion",
+  title: "Solicitud de validación (Vitrina)",
+  type: "document",
+  fields: [
+    defineField({
+      name: "empresaSlug", title: "Empresa (slug)", type: "string",
+      description: "Perfil de la Vitrina: /vitrina/[slug]. Abre la ficha para revisar y aplicar los cambios.",
+    }),
+    defineField({ name: "empresaNombre", title: "Empresa (nombre)", type: "string" }),
+    defineField({
+      name: "solicitante", title: "Solicitante", type: "object",
+      fields: [
+        { name: "nombre", title: "Nombre", type: "string" },
+        { name: "cargo", title: "Cargo", type: "string" },
+        { name: "correo", title: "Correo corporativo", type: "string" },
+      ],
+    }),
+    defineField({
+      name: "tipo", title: "Tipo de solicitud", type: "string",
+      options: { list: [{ title: "Confirmación (perfil correcto)", value: "confirmacion" }, { title: "Corrección (pide cambios)", value: "correccion" }], layout: "radio" },
+      initialValue: "confirmacion",
+    }),
+    defineField({
+      name: "correcciones", title: "Correcciones por sección", type: "object",
+      description: "Cambios pedidos por la organización. Aplícalos en la ficha; la reclasificación fina en los catálogos la haces tú.",
+      options: { collapsible: true, collapsed: false },
+      fields: [
+        { name: "contacto", title: "Contacto", type: "text", rows: 2 },
+        { name: "clasificacion", title: "Clasificación / rubros", type: "text", rows: 2 },
+        { name: "descripcion", title: "Descripción", type: "text", rows: 3 },
+        { name: "otros", title: "Otros", type: "text", rows: 2 },
+      ],
+    }),
+    defineField({ name: "mensaje", title: "Mensaje del solicitante", type: "text", rows: 3 }),
+    defineField({
+      name: "dominioSolicitante", title: "Dominio del correo", type: "string",
+      description: "Dominio del correo del solicitante. Compáralo con el sitio web de la ficha (control anti-suplantación).",
+      readOnly: true,
+    }),
+    defineField({
+      name: "coincidenciaDominio", title: "¿El dominio coincide con el sitio web de la ficha?", type: "string",
+      description: "Precalculado por el servicio. PASO CLAVE: verifica que el dominio del correo calce con el sitio web publicado en la ficha ANTES de aplicar cambios.",
+      options: { list: [{ title: "Sí coincide", value: "true" }, { title: "No coincide", value: "false" }, { title: "Sin sitio web en la ficha", value: "sin_web" }], layout: "radio" },
+      readOnly: true,
+    }),
+    defineField({
+      name: "estado", title: "Estado", type: "string",
+      description: "Flujo: nueva → en revisión → aplicada/rechazada. Marca el avance tras aplicar (o descartar) los cambios en la ficha.",
+      options: { list: [{ title: "Nueva", value: "nueva" }, { title: "En revisión", value: "en_revision" }, { title: "Aplicada", value: "aplicada" }, { title: "Rechazada", value: "rechazada" }], layout: "dropdown" },
+      initialValue: "nueva",
+    }),
+    defineField({ name: "responsable", title: "Responsable", type: "string" }),
+    defineField({
+      name: "notas", title: "Historial de notas", type: "array",
+      of: [{
+        type: "object",
+        fields: [
+          { name: "fecha", title: "Fecha", type: "datetime" },
+          { name: "autor", title: "Autor", type: "string" },
+          { name: "texto", title: "Nota", type: "text", rows: 2 },
+        ],
+        preview: { select: { title: "texto", subtitle: "autor" } },
+      }],
+    }),
+    ...COMUNES,
+  ],
+  orderings: [{ title: "Más recientes", name: "fechaDesc", by: [{ field: "fecha", direction: "desc" }] }],
+  preview: {
+    select: { empresa: "empresaNombre", tipo: "tipo", estado: "estado", coincidencia: "coincidenciaDominio" },
+    prepare({ empresa, tipo, estado, coincidencia }) {
+      const dom = coincidencia === "true" ? "dominio ✓" : coincidencia === "false" ? "dominio ✗" : coincidencia === "sin_web" ? "sin web" : "";
+      return {
+        title: empresa || "(sin empresa)",
+        subtitle: [tipo || "?", estado || "nueva", dom].filter(Boolean).join(" · "),
+      };
+    },
+  },
+});

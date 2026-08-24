@@ -22,6 +22,16 @@ export async function generateStaticParams() {
   return slugs.map((slug) => ({ slug }));
 }
 
+const MESES = [
+  "enero", "febrero", "marzo", "abril", "mayo", "junio",
+  "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre",
+];
+/** "2026-08-24" → "agosto 2026". */
+function mesAno(iso: string): string {
+  const [y, m] = iso.slice(0, 7).split("-");
+  return `${MESES[Number(m) - 1] ?? ""} ${y}`.trim();
+}
+
 // Grupo de "pastillas" para una dimensión de la taxonomía. No renderiza nada si
 // la lista viene vacía (regla dura: campos vacíos no se muestran).
 function Grupo({
@@ -70,12 +80,15 @@ export default async function EmpresaVitrinaPage({ params }: { params: Promise<{
     empresa.validationStatus === "en_actualizacion" ||
     empresa.validationStatus === "pendiente";
 
-  // mailto para que la propia organización solicite validar su perfil.
-  const mailtoValidar = `mailto:cci@cdt.cl?subject=${encodeURIComponent(
-    `Validación de perfil Vitrina — ${empresa.nombre}`
-  )}&body=${encodeURIComponent(
-    `Hola CCI,\n\nSoy de ${empresa.nombre} y quiero validar y actualizar nuestro perfil en la Vitrina.\n\nPerfil: /vitrina/${empresa.slug}\n\nDatos a actualizar o confirmar:\n- \n\nGracias.`
-  )}`;
+  // Entrada única de validación: la propia organización confirma o corrige su
+  // perfil (el mailto directo desapareció de la ficha; vive como respaldo dentro
+  // de /vitrina/validar).
+  const validarHref = `/vitrina/validar?empresa=${encodeURIComponent(empresa.slug)}`;
+
+  // Insignia "Validado por la organización · [mes año]" (solo con estado + fecha).
+  const validadoPorOrg =
+    empresa.validationStatus === "validado_por_organizacion" && Boolean(empresa.fechaValidacion);
+  const mesAnoValidacion = empresa.fechaValidacion ? mesAno(empresa.fechaValidacion) : "";
 
   const cobertura =
     empresa.coverageType ? etiqueta(ETIQUETAS_COBERTURA, empresa.coverageType) : undefined;
@@ -105,6 +118,16 @@ export default async function EmpresaVitrinaPage({ params }: { params: Promise<{
                   {etiqueta(ETIQUETAS_RELACION, r)}
                 </span>
               ))}
+            {/* Insignia neutra (estilo del indicador de evidencia): NO es un
+                sello del CCI, solo indica que la organización confirmó sus datos. */}
+            {validadoPorOrg && (
+              <span
+                className="inline-flex w-fit items-center rounded-md border border-cci-line bg-cci-paper px-2 py-0.5 text-[10px] font-700 uppercase tracking-wide text-cci-slate"
+                title="Información confirmada por la propia organización. No constituye una certificación del CCI."
+              >
+                Validado por la organización · {mesAnoValidacion}
+              </span>
+            )}
           </div>
           <h1 className="font-display text-3xl font-900 leading-tight text-cci-ink md:text-4xl">{empresa.nombre}</h1>
           {empresa.titular && <p className="mt-2 text-lg text-cci-slate">{empresa.titular}</p>}
@@ -249,24 +272,34 @@ export default async function EmpresaVitrinaPage({ params }: { params: Promise<{
             {empresa.telefono && <span className="text-sm text-cci-slate">Tel: {empresa.telefono}</span>}
           </div>
         ) : (
-          // Contacto no validado: se oculta el campo y se ofrece validar el perfil.
           <div className="rounded-xl border border-cci-line bg-cci-paper px-5 py-5">
             <p className="font-600 text-cci-ink">Perfil en actualización</p>
             <p className="mt-1 text-sm text-cci-slate">
               Estamos completando y validando la información de esta organización con su equipo.
             </p>
-            <a
-              href={mailtoValidar}
-              data-cta="valida-perfil"
-              data-ubicacion="ficha-vitrina"
-              className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-cci-orange hover:text-cci-orange-dark"
-            >
-              ¿Eres esta organización? Solicita validar tu perfil
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </a>
           </div>
+        )}
+
+        {/* CTA único de validación: la organización confirma o corrige su perfil. */}
+        <div className="mt-4">
+          <Link
+            href={validarHref}
+            data-cta="valida-perfil"
+            data-ubicacion="ficha-vitrina"
+            className="inline-flex items-center gap-1.5 rounded-full border border-cci-line px-5 py-2.5 text-sm font-semibold text-cci-graphite transition hover:border-cci-graphite hover:bg-cci-paper"
+          >
+            ¿Eres esta organización? Validar o corregir este perfil
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </Link>
+        </div>
+
+        {/* Nota discreta de la insignia (solo si está validado por la organización). */}
+        {validadoPorOrg && (
+          <p className="mt-4 text-xs leading-snug text-cci-slate-light">
+            Información confirmada por la propia organización. No constituye una certificación del CCI.
+          </p>
         )}
 
         {/* Estado de validación + fecha (discreto, no alarmista) */}

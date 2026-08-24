@@ -221,7 +221,8 @@ const EMPRESA_VITRINA_FIELDS = `
   validationStatus,
   certificaciones,
   direccionPlantas,
-  lastVerifiedAt
+  lastVerifiedAt,
+  fechaValidacion
 `;
 
 export const empresasVitrinaQuery = `*[_type == "empresaVitrina"] | order(nombre asc){${EMPRESA_VITRINA_FIELDS}}`;

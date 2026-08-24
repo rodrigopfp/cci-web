@@ -52,6 +52,7 @@ export default defineConfig({
                     S.documentTypeListItem("postulacion").title("Postulaciones"),
                     S.documentTypeListItem("aporte").title("Aportes"),
                     S.documentTypeListItem("descargaLead").title("Descargas"),
+                    S.documentTypeListItem("solicitudValidacion").title("Solicitudes de validación"),
                   ])
               ),
           ]),

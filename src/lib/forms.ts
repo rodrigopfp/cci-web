@@ -14,7 +14,7 @@ export function formsApiActiva(): boolean {
 
 export const EMAIL_CCI = "cci@cdt.cl";
 
-export type EndpointForm = "postulacion" | "descarga" | "aporte" | "latam";
+export type EndpointForm = "postulacion" | "descarga" | "aporte" | "latam" | "validacion";
 
 /** POST al microservicio. Devuelve {ok:false, error:"sin-api"} si no hay API. */
 export async function enviarFormulario(

@@ -348,6 +348,13 @@ export const empresaVitrina = defineType({
       initialValue: "en_actualizacion",
     }),
     defineField({
+      name: "fechaValidacion",
+      title: "Fecha de validación por la organización",
+      description:
+        "Se completa al marcar «Validado por la organización». Con estado + fecha, la ficha muestra la insignia «Validado por la organización · [mes año]» (no es una certificación del CCI).",
+      type: "date",
+    }),
+    defineField({
       name: "certificaciones",
       title: "Certificaciones",
       description: "Una por línea. Ej.: «ISO 9001», «CES». No inventar.",

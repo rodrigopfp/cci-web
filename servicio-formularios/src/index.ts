@@ -55,13 +55,38 @@ function rateLimited(ip: string): boolean {
 }
 
 type Body = Record<string, unknown>;
+type Doc = { _type: string; [k: string]: unknown };
 const str = (v: unknown): string => (typeof v === "string" ? v.trim() : "");
 const faltan = (b: Body, campos: string[]): string[] => campos.filter((c) => !str(b[c]));
 
-// Envuelve un handler con honeypot, rate limit y manejo de errores.
+// --- Dominio del correo vs. sitio web de la ficha (control anti-suplantación) --
+const dominioCorreo = (email: string): string => {
+  const parte = email.split("@")[1];
+  return parte ? parte.trim().toLowerCase().replace(/^www\./, "") : "";
+};
+const dominioWeb = (url: string): string => {
+  if (!url) return "";
+  try {
+    const u = new URL(/^https?:\/\//i.test(url) ? url : `https://${url}`);
+    return u.hostname.toLowerCase().replace(/^www\./, "");
+  } catch {
+    return "";
+  }
+};
+/** "true" | "false" | "sin_web" comparando el dominio del correo con el web. */
+const coincideDominio = (correo: string, web: string): "true" | "false" | "sin_web" => {
+  const dw = dominioWeb(web);
+  if (!dw) return "sin_web";
+  const dc = dominioCorreo(correo);
+  if (!dc) return "false";
+  return dc === dw || dc.endsWith(`.${dw}`) || dw.endsWith(`.${dc}`) ? "true" : "false";
+};
+
+// Envuelve un handler con honeypot, rate limit y manejo de errores. `construir`
+// puede ser async (p. ej. para consultar la ficha en Sanity antes de guardar).
 function handler(
   requeridos: string[],
-  construir: (b: Body) => { _type: string; [k: string]: unknown }
+  construir: (b: Body) => Doc | Promise<Doc>
 ) {
   return async (req: Request, res: Response) => {
     try {
@@ -75,7 +100,7 @@ function handler(
       const missing = faltan(b, requeridos);
       if (missing.length) return res.status(400).json({ ok: false, error: `faltan campos: ${missing.join(", ")}` });
 
-      const doc = construir(b);
+      const doc = await construir(b);
       await sanity.create(doc);
       return res.json({ ok: true });
     } catch (e) {
@@ -142,6 +167,45 @@ app.post(
     nombre: str(b.nombre), email: str(b.email), organizacion: str(b.organizacion),
     tipo: "latam", mensaje: str(b.mensaje), estado: "nueva", ...comunes(b),
   }))
+);
+
+// Validación de perfil de la Vitrina: la organización confirma o corrige su
+// ficha. Precalcula coincidenciaDominio (correo vs sitio web de la ficha en
+// Sanity) como control anti-suplantación; el equipo revisa antes de aplicar.
+const lstr = (v: unknown, k: string): string => (v && typeof v === "object" ? str((v as Body)[k]) : "");
+app.post(
+  "/api/validacion",
+  handler(["empresaSlug", "nombre", "correo"], async (b) => {
+    const correo = str(b.correo);
+    const empresaSlug = str(b.empresaSlug);
+    let web = "";
+    try {
+      web = str(
+        await sanity.fetch(`*[_type == "empresaVitrina" && slug.current == $slug][0].sitioWeb`, { slug: empresaSlug })
+      );
+    } catch {
+      // Si falla la consulta, coincidenciaDominio queda "sin_web" y el equipo
+      // compara a mano con el dominioSolicitante guardado.
+    }
+    return {
+      _type: "solicitudValidacion",
+      empresaSlug,
+      empresaNombre: str(b.empresaNombre),
+      solicitante: { nombre: str(b.nombre), cargo: str(b.cargo), correo },
+      tipo: str(b.tipo) === "correccion" ? "correccion" : "confirmacion",
+      correcciones: {
+        contacto: lstr(b.correcciones, "contacto"),
+        clasificacion: lstr(b.correcciones, "clasificacion"),
+        descripcion: lstr(b.correcciones, "descripcion"),
+        otros: lstr(b.correcciones, "otros"),
+      },
+      mensaje: str(b.mensaje),
+      dominioSolicitante: dominioCorreo(correo),
+      coincidenciaDominio: coincideDominio(correo, web),
+      estado: "nueva",
+      ...comunes(b),
+    };
+  })
 );
 
 app.listen(PORT, () => console.log(`cci-forms escuchando en :${PORT}`));

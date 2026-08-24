@@ -330,14 +330,14 @@ export function VitrinaClient({ empresas }: { empresas: EmpresaVitrina[] }) {
                 <Link href="/hazte-socio" data-cta="hazte-socio" data-ubicacion="cierre-vitrina" className="btn-primary">
                   Postula a ser socio CCI
                 </Link>
-                <a
-                  href={`mailto:cci@cdt.cl?subject=${encodeURIComponent("Validación de perfil Vitrina")}&body=${encodeURIComponent("Hola CCI,\n\nQuiero validar y actualizar el perfil de mi organización en la Vitrina.\n\nOrganización:\nContacto:\nDatos a actualizar:\n\nGracias.")}`}
+                <Link
+                  href="/vitrina/validar"
                   data-cta="valida-perfil"
                   data-ubicacion="cierre-vitrina"
                   className="inline-flex items-center justify-center gap-2 rounded-full border border-white/25 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10"
                 >
                   Valida el perfil de tu organización
-                </a>
+                </Link>
               </div>
             </div>
           </section>

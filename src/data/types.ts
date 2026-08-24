@@ -288,6 +288,8 @@ export interface EmpresaVitrina {
   direccionPlantas: string[];
   /** ISO datetime de la última verificación humana del perfil. */
   lastVerifiedAt?: string;
+  /** ISO date en que la organización validó su perfil (para la insignia). */
+  fechaValidacion?: string;
 }
 
 export type HitoTipo = "normativa" | "obra" | "gremial" | "dato";

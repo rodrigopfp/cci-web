@@ -6,7 +6,7 @@ import { voz } from "./voz";
 import { eici } from "./eici";
 import { empresaVitrina } from "./empresaVitrina";
 import { requerimiento } from "./requerimiento";
-import { postulacion, descargaLead, aporte } from "./formularios";
+import { postulacion, descargaLead, aporte, solicitudValidacion } from "./formularios";
 
 export const schemaTypes = [
   noticia,
@@ -26,4 +26,5 @@ export const schemaTypes = [
   postulacion,
   descargaLead,
   aporte,
+  solicitudValidacion,
 ];

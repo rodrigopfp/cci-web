@@ -611,6 +611,7 @@ type EmpresaVitrinaDoc = {
   certificaciones?: string[];
   direccionPlantas?: string[];
   lastVerifiedAt?: string;
+  fechaValidacion?: string;
 };
 
 // Devuelve un arreglo de strings solo con valores válidos (sin nulos ni vacíos).
@@ -676,6 +677,7 @@ function toEmpresaVitrina(d: EmpresaVitrinaDoc): EmpresaVitrina {
     certificaciones: limpiarLista(d.certificaciones),
     direccionPlantas: limpiarLista(d.direccionPlantas),
     lastVerifiedAt: d.lastVerifiedAt || undefined,
+    fechaValidacion: d.fechaValidacion || undefined,
   };
 }
 
