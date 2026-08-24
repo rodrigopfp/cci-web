@@ -18,6 +18,8 @@ import { PotencialGauge } from "@/components/RadarKpis";
 import { IndustrializarEscenas } from "@/components/IndustrializarEscenas";
 import { usePrefersReducedMotion, useInView, useCountUp } from "@/lib/counters";
 import { obtenerIndicador, obtenerFuente, obtenerIndicadorConFuente } from "@/lib/datos/indice";
+import { EtiquetaEvidencia, NotaEvidencia } from "@/components/EtiquetaEvidencia";
+import { infoEvidencia } from "@/lib/datos/evidencia";
 import { formatDate } from "@/lib/format";
 
 const GUIA_HREF = "/conocimiento/guia-integracion-temprana-cci";
@@ -34,6 +36,12 @@ function formatCL(n: number, decimals = 0): string {
 const val = (slug: string): number => Number(obtenerIndicador(slug).value);
 const decimalsDe = (n: number): number => (Number.isInteger(n) ? 0 : 2);
 
+/** Evidencia de un indicador para <MetricCard> (etiqueta neutra + nota). */
+const evidenciaDe = (slug: string) => {
+  const i = obtenerIndicador(slug);
+  return { tipo: i.sourceType, scope: i.scope };
+};
+
 // Adaptador registro → Indicator (tipo del sitio) para reutilizar MetricCard.
 const SOURCE_TYPE_MAP: Record<string, SourceType> = {
   official_chile: "oficial",
@@ -41,6 +49,7 @@ const SOURCE_TYPE_MAP: Record<string, SourceType> = {
   academic: "académica",
   international: "internacional",
   documented_case: "empresa",
+  declared_by_organization: "empresa",
   survey: "internacional",
   estimate: "estimación",
 };
@@ -106,6 +115,8 @@ function StatCard({
   fuente,
   fuenteUrl,
   reduced,
+  tipo,
+  scope,
 }: {
   value: number;
   decimals?: number;
@@ -115,6 +126,8 @@ function StatCard({
   fuente: string;
   fuenteUrl?: string;
   reduced: boolean;
+  tipo?: string;
+  scope?: string;
 }) {
   const { ref, inView } = useInView<HTMLDivElement>();
   const v = useCountUp(value, inView, reduced, 1500);
@@ -126,18 +139,20 @@ function StatCard({
         {suffix}
       </div>
       <p className="mt-3 flex-1 text-sm leading-snug text-cci-slate">{label}</p>
+      {tipo && <div className="mt-3"><EtiquetaEvidencia tipo={tipo} /></div>}
       {fuenteUrl ? (
         <a
           href={fuenteUrl}
           target={fuenteUrl.startsWith("http") ? "_blank" : undefined}
           rel={fuenteUrl.startsWith("http") ? "noopener noreferrer" : undefined}
-          className="mt-4 inline-flex items-center gap-1 text-[11px] font-600 text-cci-slate-light hover:text-cci-orange-dark"
+          className="mt-3 inline-flex items-center gap-1 text-[11px] font-600 text-cci-slate-light hover:text-cci-orange-dark"
         >
           Fuente: {fuente}
         </a>
       ) : (
-        <span className="mt-4 text-[11px] font-600 text-cci-slate-light">Fuente: {fuente}</span>
+        <span className="mt-3 text-[11px] font-600 text-cci-slate-light">Fuente: {fuente}</span>
       )}
+      {tipo && <NotaEvidencia tipo={tipo} scope={scope} />}
     </div>
   );
 }
@@ -166,6 +181,8 @@ function StatIndicador({
       fuente={f.shortLabel ?? f.organization}
       fuenteUrl={f.url}
       reduced={reduced}
+      tipo={i.sourceType}
+      scope={i.scope}
     />
   );
 }
@@ -184,6 +201,8 @@ function BarDuel({
   chip,
   reduced,
   dark = false,
+  tipo,
+  scope,
 }: {
   title: string;
   hint?: string;
@@ -192,6 +211,8 @@ function BarDuel({
   chip?: string;
   reduced: boolean;
   dark?: boolean;
+  tipo?: string;
+  scope?: string;
 }) {
   const { ref, inView } = useInView<HTMLDivElement>();
   const active = inView || reduced;
@@ -230,6 +251,12 @@ function BarDuel({
         ))}
       </div>
       {hint && <p className={`mt-2 text-[11px] ${dark ? "text-white/50" : "text-cci-slate-light"}`}>{hint}</p>}
+      {tipo && (
+        <div className="mt-3">
+          <EtiquetaEvidencia tipo={tipo} dark={dark} />
+          <NotaEvidencia tipo={tipo} scope={scope} dark={dark} />
+        </div>
+      )}
     </div>
   );
 }
@@ -270,6 +297,12 @@ function FuenteDetalle({ slugs, dark = false }: { slugs: string[]; dark?: boolea
               </div>
             )}
             {f.publicationDate && <div>Publicación: {f.publicationDate}</div>}
+            {infoEvidencia(rep.sourceType) && (
+              <div>
+                <span className={`font-700 ${strong}`}>Tipo de evidencia:</span>{" "}
+                {infoEvidencia(rep.sourceType)!.etiqueta} — {infoEvidencia(rep.sourceType)!.interpretacion}
+              </div>
+            )}
             <div>Fecha de corte del dato: {formatDate(rep.cutoffDate)}</div>
             <div>Alcance: {rep.scope}</div>
             {rep.methodology && <div>Metodología: {rep.methodology}</div>}
@@ -398,6 +431,9 @@ export function DataStory({ studiesInternacionales }: { studiesInternacionales: 
   const deltaRes = Math.round(((resCon - resSin) / resSin) * 100); // -30
   const factorAtr = Math.round(atrSin / atrCon); // 3
   const iplc = obtenerFuente("iplc-2025");
+  // Las tres cifras derivadas de los duelos comparten la evidencia del IPLC
+  // (muestra sectorial); reusamos su alcance para la nota de interpretación.
+  const iplcScope = obtenerIndicador("iplc-productividad-con-mmc").scope;
 
   const r20 = obtenerIndicador("residuos-sectorial-2020");
   const r25 = obtenerIndicador("residuos-sectorial-2025");
@@ -419,10 +455,10 @@ export function DataStory({ studiesInternacionales }: { studiesInternacionales: 
 
           <div className="mt-10 grid gap-5 md:grid-cols-2">
             <Reveal reduced={reduced}>
-              <MetricCard indicator={metricFromIndicador("deficit-habitacional")} />
+              <MetricCard indicator={metricFromIndicador("deficit-habitacional")} evidencia={evidenciaDe("deficit-habitacional")} />
             </Reveal>
             <Reveal reduced={reduced} delay={80}>
-              <MetricCard indicator={metricFromIndicador("meta-habitacional")} />
+              <MetricCard indicator={metricFromIndicador("meta-habitacional")} evidencia={evidenciaDe("meta-habitacional")} />
             </Reveal>
           </div>
 
@@ -466,6 +502,8 @@ export function DataStory({ studiesInternacionales }: { studiesInternacionales: 
               chip={`brecha de ${obtenerIndicador("brecha-productividad").prefix ?? ""}${val("brecha-productividad")}${obtenerIndicador("brecha-productividad").suffix ?? ""}`}
               reduced={reduced}
               dark
+              tipo={obtenerIndicador("productividad-chile").sourceType}
+              scope={obtenerIndicador("productividad-chile").scope}
             />
             <p className="mt-5 border-t border-white/10 pt-4 text-[11px] leading-relaxed text-white/50">
               Fuente: {obtenerFuente("matrix-2020").shortLabel}.
@@ -586,13 +624,13 @@ export function DataStory({ studiesInternacionales }: { studiesInternacionales: 
           {/* 4 tarjetas de cifra (3 derivadas de los duelos + BIM directo) */}
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             <Reveal reduced={reduced}>
-              <StatCard value={Math.abs(deltaProd)} prefix={deltaProd >= 0 ? "+" : "−"} suffix="%" label="Productividad con métodos modernos de construcción (MMC)" fuente={iplc.shortLabel ?? iplc.organization} fuenteUrl={iplc.url} reduced={reduced} />
+              <StatCard value={Math.abs(deltaProd)} prefix={deltaProd >= 0 ? "+" : "−"} suffix="%" label="Productividad con métodos modernos de construcción (MMC)" fuente={iplc.shortLabel ?? iplc.organization} fuenteUrl={iplc.url} reduced={reduced} tipo="survey" scope={iplcScope} />
             </Reveal>
             <Reveal reduced={reduced} delay={70}>
-              <StatCard value={Math.abs(deltaRes)} prefix={deltaRes >= 0 ? "+" : "−"} suffix="%" label="Residuos de obra con MMC" fuente={iplc.shortLabel ?? iplc.organization} fuenteUrl={iplc.url} reduced={reduced} />
+              <StatCard value={Math.abs(deltaRes)} prefix={deltaRes >= 0 ? "+" : "−"} suffix="%" label="Residuos de obra con MMC" fuente={iplc.shortLabel ?? iplc.organization} fuenteUrl={iplc.url} reduced={reduced} tipo="survey" scope={iplcScope} />
             </Reveal>
             <Reveal reduced={reduced} delay={140}>
-              <StatCard value={factorAtr} suffix="×" label="Menos obras que terminan fuera de plazo" fuente={iplc.shortLabel ?? iplc.organization} fuenteUrl={iplc.url} reduced={reduced} />
+              <StatCard value={factorAtr} suffix="×" label="Menos obras que terminan fuera de plazo" fuente={iplc.shortLabel ?? iplc.organization} fuenteUrl={iplc.url} reduced={reduced} tipo="survey" scope={iplcScope} />
             </Reveal>
             <Reveal reduced={reduced} delay={210}>
               <StatIndicador slug="iplc-productividad-bim" label="Productividad con coordinación BIM" reduced={reduced} />
@@ -612,6 +650,8 @@ export function DataStory({ studiesInternacionales }: { studiesInternacionales: 
                 decimals={2}
                 reduced={reduced}
                 dark
+                tipo="survey"
+                scope={iplcScope}
               />
             </Reveal>
             <Reveal reduced={reduced} delay={80} className="rounded-2xl border border-white/10 bg-white/[0.04] p-6">
@@ -625,6 +665,8 @@ export function DataStory({ studiesInternacionales }: { studiesInternacionales: 
                 decimals={2}
                 reduced={reduced}
                 dark
+                tipo="survey"
+                scope={iplcScope}
               />
             </Reveal>
             <Reveal reduced={reduced} delay={160} className="rounded-2xl border border-white/10 bg-white/[0.04] p-6">
@@ -637,6 +679,8 @@ export function DataStory({ studiesInternacionales }: { studiesInternacionales: 
                 ]}
                 reduced={reduced}
                 dark
+                tipo="survey"
+                scope={iplcScope}
               />
             </Reveal>
           </div>
@@ -706,9 +750,12 @@ export function DataStory({ studiesInternacionales }: { studiesInternacionales: 
                   Chile ya tiene norma oficial de construcción industrializada
                 </h3>
                 <p className="mt-3 text-sm leading-relaxed text-cci-slate">{nch.description}</p>
-                <span className="mt-auto pt-4 text-[11px] font-600 text-cci-slate-light">
-                  Fuente: {obtenerFuente(nch.sourceId).shortLabel}
-                </span>
+                <div className="mt-auto flex flex-wrap items-center gap-2 pt-4">
+                  <span className="text-[11px] font-600 text-cci-slate-light">
+                    Fuente: {obtenerFuente(nch.sourceId).shortLabel}
+                  </span>
+                  <EtiquetaEvidencia tipo={nch.sourceType} />
+                </div>
               </div>
             </Reveal>
 
@@ -781,6 +828,10 @@ export function DataStory({ studiesInternacionales }: { studiesInternacionales: 
                       );
                     })}
                   </ul>
+                  <NotaEvidencia
+                    tipo="documented_case"
+                    scope={obtenerIndicador(caso.metrics[0].slug).scope}
+                  />
                 </div>
               </Reveal>
             ))}

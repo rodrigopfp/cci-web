@@ -24,6 +24,7 @@ export const SOURCE_TYPES = [
   "international",
   "documented_case",
   "survey",
+  "declared_by_organization",
   "estimate",
 ] as const;
 export type IndicatorSourceType = (typeof SOURCE_TYPES)[number];

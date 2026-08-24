@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PAISES_LATAM, getFichaPais } from "@/lib/datos/latam";
 import { obtenerIndicadorConFuente, obtenerFuente } from "@/lib/datos/indice";
+import { EtiquetaEvidencia, NotaEvidencia } from "@/components/EtiquetaEvidencia";
 import { SITE_URL } from "@/lib/site";
 
 export function generateStaticParams() {
@@ -162,7 +163,9 @@ export default async function FichaPaisPage({ params }: { params: Promise<{ pais
                   {i.unit && <span className="ml-1 text-sm font-700 text-cci-slate">{i.unit}</span>}
                 </div>
                 <p className="mt-1 text-sm text-cci-slate">{i.title}</p>
+                <div className="mt-2"><EtiquetaEvidencia tipo={i.sourceType} /></div>
                 <p className="mt-2 text-[11px] font-600 text-cci-slate-light">Fuente: {fuente.shortLabel ?? fuente.organization}</p>
+                <NotaEvidencia tipo={i.sourceType} scope={i.scope} />
               </div>
             ))}
           </div>

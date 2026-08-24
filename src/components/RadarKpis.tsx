@@ -14,10 +14,16 @@ import Image from "next/image";
 import { usePrefersReducedMotion, useInView, useCountUp } from "@/lib/counters";
 import { obtenerIndicadorConFuente } from "@/lib/datos/indice";
 import type { DataSource } from "@/lib/datos/tipos-indicadores";
+import { EtiquetaEvidencia, NotaEvidencia } from "@/components/EtiquetaEvidencia";
+import { infoEvidencia } from "@/lib/datos/evidencia";
 
 // Foto de cabecera opcional. Solo la pasa la portada (RadarKpisPreview); en CCI
 // Data las tarjetas van sin foto, idénticas a antes.
 type Foto = { src: string; alt: string };
+
+// Tipo de evidencia del indicador. En la portada se muestra COMPACTA dentro de
+// la línea de fuente (sin elementos visuales nuevos); en CCI Data, como etiqueta.
+type Evidencia = { tipo: string; scope?: string; variant?: "normal" | "compacta" };
 
 // ---- Piezas de presentación -------------------------------------------
 
@@ -25,8 +31,14 @@ function anioDe(fecha?: string): string {
   return fecha ? String(fecha).slice(0, 4) : "";
 }
 
-function SourceLink({ source }: { source: DataSource }) {
-  const etiqueta = `Fuente: ${source.organization}${source.publicationDate ? ` (${anioDe(source.publicationDate)})` : ""}`;
+function SourceLink({ source, evidenciaTipo }: { source: DataSource; evidenciaTipo?: string }) {
+  const anio = source.publicationDate ? ` (${anioDe(source.publicationDate)})` : "";
+  // En compacta el tipo de evidencia reemplaza el prefijo "Fuente:": una sola
+  // línea "Benchmark internacional · MGI (2017)". Sin la etiqueta, "Fuente: …".
+  const et = evidenciaTipo ? infoEvidencia(evidenciaTipo)?.etiqueta : undefined;
+  const etiqueta = et
+    ? `${et} · ${source.organization}${anio}`
+    : `Fuente: ${source.organization}${anio}`;
   if (!source.url) {
     return <span className="mt-4 inline-block text-[11px] font-600 leading-snug text-cci-slate-light">{etiqueta}</span>;
   }
@@ -36,7 +48,7 @@ function SourceLink({ source }: { source: DataSource }) {
       href={source.url}
       target={externo ? "_blank" : undefined}
       rel={externo ? "noopener noreferrer" : undefined}
-      title={`${source.title}${source.publicationDate ? ` (${anioDe(source.publicationDate)})` : ""}`}
+      title={`${source.title}${anio}`}
       className="mt-4 inline-block text-[11px] font-600 leading-snug text-cci-slate-light transition hover:text-cci-orange"
     >
       {etiqueta}
@@ -75,6 +87,7 @@ function GaugeCard({
   reduced,
   mirror = false,
   foto,
+  evidencia,
 }: {
   label: string;
   note: string;
@@ -87,6 +100,7 @@ function GaugeCard({
   reduced: boolean;
   mirror?: boolean;
   foto?: Foto;
+  evidencia?: Evidencia;
 }) {
   const { ref, inView } = useInView<HTMLElement>();
   const v = useCountUp(target, inView, reduced);
@@ -125,7 +139,20 @@ function GaugeCard({
         </div>
         <p className="mt-3 text-sm text-cci-slate">{note}</p>
         <div className="mt-auto">
-          <SourceLink source={source} />
+          {evidencia?.variant === "compacta" ? (
+            // Portada: el tipo de evidencia vive DENTRO de la línea de fuente.
+            <SourceLink source={source} evidenciaTipo={evidencia.tipo} />
+          ) : (
+            <>
+              <SourceLink source={source} />
+              {evidencia && (
+                <div className="mt-2">
+                  <EtiquetaEvidencia tipo={evidencia.tipo} />
+                  <NotaEvidencia tipo={evidencia.tipo} scope={evidencia.scope} />
+                </div>
+              )}
+            </>
+          )}
         </div>
       </div>
     </article>
@@ -134,7 +161,9 @@ function GaugeCard({
 
 // ---- Instrumentos reutilizables (portada + CCI Data), desde el registro ----
 
-export function PotencialGauge({ reduced, foto }: { reduced: boolean; foto?: Foto }) {
+type GaugeProps = { reduced: boolean; foto?: Foto; variant?: "normal" | "compacta" };
+
+export function PotencialGauge({ reduced, foto, variant = "normal" }: GaugeProps) {
   const { indicador, fuente } = obtenerIndicadorConFuente("potencial-productividad");
   const target = Number(indicador.value);
   const prefix = indicador.prefix ?? "";
@@ -151,11 +180,12 @@ export function PotencialGauge({ reduced, foto }: { reduced: boolean; foto?: Fot
       ariaLabel={`${prefix}${target}${suffix} — ${indicador.title}`}
       reduced={reduced}
       foto={foto}
+      evidencia={{ tipo: indicador.sourceType, scope: indicador.scope, variant }}
     />
   );
 }
 
-export function CalidadGauge({ reduced, foto }: { reduced: boolean; foto?: Foto }) {
+export function CalidadGauge({ reduced, foto, variant = "normal" }: GaugeProps) {
   const { indicador, fuente } = obtenerIndicadorConFuente("calidad-percepcion");
   const target = Number(indicador.value);
   const suffix = indicador.suffix ?? "%";
@@ -171,11 +201,12 @@ export function CalidadGauge({ reduced, foto }: { reduced: boolean; foto?: Foto 
       ariaLabel={`${target}${suffix} — ${indicador.title}`}
       reduced={reduced}
       foto={foto}
+      evidencia={{ tipo: indicador.sourceType, scope: indicador.scope, variant }}
     />
   );
 }
 
-export function ResiduosGauge({ reduced, foto }: { reduced: boolean; foto?: Foto }) {
+export function ResiduosGauge({ reduced, foto, variant = "normal" }: GaugeProps) {
   const { indicador, fuente } = obtenerIndicadorConFuente("residuos-reduccion");
   const target = Number(indicador.value);
   const prefix = indicador.prefix ?? "−";
@@ -193,6 +224,7 @@ export function ResiduosGauge({ reduced, foto }: { reduced: boolean; foto?: Foto
       ariaLabel={`${prefix}${target}${suffix} — ${indicador.title}`}
       reduced={reduced}
       foto={foto}
+      evidencia={{ tipo: indicador.sourceType, scope: indicador.scope, variant }}
     />
   );
 }
@@ -208,14 +240,17 @@ export function RadarKpisPreview() {
     <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
       <PotencialGauge
         reduced={reduced}
+        variant="compacta"
         foto={{ src: "/img/portada/portada-productividad.jpg", alt: "Montaje de vivienda industrializada: panel con ventana instalada izado por grúa" }}
       />
       <CalidadGauge
         reduced={reduced}
+        variant="compacta"
         foto={{ src: "/img/portada/portada-calidad.jpg", alt: "Control de calidad en planta: operadora en estación CNC" }}
       />
       <ResiduosGauge
         reduced={reduced}
+        variant="compacta"
         foto={{ src: "/img/portada/portada-residuos.jpg", alt: "Montaje de elementos industrializados en obra" }}
       />
     </div>

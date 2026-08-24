@@ -42,6 +42,14 @@ function conValorDelRegistro(ind: Indicator): Indicator {
   const value = typeof v === "number" ? formatoCL(v) : String(v);
   return { ...ind, value };
 }
+// Tipo de evidencia para la portada: COMPACTA (texto en la línea de ficha
+// existente, Regla 3). Solo para los indicadores respaldados por el registro.
+function evidenciaPortada(ind: Indicator) {
+  const slug = REGISTRO_PORTADA[ind.id];
+  if (!slug) return undefined;
+  const i = obtenerIndicador(slug);
+  return { tipo: i.sourceType, scope: i.scope, variant: "compacta" as const };
+}
 
 export const metadata = {
   alternates: { canonical: `${SITE_URL}/` },
@@ -262,7 +270,7 @@ export default async function Home() {
         <SectionHeader kicker="CCI Data" title="El ecosistema industrializado de Chile, hoy" href="/data" hrefLabel="Ver CCI Data completo" />
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {radarIndicators.map((i) => (
-            <MetricCard key={i.id} indicator={conValorDelRegistro(i)} />
+            <MetricCard key={i.id} indicator={conValorDelRegistro(i)} evidencia={evidenciaPortada(i)} />
           ))}
         </div>
         <p className="mt-6 max-w-3xl text-sm leading-relaxed text-cci-slate">

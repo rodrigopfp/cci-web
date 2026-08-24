@@ -12,6 +12,7 @@ import { SITE_URL } from "@/lib/site";
 import { formatDate } from "@/lib/format";
 import { ETIQUETAS_CATEGORIA, ETIQUETAS_ESTADO, etiquetaTema, estadoChip, urlDescarga, esDescargable } from "@/lib/biblioteca";
 import { obtenerIndicadorConFuente } from "@/lib/datos/indice";
+import { EtiquetaEvidencia } from "@/components/EtiquetaEvidencia";
 import { getTerminoBySlug } from "@/lib/datos/glosario";
 import { DescargaForm } from "@/components/DescargaForm";
 
@@ -163,6 +164,9 @@ export default async function RecursoPage({ params }: { params: Promise<{ slug: 
                   {i.suffix ?? ""}
                 </div>
                 <p className="mt-1 text-sm text-cci-slate">{i.title}</p>
+                <div className="mt-2">
+                  <EtiquetaEvidencia tipo={i.sourceType} />
+                </div>
               </div>
             ))}
           </div>

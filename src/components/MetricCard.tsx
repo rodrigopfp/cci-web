@@ -3,6 +3,12 @@
 import { useState } from "react";
 import type { Indicator } from "@/data/types";
 import { sourceTypeLabel, dataStatusLabel, formatDate } from "@/lib/format";
+import { EtiquetaEvidencia, NotaEvidencia } from "@/components/EtiquetaEvidencia";
+import { infoEvidencia } from "@/lib/datos/evidencia";
+
+/** Tipo de evidencia del registro. En la portada se muestra COMPACTA (texto en la
+ *  línea de ficha existente); en CCI Data, como etiqueta neutra + nota. */
+export type EvidenciaProp = { tipo: string; scope?: string; variant?: "normal" | "compacta" };
 
 /** Color del estado del dato: azul institucional = verificado. */
 const statusColor: Record<Indicator["status"], string> = {
@@ -25,9 +31,11 @@ export function SourceBadge({ indicator }: { indicator: Indicator }) {
 }
 
 // Tarjeta de indicador grande, con número protagónico + fuente clicable.
-export function MetricCard({ indicator }: { indicator: Indicator }) {
+export function MetricCard({ indicator, evidencia }: { indicator: Indicator; evidencia?: EvidenciaProp }) {
   const [open, setOpen] = useState(false);
   const isPending = indicator.status === "pending";
+  const compacta = evidencia?.variant === "compacta";
+  const etiquetaCompacta = compacta && evidencia ? infoEvidencia(evidencia.tipo)?.etiqueta : undefined;
 
   return (
     <div className="relative flex flex-col gap-3 rounded-2xl border border-cci-line bg-white p-6 shadow-card">
@@ -56,9 +64,20 @@ export function MetricCard({ indicator }: { indicator: Indicator }) {
 
       <p className="text-xs leading-relaxed text-cci-slate">{indicator.note}</p>
 
+      {/* CCI Data: etiqueta neutra de tipo de evidencia + nota (si aplica). */}
+      {evidencia && !compacta && (
+        <div>
+          <EtiquetaEvidencia tipo={evidencia.tipo} />
+          <NotaEvidencia tipo={evidencia.tipo} scope={evidencia.scope} />
+        </div>
+      )}
+
       <div className="mt-auto flex items-end justify-between gap-3 border-t border-cci-line pt-3">
         <span className="font-mono text-[10px] leading-relaxed text-cci-slate-light">
           {indicator.geography} · {dataStatusLabel[indicator.status]}
+          {/* Portada: el tipo de evidencia va como texto en esta línea de ficha
+              existente (Regla 3: sin elementos visuales nuevos en la portada). */}
+          {etiquetaCompacta && <> · {etiquetaCompacta}</>}
           {indicator.lastUpdated && (
             <>
               <br />

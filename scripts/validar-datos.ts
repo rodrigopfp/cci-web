@@ -14,6 +14,7 @@ import { validarGlosario, TERMINOS } from "../src/lib/datos/glosario";
 import { INDICADORES_LISTA } from "../src/lib/datos/indicadores";
 import { FUENTES } from "../src/lib/datos/fuentes";
 import { SOURCE_TYPES, CATEGORIES, VERIFICATION_STATUSES } from "../src/lib/datos/tipos-indicadores";
+import { EVIDENCIA } from "../src/lib/datos/evidencia";
 import { validarLatam, PAISES_LATAM } from "../src/lib/datos/latam";
 
 // Slugs que legítimamente pueden valer 0 (hoy ninguno). Whitelist explícita.
@@ -55,6 +56,20 @@ function validarIndicadores(): { errores: string[]; avisos: string[] } {
     // catálogos
     if (!SOURCE_TYPES.includes(i.sourceType)) errores.push(`${donde}: sourceType fuera de catálogo: "${i.sourceType}".`);
     if (!CATEGORIES.includes(i.category)) errores.push(`${donde}: category fuera de catálogo: "${i.category}".`);
+
+    // Evidencia (Fase 3 · ajuste 6):
+    // 1) todo sourceType usado DEBE tener etiqueta en evidencia.ts.
+    const info = EVIDENCIA[i.sourceType];
+    if (!info) {
+      errores.push(`${donde}: sourceType "${i.sourceType}" sin etiqueta en evidencia.ts.`);
+    } else {
+      // 2) un indicador declared_by_organization DEBE traer caveat.
+      if (info.requiereCaveat && !i.caveat?.trim())
+        errores.push(`${donde}: sourceType "${i.sourceType}" exige caveat y no lo tiene.`);
+      // 3) aviso: survey / documented_case con scope demasiado escueto.
+      if ((i.sourceType === "survey" || i.sourceType === "documented_case") && (i.scope?.trim().length ?? 0) < 15)
+        avisos.push(`${donde}: sourceType "${i.sourceType}" con scope muy escueto (<15 car.); conviene precisar el universo.`);
+    }
     if (!VERIFICATION_STATUSES.includes(i.verificationStatus))
       errores.push(`${donde}: verificationStatus fuera de catálogo: "${i.verificationStatus}".`);
 
