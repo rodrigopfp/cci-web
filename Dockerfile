@@ -23,6 +23,14 @@ ARG NEXT_PUBLIC_SANITY_DATASET=production
 ENV NEXT_PUBLIC_SANITY_PROJECT_ID=$NEXT_PUBLIC_SANITY_PROJECT_ID
 ENV NEXT_PUBLIC_SANITY_DATASET=$NEXT_PUBLIC_SANITY_DATASET
 
+# URL del microservicio de formularios (cci-forms). Igual que las de Sanity: es
+# una variable NEXT_PUBLIC_* que Next INCRUSTA en el bundle en tiempo de build.
+# Si no se declara aquí, el build estático no la ve y el sitio queda en modo
+# respaldo (mailto) aunque la variable exista en el servicio de Railway.
+# Vacía o ausente → modo respaldo; definida → los formularios hacen POST.
+ARG NEXT_PUBLIC_FORMS_API_URL
+ENV NEXT_PUBLIC_FORMS_API_URL=$NEXT_PUBLIC_FORMS_API_URL
+
 # Se copian primero los manifiestos para aprovechar la caché de capas:
 # si no cambian las dependencias, no se reinstalan en cada despliegue.
 # npm ci depende SOLO de estos manifiestos, así que sigue cacheado (es lo lento).
