@@ -154,7 +154,7 @@ const LISTA: DataIndicator[] = [
     category: "productividad",
     tags: ["productividad", "internacional", "brecha"],
     sourceId: "matrix-2020",
-    sourceType: "academic",
+    sourceType: "international",
     scope:
       "Estándar internacional de referencia (Matrix Consulting 2020, reproducido en el Estudio IPLC 2025).",
     visualizationType: "duelo",
