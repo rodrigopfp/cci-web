@@ -139,6 +139,7 @@ export const recurso = defineType({
       type: "file",
     }),
     defineField({ name: "enlaceExterno", title: "Enlace externo", type: "url", description: "Alternativa al archivo (norma pública, documento de terceros)." }),
+    defineField({ name: "resumenEjecutivo", title: "Resumen ejecutivo", type: "array", of: [{ type: "block" }], description: "Síntesis breve (150-250 palabras) del documento. Se muestra antes de la introducción." }),
     defineField({ name: "intro", title: "Introducción", type: "array", of: [{ type: "block" }] }),
     defineField({ name: "hallazgos", title: "Hallazgos", type: "array", of: [{ type: "string" }] }),
     defineField({ name: "cuerpo", title: "Cuerpo", type: "array", of: [{ type: "block" }] }),

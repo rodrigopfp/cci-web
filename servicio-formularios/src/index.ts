@@ -126,7 +126,12 @@ app.post(
   handler(["nombre", "email", "mensaje"], (b) => ({
     _type: "aporte",
     nombre: str(b.nombre), email: str(b.email), organizacion: str(b.organizacion),
-    tipo: str(b.tipo) || "dato", mensaje: str(b.mensaje), estado: "nueva", ...comunes(b),
+    // tipo abierto: "dato" (por defecto), "aviso-recurso" (Aviso de disponibilidad), etc.
+    tipo: str(b.tipo) || "dato", mensaje: str(b.mensaje),
+    // Recurso asociado (p. ej. aviso de disponibilidad). Opcional.
+    recursoSlug: str(b.recursoSlug) || undefined,
+    recursoTitulo: str(b.recursoTitulo) || undefined,
+    estado: "nueva", ...comunes(b),
   }))
 );
 

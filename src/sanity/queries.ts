@@ -175,6 +175,7 @@ const RECURSO_BIBLIO_FIELDS = `
   requiereFormulario,
   archivo{ asset->{ url, extension, size } },
   enlaceExterno,
+  resumenEjecutivo,
   intro,
   hallazgos,
   cuerpo,

@@ -15,6 +15,7 @@ import { obtenerIndicadorConFuente } from "@/lib/datos/indice";
 import { EtiquetaEvidencia } from "@/components/EtiquetaEvidencia";
 import { getTerminoBySlug } from "@/lib/datos/glosario";
 import { DescargaForm } from "@/components/DescargaForm";
+import { AvisoDisponibilidad } from "@/components/AvisoDisponibilidad";
 
 export async function generateStaticParams() {
   const slugs = await getRecursoBiblioSlugs();
@@ -25,6 +26,7 @@ export async function generateStaticParams() {
 function tiempoLectura(r: RecursoBiblioteca): number {
   const texto = [
     r.bajada ?? "",
+    r.resumenEjecutivo ? toPlainText(r.resumenEjecutivo) : "",
     r.intro ? toPlainText(r.intro) : "",
     r.hallazgos.join(" "),
     r.cuerpo ? toPlainText(r.cuerpo) : "",
@@ -144,6 +146,16 @@ export default async function RecursoPage({ params }: { params: Promise<{ slug: 
         <Meta label="Actualizado" value={r.fechaActualizacion ? formatDate(r.fechaActualizacion) : undefined} />
       </dl>
 
+      {/* RESUMEN EJECUTIVO */}
+      {r.resumenEjecutivo && (
+        <section className="mt-8 rounded-2xl border border-cci-line bg-cci-paper p-6">
+          <h2 className="text-sm font-700 uppercase tracking-wide text-cci-orange">Resumen ejecutivo</h2>
+          <div className="prose-cci mt-3 space-y-3 text-[16px] leading-[1.7] text-cci-ink/90">
+            <PortableText value={r.resumenEjecutivo} />
+          </div>
+        </section>
+      )}
+
       {/* INTRODUCCIÓN */}
       {r.intro && (
         <section className="prose-cci mt-8 space-y-4 text-[17px] leading-[1.75] text-cci-ink/90">
@@ -215,6 +227,9 @@ export default async function RecursoPage({ params }: { params: Promise<{ slug: 
               {r.esExterno && <p className="mt-3 text-xs text-cci-slate-light">Documento alojado por su institución de origen.</p>}
             </div>
           )
+        ) : ["en_preparacion", "proximamente", "en_revision"].includes(r.estado) ? (
+          // Sin archivo y en preparación/próximamente/revisión: aviso de disponibilidad.
+          <AvisoDisponibilidad slug={r.slug} titulo={r.titulo} />
         ) : (
           <div className="rounded-2xl border border-dashed border-cci-line bg-cci-paper p-6 text-sm text-cci-slate">
             Este recurso está <strong>{ETIQUETAS_ESTADO[r.estado].toLowerCase()}</strong>. Aún no hay una descarga disponible.

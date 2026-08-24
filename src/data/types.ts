@@ -99,6 +99,7 @@ export interface RecursoBiblioteca {
   archivoExt?: string;
   enlaceExterno?: string;
   esExterno: boolean;
+  resumenEjecutivo?: PortableTextBlock[];
   intro?: PortableTextBlock[];
   hallazgos: string[];
   cuerpo?: PortableTextBlock[];

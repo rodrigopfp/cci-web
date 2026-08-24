@@ -11,8 +11,9 @@
 // formulario captura leads, no es un candado.
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { enviarFormulario, formsApiActiva } from "@/lib/forms";
+import { enviarFormulario, formsApiActiva, origenYUtm } from "@/lib/forms";
 
 const TIPOS_ORG = [
   "Empresa",
@@ -49,11 +50,13 @@ export function DescargaForm({
   esExterno: boolean;
 }) {
   const apiActiva = formsApiActiva();
+  const router = useRouter();
   const [yaDescargado, setYaDescargado] = useState(false);
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const key = `cci-descarga:${slug}`;
+  const graciasUrl = `/conocimiento/gracias?recurso=${encodeURIComponent(slug)}`;
 
   useEffect(() => {
     try {
@@ -71,6 +74,7 @@ export function DescargaForm({
     }
     setYaDescargado(true);
     dispararDescarga(downloadUrl, esExterno);
+    router.push(graciasUrl);
   };
 
   // Modo respaldo (sin API) o ya descargado antes: descarga directa, sin formulario.
@@ -80,12 +84,17 @@ export function DescargaForm({
         <a
           href={downloadUrl}
           {...(esExterno ? { target: "_blank", rel: "noopener noreferrer" } : { download: true })}
+          data-cta="descarga-completada"
+          data-recurso={slug}
           onClick={() => {
+            // La descarga nativa (href) funciona sin JS; con JS, además
+            // llevamos a la página de confirmación tras iniciar la descarga.
             try {
               window.localStorage.setItem(key, new Date().toISOString());
             } catch {
               /* ignorar */
             }
+            window.setTimeout(() => router.push(graciasUrl), 300);
           }}
           className="btn-primary"
         >
@@ -118,7 +127,7 @@ export function DescargaForm({
       autorizaContacto: fd.get("autorizaContacto") === "on",
       recursoSlug: slug,
       recursoTitulo: titulo,
-      origen: typeof window !== "undefined" ? window.location.pathname : "",
+      ...origenYUtm(),
       web2: "",
     };
     const r = await enviarFormulario("descarga", payload);

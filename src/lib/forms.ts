@@ -35,6 +35,21 @@ export async function enviarFormulario(
   }
 }
 
+/**
+ * Origen (ruta) y utm (si viene en la URL) para el payload — patrón de
+ * postulación (Parte 5). En modo respaldo no se pierde nada visible: la
+ * información viaja igual en el registro de origen.
+ */
+export function origenYUtm(fallback = ""): { origen: string; utm?: string } {
+  if (typeof window === "undefined") return { origen: fallback };
+  const params = new URLSearchParams(window.location.search);
+  const utm = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"]
+    .map((k) => (params.get(k) ? `${k}=${params.get(k)}` : ""))
+    .filter(Boolean)
+    .join("&");
+  return { origen: window.location.pathname || fallback, utm: utm || undefined };
+}
+
 /** mailto estructurado de respaldo (cuando no hay API). */
 export function mailtoRespaldo(asunto: string, campos: Record<string, string | undefined>): string {
   const cuerpo = Object.entries(campos)

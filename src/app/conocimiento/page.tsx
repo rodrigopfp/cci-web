@@ -19,6 +19,8 @@ export const metadata = {
 };
 
 export default async function ConocimientoPage() {
-  const recursos = await getRecursosBiblioteca();
+  // El índice excluye los recursos archivados (patrón del sitemap). Operación
+  // reversible: un recurso vuelve al índice al cambiar su estado en Sanity.
+  const recursos = (await getRecursosBiblioteca()).filter((r) => r.estado !== "archivado");
   return <ConocimientoClient recursos={recursos} />;
 }

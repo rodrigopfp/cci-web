@@ -509,6 +509,7 @@ type RecursoBiblioDoc = {
   requiereFormulario?: boolean;
   archivo?: { asset?: { url?: string; extension?: string; size?: number } };
   enlaceExterno?: string;
+  resumenEjecutivo?: PortableTextBlock[];
   intro?: PortableTextBlock[];
   hallazgos?: string[];
   cuerpo?: PortableTextBlock[];
@@ -546,6 +547,7 @@ function toRecursoBiblio(d: RecursoBiblioDoc): RecursoBiblioteca {
     archivoExt: d.archivo?.asset?.extension,
     enlaceExterno,
     esExterno,
+    resumenEjecutivo: Array.isArray(d.resumenEjecutivo) ? d.resumenEjecutivo : undefined,
     intro: Array.isArray(d.intro) ? d.intro : undefined,
     hallazgos: Array.isArray(d.hallazgos) ? d.hallazgos.filter(Boolean) : [],
     cuerpo: Array.isArray(d.cuerpo) ? d.cuerpo : undefined,
