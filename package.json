@@ -10,6 +10,7 @@
     "start": "next start",
     "lint": "next lint",
     "validar-datos": "npx tsx scripts/validar-datos.ts",
+    "glosario-estado": "npx tsx scripts/glosario-estado.ts",
     "auditar-enlaces": "npx tsx scripts/auditar-enlaces.ts",
     "check": "npm run build"
   },

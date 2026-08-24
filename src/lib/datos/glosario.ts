@@ -1,12 +1,17 @@
 // ============================================================================
-// GLOSARIO TÉCNICO CCI — capa de datos tipada (Fase 2 · paso 3)
+// GLOSARIO TÉCNICO CCI — capa de datos tipada (Fase 2 · paso 3; Fase 3 · ajuste 2)
 // ============================================================================
-// Los 44 términos entran como BORRADOR (publicado: false). Se publican por
-// bloques tras la revisión editorial de Rodrigo con Claude web. Las definiciones
-// son EXACTAS: no se corrigen ni se mejoran aquí.
+// Cada término tiene un estadoEditorial que gobierna su visibilidad y SEO:
+//   validada_cci          → pública, indexable ("Definición CCI validada").
+//   revision_grupo_tecnico→ pública, indexable ("En revisión por grupo técnico").
+//   borrador              → no pública (noindex, fuera del sitemap, insignia).
+//   archivada             → la ruta redirige a reemplazadoPor; se conserva.
+// Los 8 términos esenciales están validada_cci (contenido aprobado por Rodrigo,
+// se carga TAL CUAL); los 36 restantes siguen como borrador.
 //
-// `fuentes` son ids de fuentes.ts (Paso 1). Ese archivo aún no existe en el repo;
-// mientras tanto las fuentes quedan en [] y se completan en la revisión.
+// `fuentes` son ids de fuentes.ts (Paso 1). `naturaleza` distingue una
+// definición alineada con una norma ("normativa") de una explicación propia
+// del CCI ("editorial").
 // ============================================================================
 
 export type CategoriaGlosario =
@@ -19,6 +24,12 @@ export type CategoriaGlosario =
   | "regulacion_chilena"
   | "productividad_datos"
   | "sostenibilidad";
+
+export type EstadoEditorial =
+  | "validada_cci"
+  | "revision_grupo_tecnico"
+  | "borrador"
+  | "archivada";
 
 export interface TerminoGlosario {
   slug: string;
@@ -35,7 +46,11 @@ export interface TerminoGlosario {
   recursosRelacionados?: string[]; // slugs de /conocimiento
   fuentes: string[]; // ids de fuentes.ts
   fechaRevision?: string; // ISO
-  publicado: boolean;
+  estadoEditorial: EstadoEditorial;
+  /** Distingue norma ("normativa") de explicación propia del CCI ("editorial"). */
+  naturaleza?: "normativa" | "editorial";
+  /** Obligatorio si estadoEditorial === "archivada": slug del término vigente. */
+  reemplazadoPor?: string;
   destacado?: boolean;
 }
 
@@ -74,32 +89,74 @@ const GRUPOS_RELACIONADOS: string[][] = [
   ["acv", "dap-epd", "carbono-incorporado"],
 ];
 
-// Los términos destacados en el índice (curación editorial, no contenido nuevo).
-const DESTACADOS = new Set([
+// Los 8 términos esenciales validados (contenido aprobado por Rodrigo). Se
+// cargan validada_cci; el resto queda como borrador. También son los destacados
+// del índice.
+const ESENCIALES = new Set([
   "construccion-industrializada",
+  "prefabricacion",
   "integracion-temprana",
+  "dfma",
+  "mmc",
   "bim",
-  "lean-construction",
-  "iplc",
+  "empresa-industrializadora-ditec",
   "vivienda-industrializada-tipo",
 ]);
+const DESTACADOS = ESENCIALES;
 
-// --- Definiciones EXACTAS de los 44 términos (borradores) --------------------
-const BASE: Omit<TerminoGlosario, "publicado" | "fuentes" | "relacionados" | "destacado">[] = [
+const FECHA_VALIDACION = "2026-08-23"; // revisión de los 8 esenciales
+
+// Un término del glosario tal como se declara aquí (sin los campos derivados en
+// el ensamblado). Las definiciones esenciales traen fuentes/relacionados/naturaleza
+// propios; los borradores heredan relacionados del clúster y fuentes vacías.
+type TerminoBase = Omit<TerminoGlosario, "estadoEditorial" | "destacado" | "fuentes" | "relacionados"> & {
+  fuentes?: string[];
+  relacionados?: string[];
+};
+
+// --- Definiciones de los 44 términos (8 validadas + 36 borradores) -----------
+const BASE: TerminoBase[] = [
   {
     slug: "construccion-industrializada",
     titulo: "Construcción industrializada",
     categoria: "fundamentos",
+    naturaleza: "normativa",
+    fuentes: ["inn-nch3744", "guia-cci-2024"],
     definicionCorta:
-      "Metodología que organiza el diseño, la producción, la logística y la ejecución de un proyecto como un sistema integrado, con el objetivo de mejorar productividad, calidad, sostenibilidad, trazabilidad y certeza. Puede utilizar o no componentes prefabricados.",
+      "Metodología que organiza el diseño, la producción, la logística y la ejecución de un proyecto como un sistema integrado, para mejorar productividad, calidad, sostenibilidad, trazabilidad y certeza. Puede utilizar o no componentes prefabricados.",
+    explicacionSimple:
+      "Industrializar la construcción no es solo fabricar piezas en una planta: es organizar el proyecto completo — desde el diseño hasta el montaje — como un proceso productivo planificado, donde las decisiones se toman a tiempo y cada etapa está pensada para la siguiente.",
+    explicacionTecnica:
+      "La construcción industrializada integra evaluación, diseño, ingeniería, fabricación, abastecimiento, logística, montaje, control y aprendizaje bajo reglas comunes: estandarización de componentes e interfaces, producción seriada y rítmica, planificación de flujo y medición de desempeño. La prefabricación es una de sus herramientas posibles, no su condición: un proyecto puede industrializarse optimizando procesos en obra, y puede usarse prefabricación sin que el proyecto esté industrializado.",
+    porQueImporta:
+      "Es la respuesta metodológica del sector al desafío de productividad y al déficit habitacional: permite construir con más certeza de plazo, menos pérdidas y calidad más consistente, como muestra la evidencia reunida en CCI Data.",
+    ejemplo:
+      "Un proyecto habitacional donde mandante, arquitectura, ingeniería e industrializador definen juntos — antes de cerrar el anteproyecto — la modulación, los paneles estandarizados, la logística y la secuencia de montaje. Parte de las partidas puede seguir ejecutándose en terreno: lo industrializado es el proceso, no solo las piezas.",
     noConfundirCon: ["prefabricacion"],
+    contextoChileno:
+      "La NCh3744:2023 estableció por primera vez un lenguaje común de términos y definiciones para la construcción industrializada y prefabricada en Chile, y el Estado la incorporó a su política habitacional mediante el mecanismo de empresas industrializadoras y Viviendas Industrializadas Tipo del MINVU.",
+    relacionados: ["prefabricacion", "construccion-off-site", "mmc", "integracion-temprana", "dfma"],
   },
   {
     slug: "prefabricacion",
     titulo: "Prefabricación",
     categoria: "fundamentos",
+    naturaleza: "normativa",
+    fuentes: ["inn-nch3744"],
     definicionCorta:
-      "Fabricación anticipada de un elemento, componente o conjunto en un lugar distinto de su posición final, para transportarlo e instalarlo posteriormente. Es una herramienta que puede formar parte de un proceso industrializado, pero su sola utilización no convierte necesariamente un proyecto en industrializado.",
+      "Fabricación anticipada de un elemento, componente o conjunto en un lugar distinto de su posición final, para transportarlo e instalarlo posteriormente.",
+    explicacionSimple:
+      "Prefabricar es adelantar trabajo: producir una pieza — un panel, una escalera, un baño completo — fuera de su ubicación definitiva, en condiciones controladas, y luego llevarla e instalarla.",
+    explicacionTecnica:
+      "La prefabricación es una técnica de producción, no una metodología de gestión: define DÓNDE y CUÁNDO se fabrica un elemento, pero no cómo se integra el proyecto. Por eso puede existir dentro de un proceso industrializado — donde diseño, logística y montaje están coordinados desde el inicio — o de forma aislada, trasladando a la planta las mismas descoordinaciones de la obra tradicional.",
+    porQueImporta:
+      "Distinguir la herramienta (prefabricar) de la metodología (industrializar) es la base para evaluar proyectos y proveedores con criterio: comprar paneles no industrializa un proyecto; integrarlos desde el diseño, sí.",
+    ejemplo:
+      "Una constructora compra tabiques prefabricados para acelerar la obra gruesa, pero los planos llegan tarde, las instalaciones no calzan y hay retrabajos en terreno: hay prefabricación, pero no industrialización.",
+    noConfundirCon: ["construccion-industrializada"],
+    contextoChileno:
+      "La NCh3744:2023 define y ordena los conceptos de construcción industrializada y prefabricada, separando la técnica de fabricación anticipada de la metodología integral.",
+    relacionados: ["construccion-industrializada", "construccion-off-site", "sistema-panelizado-2d", "modulo-volumetrico-3d", "preensamblaje"],
   },
   {
     slug: "construccion-off-site",
@@ -112,10 +169,22 @@ const BASE: Omit<TerminoGlosario, "publicado" | "fuentes" | "relacionados" | "de
     slug: "mmc",
     titulo: "Métodos modernos de construcción (MMC)",
     categoria: "fundamentos",
+    naturaleza: "editorial",
+    fuentes: ["iplc-2025"],
     definicionCorta:
-      "Conjunto amplio de sistemas, tecnologías y formas de gestión que buscan mejorar el desempeño de la construcción mediante estandarización, prefabricación, producción fuera de obra, digitalización, automatización y nuevas formas de ensamblaje.",
-    // Nota original "no es un sistema constructivo específico": es una aclaración
-    // en prosa, no un slug; se resolverá en la revisión editorial.
+      "Conjunto amplio de sistemas, tecnologías y formas de gestión que buscan mejorar el desempeño de la construcción mediante estandarización, prefabricación, producción fuera de obra, digitalización y nuevas formas de ensamblaje (Modern Methods of Construction).",
+    explicacionSimple:
+      "MMC es un paraguas: agrupa las distintas maneras «modernas» de construir — paneles, unidades volumétricas, componentes, automatización, gestión digital — en una sola categoría para poder estudiarlas y compararlas.",
+    explicacionTecnica:
+      "El término, de origen británico, clasifica métodos según su grado de producción fuera de obra y de innovación de proceso. No es un sistema constructivo específico: un proyecto «con MMC» puede combinar panelización, preensamblaje de instalaciones y gestión digital de producción. Su utilidad principal es analítica: permite medir y comparar el desempeño de proyectos con y sin estos métodos bajo una definición común.",
+    porQueImporta:
+      "Es la categoría que usa la medición sectorial en Chile para comparar desempeño: los resultados de productividad, residuos y plazos publicados en CCI Data se ordenan bajo esta clasificación.",
+    ejemplo:
+      "El Estudio IPLC 2025 comparó proyectos de edificación en altura con y sin MMC, midiendo productividad, cumplimiento de plazos y generación de residuos bajo una misma metodología.",
+    noConfundirCon: ["construccion-modular"],
+    contextoChileno:
+      "En Chile el término se emplea principalmente en estudios de productividad y benchmarking; el lenguaje normativo local se ordena bajo la NCh3744:2023 y el concepto de construcción industrializada.",
+    relacionados: ["construccion-industrializada", "construccion-off-site", "prefabricacion"],
   },
   {
     slug: "construccion-modular",
@@ -163,15 +232,41 @@ const BASE: Omit<TerminoGlosario, "publicado" | "fuentes" | "relacionados" | "de
     slug: "integracion-temprana",
     titulo: "Integración temprana",
     categoria: "diseno_integracion",
+    naturaleza: "editorial",
+    fuentes: ["guia-cci-2024"],
     definicionCorta:
-      "Participación coordinada de los actores relevantes desde las primeras etapas del proyecto, antes de que las decisiones críticas queden cerradas. Permite incorporar oportunamente restricciones de diseño, fabricación, costos, logística, montaje, operación y normativa.",
+      "Participación coordinada de los actores relevantes del proyecto desde sus primeras etapas, antes de que las decisiones críticas queden cerradas.",
+    explicacionSimple:
+      "Sentar a todos en la mesa desde el principio: mandante, arquitectura, ingeniería, especialidades, industrializador y constructor definen juntos las decisiones que después serían caras o imposibles de cambiar.",
+    explicacionTecnica:
+      "La integración temprana (ITCI) incorpora al diseño las restricciones y oportunidades de fabricación, costos, logística, montaje, operación y normativa cuando modificarlas aún es barato. Reordena el flujo de decisiones del proyecto: la información que tradicionalmente llega en obra — tolerancias de planta, dimensiones de transporte, secuencia de montaje — se convierte en dato de entrada del diseño.",
+    porQueImporta:
+      "La fragmentación y la información tardía están en el origen de los rediseños, interferencias y retrabajos que explican la brecha de productividad del sector; integrar temprano es la palanca que la evidencia de los casos documentados del CCI muestra una y otra vez.",
+    ejemplo:
+      "Incorporar al industrializador durante el anteproyecto para fijar la modulación de paneles y las pasadas de instalaciones: se eliminan rediseños posteriores y el montaje se planifica desde el primer plano.",
+    contextoChileno:
+      "La Guía Práctica de Integración Temprana en Construcción Industrializada (CCI, 2024) sistematiza el enfoque para Chile con casos documentados de socios y fue elaborada junto a instituciones del sector.",
+    relacionados: ["construccion-industrializada", "dfma", "bim", "estandarizacion"],
   },
   {
     slug: "dfma",
     titulo: "DfMA — Diseño para Fabricación y Montaje",
     categoria: "diseno_integracion",
+    naturaleza: "editorial",
+    fuentes: ["guia-cci-2024"],
     definicionCorta:
-      "Enfoque que incorpora desde el diseño la forma en que los elementos serán fabricados, transportados y ensamblados. Busca reducir complejidad, cantidad de componentes, operaciones innecesarias, tiempos de montaje, errores y desperdicios.",
+      "Enfoque de diseño que incorpora desde el inicio la forma en que los elementos serán fabricados, transportados y montados (Design for Manufacture and Assembly).",
+    explicacionSimple:
+      "Diseñar pensando en la fábrica y en la grúa: cada elemento se dibuja para que sea fácil de producir, de trasladar y de instalar, no solo para que se vea bien en el plano.",
+    explicacionTecnica:
+      "DfMA optimiza el diseño contra las restricciones reales del proceso: capacidades de planta, tolerancias, dimensiones de transporte, peso izable, secuencia y accesibilidad de montaje. Busca reducir cantidad de componentes, operaciones innecesarias, errores y desperdicio, y es uno de los puentes concretos entre integración temprana e industrialización.",
+    porQueImporta:
+      "Gran parte del costo y del plazo de un proyecto queda definido en el diseño; DfMA traslada la eficiencia de la obra al tablero, donde corregir es barato.",
+    ejemplo:
+      "Diseñar un baño industrializado cuyas dimensiones caben en un camión estándar sin escolta, con conexiones agrupadas y accesibles para conectarlo en horas y no en días.",
+    contextoChileno:
+      "El enfoque se difunde en Chile a través de las guías y actividades del CCI y su ecosistema, como criterio de diseño para proyectos industrializados.",
+    relacionados: ["integracion-temprana", "estandarizacion", "modularizacion", "construccion-industrializada"],
   },
   {
     slug: "estandarizacion",
@@ -205,8 +300,22 @@ const BASE: Omit<TerminoGlosario, "publicado" | "fuentes" | "relacionados" | "de
     slug: "bim",
     titulo: "BIM — Building Information Modeling",
     categoria: "digitalizacion",
+    naturaleza: "editorial",
+    fuentes: ["planbim", "buildingsmart"],
     definicionCorta:
-      "Metodología colaborativa para crear, gestionar e intercambiar información estructurada de un activo durante su ciclo de vida. BIM no es únicamente un modelo 3D ni el nombre de un software.",
+      "Metodología colaborativa para crear, gestionar e intercambiar información estructurada de un edificio o infraestructura durante su ciclo de vida (Building Information Modeling).",
+    explicacionSimple:
+      "Más que un modelo 3D: una manera de trabajar en la que todos los participantes crean y comparten información ordenada del proyecto — geometría, materiales, plazos, costos — sobre una base común y confiable.",
+    explicacionTecnica:
+      "BIM estructura la información del activo en modelos de datos compartidos, con estándares de intercambio (como IFC en el enfoque openBIM), roles, entornos comunes de datos y usos definidos: coordinación de especialidades, detección de interferencias, planificación 4D, cubicación y gestión de activos. No es el nombre de un software ni un entregable único, sino la metodología que gobierna esa información.",
+    porQueImporta:
+      "Para industrializar se necesita información precisa y a tiempo: BIM es el vehículo natural de la integración temprana y del DfMA, y la evidencia sectorial en CCI Data asocia su uso con mejor desempeño de plazos.",
+    ejemplo:
+      "Coordinar arquitectura, estructura e instalaciones en un modelo federado y resolver las interferencias ANTES de fabricar los paneles, en lugar de descubrirlas en obra.",
+    noConfundirCon: ["gemelo-digital"],
+    contextoChileno:
+      "Planbim (Corfo) impulsa estándares BIM para proyectos públicos en Chile, y buildingSMART define los estándares abiertos internacionales (openBIM, IFC) que permiten colaborar entre plataformas.",
+    relacionados: ["openbim", "ifc", "cde", "deteccion-de-interferencias", "integracion-temprana"],
   },
   {
     slug: "openbim",
@@ -296,16 +405,43 @@ const BASE: Omit<TerminoGlosario, "publicado" | "fuentes" | "relacionados" | "de
     slug: "empresa-industrializadora-ditec",
     titulo: "Empresa industrializadora aprobada por DITEC",
     categoria: "regulacion_chilena",
+    naturaleza: "normativa",
+    fuentes: ["ditec-minvu", "minvu-res-52"],
     definicionCorta:
-      "Empresa cuyo proceso, planta y antecedentes han sido evaluados bajo el procedimiento correspondiente del MINVU. Esta aprobación le permite presentar proyectos de Vivienda Industrializada Tipo, pero no debe confundirse con la aprobación de una VIT específica.",
+      "Empresa cuyo proceso productivo, planta y antecedentes han sido evaluados y aprobados por el MINVU conforme al procedimiento de la División Técnica (DITEC), lo que la habilita para presentar proyectos de Vivienda Industrializada Tipo.",
+    explicacionSimple:
+      "Es un registro oficial: el Ministerio evalúa a la empresa — su planta, su proceso, su capacidad — y, si la aprueba, esa empresa puede presentar sus tipologías de vivienda para ser aprobadas como VIT.",
+    explicacionTecnica:
+      "La aprobación recae sobre la EMPRESA y su sistema productivo, según el procedimiento establecido en la Resolución Exenta N.º 52 del MINVU y sus modificaciones. Es una habilitación de proceso, no una certificación de cada vivienda: las tipologías específicas se aprueban por separado como VIT. La condición de empresa aprobada tampoco constituye una certificación de calidad emitida por el CCI ni un sello comercial.",
+    porQueImporta:
+      "Es la puerta de entrada de la industrialización a la política habitacional: solo las empresas aprobadas pueden presentar VIT y participar por esa vía en los programas del Estado, lo que da al mandante público y privado un registro verificable de proveedores evaluados.",
+    ejemplo:
+      "Una planta de paneles de madera somete su proceso, control de calidad y antecedentes al procedimiento DITEC; una vez aprobada, queda registrada oficialmente y puede presentar sus tipologías de vivienda a aprobación como VIT.",
     noConfundirCon: ["vivienda-industrializada-tipo"],
+    contextoChileno:
+      "El registro público de empresas industrializadoras aprobadas y de tipologías VIT lo administra el MINVU a través de la DITEC; CCI Data publica sus conteos oficiales con fecha de corte.",
+    relacionados: ["vivienda-industrializada-tipo", "resolucion-exenta-52", "resolucion-exenta-59", "ditec"],
   },
   {
     slug: "vivienda-industrializada-tipo",
     titulo: "Vivienda Industrializada Tipo (VIT)",
     categoria: "regulacion_chilena",
+    naturaleza: "normativa",
+    fuentes: ["ditec-minvu", "minvu-res-59"],
     definicionCorta:
-      "Tipología de vivienda industrializada revisada y aprobada conforme al procedimiento técnico del MINVU para su utilización en proyectos de determinados programas habitacionales, bajo las condiciones establecidas en su aprobación.",
+      "Tipología de vivienda industrializada revisada y aprobada conforme al procedimiento técnico del MINVU, para su utilización en proyectos de determinados programas habitacionales bajo las condiciones de su aprobación.",
+    explicacionSimple:
+      "Una «vivienda tipo» aprobada una vez y lista para repetirse: el diseño y su solución técnica pasan la revisión del Ministerio como tipología, y luego pueden incorporarse en proyectos habitacionales según las condiciones aprobadas.",
+    explicacionTecnica:
+      "La VIT es la aprobación de la TIPOLOGÍA (diseño, solución constructiva y antecedentes técnicos) presentada por una empresa industrializadora aprobada, conforme al mecanismo de la Resolución Exenta N.º 59 del MINVU. Su utilización en proyectos concretos se rige por las condiciones establecidas en la aprobación y por las reglas del programa habitacional correspondiente; no exime de las demás revisiones y permisos que apliquen a cada proyecto.",
+    porQueImporta:
+      "Convierte la repetición — el corazón de la industrialización — en ventaja regulatoria: una tipología bien resuelta se aprueba una vez y escala en múltiples proyectos, con más certeza técnica para mandantes y familias.",
+    ejemplo:
+      "Una tipología de vivienda de un piso aprobada como VIT se incorpora en distintos proyectos del programa habitacional correspondiente, replicando la misma solución evaluada en lugar de rediseñar y revisar desde cero cada vez.",
+    noConfundirCon: ["empresa-industrializadora-ditec"],
+    contextoChileno:
+      "El catálogo de tipologías VIT vigentes es parte del registro oficial del MINVU/DITEC; su conteo se publica en CCI Data con fuente y fecha de corte.",
+    relacionados: ["empresa-industrializadora-ditec", "resolucion-exenta-59", "resolucion-exenta-52", "construccion-industrializada"],
   },
   {
     slug: "resolucion-exenta-52",
@@ -411,25 +547,63 @@ for (const grupo of GRUPOS_RELACIONADOS) {
   }
 }
 
-// Ensamblado final: todos borradores, fuentes vacías, relacionados cableados.
-export const TERMINOS: TerminoGlosario[] = BASE.map((t) => ({
-  ...t,
-  fuentes: [],
-  publicado: false,
-  destacado: DESTACADOS.has(t.slug) || undefined,
-  relacionados: RELACIONADOS_POR_SLUG.get(t.slug),
-}));
+// Ensamblado final: los 8 esenciales validada_cci (con su fecha, fuentes y
+// relacionados propios); el resto borrador, con relacionados del clúster.
+export const TERMINOS: TerminoGlosario[] = BASE.map((t) => {
+  const esencial = ESENCIALES.has(t.slug);
+  return {
+    ...t,
+    fuentes: t.fuentes ?? [],
+    relacionados: t.relacionados ?? RELACIONADOS_POR_SLUG.get(t.slug),
+    estadoEditorial: (esencial ? "validada_cci" : "borrador") as EstadoEditorial,
+    fechaRevision: t.fechaRevision ?? (esencial ? FECHA_VALIDACION : undefined),
+    destacado: DESTACADOS.has(t.slug) || undefined,
+  };
+});
 
 // --- Consultas --------------------------------------------------------------
 export function getTerminoBySlug(slug: string): TerminoGlosario | undefined {
   return TERMINOS.find((t) => t.slug === slug);
 }
+/** Público = pieza indexable y en el sitemap (validada o en revisión técnica). */
+export function esPublico(t: TerminoGlosario): boolean {
+  return t.estadoEditorial === "validada_cci" || t.estadoEditorial === "revision_grupo_tecnico";
+}
+export function esBorrador(t: TerminoGlosario): boolean {
+  return t.estadoEditorial === "borrador";
+}
+export function esArchivada(t: TerminoGlosario): boolean {
+  return t.estadoEditorial === "archivada";
+}
 export function terminosPublicados(): TerminoGlosario[] {
-  return TERMINOS.filter((t) => t.publicado);
+  return TERMINOS.filter(esPublico);
 }
 export function ultimaActualizacion(): string | undefined {
-  const fechas = TERMINOS.map((t) => t.fechaRevision).filter((f): f is string => Boolean(f));
+  const fechas = TERMINOS.filter(esPublico)
+    .map((t) => t.fechaRevision)
+    .filter((f): f is string => Boolean(f));
   return fechas.sort().at(-1);
+}
+
+/**
+ * Etiqueta de naturaleza para la ficha (mismo estilo de pill del indicador de
+ * evidencia, pero mapeo propio): "normativa" cita su fuente principal;
+ * "editorial" es explicación propia del CCI.
+ */
+export function etiquetaNaturaleza(t: TerminoGlosario): string | undefined {
+  if (!t.naturaleza) return undefined;
+  if (t.naturaleza === "editorial") return "Explicación editorial del CCI";
+  const f = t.fuentes[0] ? FUENTES[t.fuentes[0]] : undefined;
+  const nombre = f?.shortLabel ?? f?.organization ?? "su fuente normativa";
+  return `Definición alineada con ${nombre}`;
+}
+
+/** Rótulo de estado para la ficha pública. */
+export function rotuloEstado(t: TerminoGlosario): string | undefined {
+  if (t.estadoEditorial === "validada_cci") return "Definición CCI validada";
+  if (t.estadoEditorial === "revision_grupo_tecnico")
+    return "En revisión por grupo técnico — esta definición puede cambiar";
+  return undefined;
 }
 
 // --- Validación (Paso 1: patrón de datos tipados) ---------------------------
@@ -446,16 +620,25 @@ export function validarGlosario(terms: TerminoGlosario[] = TERMINOS): string[] {
 
     if (!t.definicionCorta?.trim()) errores.push(`"${t.slug}" no tiene definicionCorta.`);
 
-    if (t.publicado) {
+    // Público (validada_cci / revision_grupo_tecnico): exige la ficha completa.
+    if (esPublico(t)) {
+      if (!t.explicacionSimple?.trim())
+        errores.push(`"${t.slug}" es público pero no tiene explicacionSimple.`);
       if (!t.fuentes || t.fuentes.length === 0)
-        errores.push(`"${t.slug}" está publicado pero no tiene fuentes.`);
-      if (!t.fechaRevision) errores.push(`"${t.slug}" está publicado pero no tiene fechaRevision.`);
-      if (!t.definicionCorta?.trim())
-        errores.push(`"${t.slug}" está publicado pero no tiene definicionCorta.`);
-      // Paso 1 · 4.2: las fuentes de un término publicado deben existir en fuentes.ts.
+        errores.push(`"${t.slug}" es público pero no tiene fuentes.`);
+      if (!t.fechaRevision) errores.push(`"${t.slug}" es público pero no tiene fechaRevision.`);
+      // Paso 1 · 4.2: las fuentes de un término público deben existir en fuentes.ts.
       for (const fid of t.fuentes ?? [])
         if (!FUENTES[fid])
           errores.push(`"${t.slug}".fuentes apunta a una fuente inexistente: "${fid}".`);
+    }
+
+    // Archivada: exige un reemplazo vigente y existente.
+    if (t.estadoEditorial === "archivada") {
+      if (!t.reemplazadoPor?.trim())
+        errores.push(`"${t.slug}" está archivada pero no tiene reemplazadoPor.`);
+      else if (!todos.has(t.reemplazadoPor))
+        errores.push(`"${t.slug}".reemplazadoPor apunta a un slug inexistente: "${t.reemplazadoPor}".`);
     }
 
     for (const ref of t.noConfundirCon ?? [])

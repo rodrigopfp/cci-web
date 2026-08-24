@@ -6,7 +6,13 @@ import {
   getTerminoBySlug,
   assertGlosarioValido,
   ETIQUETAS_CATEGORIA,
+  esPublico,
+  esArchivada,
+  esBorrador,
+  etiquetaNaturaleza,
+  rotuloEstado,
 } from "@/lib/datos/glosario";
+import { obtenerFuente } from "@/lib/datos/indice";
 import { formatDate } from "@/lib/format";
 import { SITE_URL } from "@/lib/site";
 
@@ -27,8 +33,17 @@ export async function generateMetadata({
   const url = `${SITE_URL}/glosario/${t.slug}/`;
   const title = `${t.titulo} · Glosario CCI`;
 
-  // Borrador: fuera de índice y sin canonical/OG (aún no publicado).
-  if (!t.publicado) {
+  // Archivada: no indexar; canonical apunta al término vigente de reemplazo.
+  if (esArchivada(t)) {
+    return {
+      title,
+      robots: { index: false, follow: true },
+      alternates: t.reemplazadoPor ? { canonical: `${SITE_URL}/glosario/${t.reemplazadoPor}/` } : undefined,
+    };
+  }
+
+  // Borrador: fuera de índice y sin canonical/OG (aún no público).
+  if (!esPublico(t)) {
     return { title, description: t.definicionCorta, robots: { index: false, follow: false } };
   }
 
@@ -77,8 +92,31 @@ export default async function TerminoPage({ params }: { params: Promise<{ slug: 
 
   const url = `${SITE_URL}/glosario/${t.slug}/`;
 
-  // JSON-LD solo cuando el término está publicado.
-  const jsonLd = t.publicado
+  // Archivada: stub de redirección (meta-refresh) al término vigente. En
+  // producción Caddy sirve además un 301; aquí garantizamos el redirect sin JS.
+  if (esArchivada(t)) {
+    const destino = t.reemplazadoPor ? `/glosario/${t.reemplazadoPor}/` : "/glosario/";
+    return (
+      <>
+        <meta httpEquiv="refresh" content={`0; url=${destino}`} />
+        <article className="container-cci max-w-3xl py-16 text-center">
+          <p className="text-cci-slate">
+            Este término se archivó. Redirigiendo a{" "}
+            <Link href={destino} className="font-600 text-cci-orange hover:text-cci-orange-dark">
+              la definición vigente
+            </Link>
+            …
+          </p>
+        </article>
+      </>
+    );
+  }
+
+  const naturalezaLabel = etiquetaNaturaleza(t);
+  const estadoLabel = rotuloEstado(t);
+
+  // JSON-LD DefinedTerm solo cuando el término es público.
+  const jsonLd = esPublico(t)
     ? {
         "@context": "https://schema.org",
         "@type": "DefinedTerm",
@@ -115,13 +153,29 @@ export default async function TerminoPage({ params }: { params: Promise<{ slug: 
           <span className="rounded-full bg-cci-orange-soft px-2.5 py-0.5 text-[11px] font-700 uppercase tracking-wide text-cci-orange-dark">
             {ETIQUETAS_CATEGORIA[t.categoria]}
           </span>
-          {!t.publicado && (
+          {/* Naturaleza (mismo estilo de pill que el indicador de evidencia). */}
+          {naturalezaLabel && (
+            <span
+              className="inline-flex w-fit items-center rounded-md border border-cci-line bg-cci-paper px-2 py-0.5 text-[10px] font-700 uppercase tracking-wide text-cci-slate"
+              title={
+                t.naturaleza === "normativa"
+                  ? "Definición alineada con una norma o instrumento oficial."
+                  : "Explicación propia del CCI, no un texto normativo."
+              }
+            >
+              {naturalezaLabel}
+            </span>
+          )}
+          {esBorrador(t) && (
             <span className="rounded-full bg-cci-paper px-2.5 py-0.5 text-[11px] font-700 uppercase tracking-wide text-cci-slate-light">
               En revisión técnica
             </span>
           )}
         </div>
         <h1 className="font-display text-3xl font-900 leading-tight text-cci-ink md:text-4xl">{t.titulo}</h1>
+        {estadoLabel && (
+          <p className="mt-3 text-sm font-600 text-cci-slate">{estadoLabel}.</p>
+        )}
       </header>
 
       {/* 1. DEFINICIÓN CORTA */}
@@ -202,10 +256,29 @@ export default async function TerminoPage({ params }: { params: Promise<{ slug: 
       {/* 10. FUENTES */}
       {t.fuentes.length > 0 && (
         <Bloque titulo="Fuentes">
-          <ul className="space-y-1 text-sm text-cci-slate">
-            {t.fuentes.map((f) => (
-              <li key={f}>{f}</li>
-            ))}
+          <ul className="space-y-1.5 text-sm text-cci-slate">
+            {t.fuentes.map((id) => {
+              const f = obtenerFuente(id);
+              const externo = f.url?.startsWith("http");
+              return (
+                <li key={id}>
+                  <span className="font-600 text-cci-ink">{f.organization}</span> — {f.title}
+                  {f.url && (
+                    <>
+                      {" · "}
+                      <a
+                        href={f.url}
+                        target={externo ? "_blank" : undefined}
+                        rel={externo ? "noopener noreferrer" : undefined}
+                        className="font-600 text-cci-orange hover:text-cci-orange-dark"
+                      >
+                        Ir a la fuente
+                      </a>
+                    </>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         </Bloque>
       )}

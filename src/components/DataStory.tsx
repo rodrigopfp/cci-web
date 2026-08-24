@@ -468,7 +468,10 @@ export function DataStory({ studiesInternacionales }: { studiesInternacionales: 
             </Reveal>
             <Reveal reduced={reduced} delay={80}>
               <p className="font-display text-xl font-800 leading-snug text-cci-ink md:text-2xl">
-                La construcción industrializada permite responder con velocidad, calidad y menos pérdidas.
+                <Link href="/glosario/construccion-industrializada" className="underline decoration-cci-orange/40 underline-offset-4 transition hover:decoration-cci-orange">
+                  La construcción industrializada
+                </Link>{" "}
+                permite responder con velocidad, calidad y menos pérdidas.
               </p>
             </Reveal>
           </div>
@@ -581,8 +584,11 @@ export function DataStory({ studiesInternacionales }: { studiesInternacionales: 
               Industrializar no es prefabricar
             </h2>
             <p className="mt-4 max-w-2xl text-lg leading-relaxed text-cci-slate">
-              La prefabricación puede ser una herramienta. La industrialización es la metodología que
-              integra el proyecto completo.
+              <Link href="/glosario/prefabricacion" className="underline decoration-cci-orange/40 underline-offset-4 transition hover:decoration-cci-orange">
+                La prefabricación
+              </Link>{" "}
+              puede ser una herramienta. La industrialización es la metodología que integra el
+              proyecto completo.
             </p>
           </Reveal>
 
@@ -597,6 +603,8 @@ export function DataStory({ studiesInternacionales }: { studiesInternacionales: 
               <span className="font-700 uppercase tracking-wide text-cci-slate-light">Conceptos:</span>
               <Link href="/glosario/integracion-temprana" className="font-600 text-cci-orange hover:text-cci-orange-dark">Integración temprana</Link>
               <Link href="/glosario/dfma" className="font-600 text-cci-orange hover:text-cci-orange-dark">DfMA</Link>
+              <Link href="/glosario/bim" className="font-600 text-cci-orange hover:text-cci-orange-dark">BIM</Link>
+              <Link href="/glosario/mmc" className="font-600 text-cci-orange hover:text-cci-orange-dark">MMC</Link>
             </p>
           </Reveal>
 
@@ -739,6 +747,12 @@ export function DataStory({ studiesInternacionales }: { studiesInternacionales: 
               <StatIndicador slug="tipologias-vit" label="Tipologías VIT aprobadas por la DITEC" reduced={reduced} />
             </Reveal>
           </div>
+
+          <p className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-cci-slate">
+            <span className="font-700 uppercase tracking-wide text-cci-slate-light">Conceptos:</span>
+            <Link href="/glosario/empresa-industrializadora-ditec" className="font-600 text-cci-orange hover:text-cci-orange-dark">Empresa industrializadora (DITEC)</Link>
+            <Link href="/glosario/vivienda-industrializada-tipo" className="font-600 text-cci-orange hover:text-cci-orange-dark">Vivienda Industrializada Tipo</Link>
+          </p>
 
           <div className="mt-10 grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
             <Reveal reduced={reduced}>

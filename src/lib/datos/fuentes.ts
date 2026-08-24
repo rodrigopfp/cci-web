@@ -136,4 +136,52 @@ export const FUENTES: Record<string, DataSource> = {
     documentType: "guia",
     geography: "Chile",
   },
+
+  // --- Fuentes del Glosario (Fase 3 · ajuste 2), verificadas 2026-08-23 --------
+  buildingsmart: {
+    id: "buildingsmart",
+    shortLabel: "buildingSMART International",
+    organization: "buildingSMART International",
+    title: "openBIM e Industry Foundation Classes (IFC) — estándares abiertos",
+    url: "https://www.buildingsmart.org/",
+    accessedAt: "2026-08-23",
+    documentType: "otro",
+    geography: "internacional",
+    notes:
+      "Organización que define los estándares abiertos internacionales (openBIM, IFC, IDS, BCF). Dominio oficial; el sitio responde 403 a bots (anti-bot), verificado como oficial.",
+  },
+  planbim: {
+    id: "planbim",
+    shortLabel: "Planbim (Corfo)",
+    organization: "Planbim · Corfo",
+    title: "Estándar BIM para proyectos públicos de Chile",
+    url: "https://www.planbim.cl/",
+    accessedAt: "2026-08-23",
+    documentType: "otro",
+    geography: "Chile",
+    notes:
+      "Programa de Corfo que impulsa estándares BIM para proyectos públicos en Chile. Dominio oficial confirmado; no accesible por curl desde el entorno de build (000).",
+  },
+  "minvu-res-52": {
+    id: "minvu-res-52",
+    shortLabel: "MINVU · Res. Ex. N.º 52 (2023)",
+    organization: "Ministerio de Vivienda y Urbanismo (MINVU)",
+    title: "Resolución Exenta N.º 52 — Evaluación y aprobación de empresas industrializadoras",
+    url: "https://www.minvu.gob.cl/wp-content/uploads/2023/01/Res-Ex-N-52-EVALUACION-Y-APROBACION-DE-EMPRESAS-INDUSTRIALIZADORAS.pdf",
+    publicationDate: "2023",
+    accessedAt: "2026-08-23",
+    documentType: "registro_oficial",
+    geography: "Chile",
+  },
+  "minvu-res-59": {
+    id: "minvu-res-59",
+    shortLabel: "MINVU · Res. Ex. N.º 59 (2023)",
+    organization: "Ministerio de Vivienda y Urbanismo (MINVU)",
+    title: "Resolución Exenta N.º 59 — Condiciones de aprobación de Vivienda Industrializada Tipo",
+    url: "https://www.minvu.gob.cl/wp-content/uploads/2026/04/Res-Ex-59-17.01.2023-Condiciones-Aprobacion-Vivienda-Industrializada-Tipo.pdf",
+    publicationDate: "2023",
+    accessedAt: "2026-08-23",
+    documentType: "registro_oficial",
+    geography: "Chile",
+  },
 };

@@ -10,7 +10,7 @@
  *
  * Uso:  npx tsx scripts/validar-datos.ts
  */
-import { validarGlosario, TERMINOS } from "../src/lib/datos/glosario";
+import { validarGlosario, TERMINOS, esPublico } from "../src/lib/datos/glosario";
 import { INDICADORES_LISTA } from "../src/lib/datos/indicadores";
 import { FUENTES } from "../src/lib/datos/fuentes";
 import { SOURCE_TYPES, CATEGORIES, VERIFICATION_STATUSES } from "../src/lib/datos/tipos-indicadores";
@@ -34,6 +34,10 @@ function validarIndicadores(): { errores: string[]; avisos: string[] } {
   const avisos: string[] = [];
   const vistos = new Set<string>();
   const fuentesUsadas = new Set<string>();
+
+  // Las fuentes también se referencian desde el glosario: cuéntalas como usadas
+  // para no marcar como huérfanas las que solo usan los términos (p. ej. planbim).
+  for (const t of TERMINOS) for (const fid of t.fuentes) fuentesUsadas.add(fid);
 
   for (const i of INDICADORES_LISTA) {
     const donde = `indicador "${i.slug}"`;
@@ -103,11 +107,11 @@ function validarIndicadores(): { errores: string[]; avisos: string[] } {
 
 function main() {
   const erroresGlosario = validarGlosario();
-  const publicados = TERMINOS.filter((t) => t.publicado).length;
+  const publicos = TERMINOS.filter(esPublico).length;
   const { errores: erroresInd, avisos } = validarIndicadores();
   const erroresLatam = validarLatam();
 
-  console.log(`Glosario: ${TERMINOS.length} términos (${publicados} publicados, ${TERMINOS.length - publicados} borradores).`);
+  console.log(`Glosario: ${TERMINOS.length} términos (${publicos} públicos, ${TERMINOS.length - publicos} borradores).`);
   console.log(`Indicadores: ${INDICADORES_LISTA.length} · Fuentes: ${Object.keys(FUENTES).length}.`);
   console.log(`Panorama LATAM: ${PAISES_LATAM.length} países (${PAISES_LATAM.filter((p) => p.estadoFicha !== "en_levantamiento").length} con contenido).`);
 

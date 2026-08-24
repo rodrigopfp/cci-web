@@ -6,6 +6,7 @@ import {
   type CategoriaGlosario,
   CATEGORIAS,
   ETIQUETAS_CATEGORIA,
+  esBorrador,
 } from "@/lib/datos/glosario";
 
 // Primera letra normalizada (sin acentos) para el índice alfabético.
@@ -30,6 +31,14 @@ function BadgeBorrador() {
   );
 }
 
+function BadgeValidada() {
+  return (
+    <span className="inline-flex items-center gap-1 rounded-md border border-cci-line bg-cci-paper px-2 py-0.5 text-[10px] font-700 uppercase tracking-wide text-cci-slate">
+      Definición CCI validada
+    </span>
+  );
+}
+
 function TerminoRow({ t }: { t: TerminoGlosario }) {
   return (
     <li>
@@ -44,7 +53,7 @@ function TerminoRow({ t }: { t: TerminoGlosario }) {
           <span className="rounded-full bg-cci-orange-soft px-2 py-0.5 text-[10px] font-700 uppercase tracking-wide text-cci-orange-dark">
             {ETIQUETAS_CATEGORIA[t.categoria]}
           </span>
-          {!t.publicado && <BadgeBorrador />}
+          {esBorrador(t) ? <BadgeBorrador /> : <BadgeValidada />}
         </div>
         <p className="line-clamp-2 max-w-3xl text-sm leading-relaxed text-cci-slate">{t.definicionCorta}</p>
       </Link>
@@ -162,7 +171,7 @@ export function GlosarioClient({
                   <h3 className="font-display text-base font-800 text-cci-ink group-hover:text-cci-orange-dark">
                     {t.titulo}
                   </h3>
-                  {!t.publicado && <BadgeBorrador />}
+                  {esBorrador(t) ? <BadgeBorrador /> : <BadgeValidada />}
                 </div>
                 <p className="line-clamp-3 text-sm leading-relaxed text-cci-slate">{t.definicionCorta}</p>
               </Link>
