@@ -20,7 +20,12 @@
 		Referrer-Policy "strict-origin-when-cross-origin"
 		Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
 		Strict-Transport-Security "max-age=31536000; includeSubDomains"
-		Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://images.unsplash.com https://cdn.sanity.io; connect-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+		# connect-src incluye el microservicio de formularios (cci-forms): sin él, el
+		# CSP del navegador bloquea el fetch a /api/* y los formularios caen en error
+		# (aunque CORS del servicio esté correcto). Es la única conexión externa en
+		# runtime; las lecturas de Sanity ocurren en build. Si cambia la URL del
+		# servicio, actualizar aquí y en la variable NEXT_PUBLIC_FORMS_API_URL.
+		Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://images.unsplash.com https://cdn.sanity.io; connect-src 'self' https://aware-endurance-production-313b.up.railway.app; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
 		# Ocultar la cabecera que identifica al servidor.
 		-Server
 	}
