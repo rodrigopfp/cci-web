@@ -42,6 +42,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const url = `${SITE_URL}/conocimiento/${r.slug}/`;
   const title = `${r.titulo} · Biblioteca CCI`;
   const description = r.bajada ?? `Recurso de la biblioteca del CCI: ${r.titulo}.`;
+
+  // Archivado: la ficha se conserva por reversibilidad, pero fuera de índice
+  // (ya está fuera del sitemap y del índice /conocimiento).
+  if (r.estado === "archivado") {
+    return { title, description, robots: { index: false, follow: true } };
+  }
+
   return {
     title,
     description,

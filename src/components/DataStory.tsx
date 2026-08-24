@@ -376,12 +376,16 @@ const CASOS = [
     metrics: [
       { slug: "caso-socovesa-coordinacion", etiqueta: "tiempo de coordinación" },
       { slug: "caso-socovesa-adicionales", etiqueta: "de adicionales de obra" },
+      { slug: "socovesa-rdi", etiqueta: "de RDI (consultas de información en obra)" },
     ],
   },
   {
     empresa: "Boetsch · Spoerer Ingenieros",
     proyecto: "Optimización estructural temprana",
-    metrics: [{ slug: "caso-boetsch-ahorro", etiqueta: "de ahorro del costo directo desde el diseño" }],
+    metrics: [
+      { slug: "caso-boetsch-ahorro", etiqueta: "de ahorro del costo directo desde el diseño" },
+      { slug: "boetsch-iteraciones-bim", etiqueta: "de iteraciones y modificaciones en BIM" },
+    ],
   },
 ];
 const CASOS_SLUGS = CASOS.flatMap((c) => c.metrics.map((m) => m.slug));
