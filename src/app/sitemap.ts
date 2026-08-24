@@ -20,6 +20,7 @@ const RUTAS_PRINCIPALES = [
   "nosotros",
   "hazte-socio",
   "conocimiento",
+  "conocimiento/biblioteca",
   "voces",
   "publica",
   "media-kit",

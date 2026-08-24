@@ -135,24 +135,8 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* TEASER — Industrializar no es prefabricar (delta aprobado, paso 5) */}
-      <section className="relative overflow-hidden bg-cci-graphite-dark">
-        <div
-          className="absolute inset-0 opacity-[0.16]"
-          style={{ backgroundImage: "radial-gradient(circle at 88% 20%, #E04E00 0%, transparent 45%), radial-gradient(circle at 5% 90%, #5C5C5C 0%, transparent 45%)" }}
-        />
-        <div className="container-cci relative py-12 text-center md:py-14">
-          <h2 className="mx-auto max-w-2xl font-display text-2xl font-900 leading-tight text-white md:text-3xl">
-            Industrializar no es solo prefabricar
-          </h2>
-          <p className="mx-auto mt-3 max-w-2xl leading-relaxed text-white/75">
-            Es integrar diseño, ingeniería, producción, logística y montaje desde el inicio.
-          </p>
-          <div className="mt-6">
-            <Link href="/data/#cap4" className="btn-primary">Entender la metodología</Link>
-          </div>
-        </div>
-      </section>
+      {/* El teaser "Industrializar no es solo prefabricar" migró al hub
+          /conocimiento (Fase 3 · ajuste 1, Parte 2.3b). */}
 
       {/* QUIÉNES SOMOS — presentación compacta del CCI (detalle vive en /nosotros) */}
       <section className="bg-cci-paper py-14">

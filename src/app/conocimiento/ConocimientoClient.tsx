@@ -1,5 +1,6 @@
 "use client";
 import { useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import type { RecursoBiblioteca } from "@/data/types";
 import { ETIQUETAS_CATEGORIA, ETIQUETAS_ESTADO, etiquetaTema, estadoChip } from "@/lib/biblioteca";
@@ -42,8 +43,11 @@ function RecursoCard({ r }: { r: RecursoBiblioteca }) {
 }
 
 export function ConocimientoClient({ recursos }: { recursos: RecursoBiblioteca[] }) {
-  const [cat, setCat] = useState<string>("todas");
-  const [tema, setTema] = useState<string>("todos");
+  // Vistas filtradas del hub (Parte 2.2): ?categoria=... / ?tema=... siembran el
+  // filtro inicial; el canonical siempre apunta a /conocimiento/biblioteca.
+  const params = useSearchParams();
+  const [cat, setCat] = useState<string>(params.get("categoria") ?? "todas");
+  const [tema, setTema] = useState<string>(params.get("tema") ?? "todos");
 
   const categoriasPresentes = useMemo(
     () => [...new Set(recursos.map((r) => r.categoria).filter(Boolean))] as string[],
@@ -66,6 +70,13 @@ export function ConocimientoClient({ recursos }: { recursos: RecursoBiblioteca[]
     <>
       <section className="border-b border-cci-line bg-cci-paper">
         <div className="container-cci py-12 md:py-14">
+          <nav aria-label="Ruta de navegación" className="mb-5 flex flex-wrap items-center gap-1.5 text-xs text-cci-slate-light">
+            <Link href="/" className="hover:text-cci-orange-dark">Inicio</Link>
+            <span>/</span>
+            <Link href="/conocimiento" className="hover:text-cci-orange-dark">Conocimiento</Link>
+            <span>/</span>
+            <span className="text-cci-slate">Biblioteca</span>
+          </nav>
           <div className="inline-flex w-fit items-center whitespace-nowrap border-l-4 border-cci-orange bg-cci-orange-soft py-2 pl-4 pr-3 text-[11px] font-700 uppercase leading-none tracking-[0.15em] text-cci-orange-dark md:text-xs">
             Biblioteca
           </div>

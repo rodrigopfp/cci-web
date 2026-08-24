@@ -29,14 +29,21 @@ export function Footer() {
         <div>
           <h4 className="mb-3 text-sm font-700 uppercase tracking-wide text-cci-graphite">Plataforma</h4>
           <ul className="space-y-2 text-sm text-cci-slate">
-            <li><Link href="/noticias" className="hover:text-cci-orange-dark">Actualidad</Link></li>
             <li><Link href="/data" className="hover:text-cci-orange-dark">CCI Data</Link></li>
-            <li><Link href="/data/latam" className="hover:text-cci-orange-dark">Panorama LATAM</Link></li>
-            <li><Link href="/data/#cap5" className="hover:text-cci-orange-dark">Evidencia</Link></li>
+            <li>
+              <Link href="/conocimiento" className="hover:text-cci-orange-dark">Conocimiento</Link>
+              <ul className="mt-2 space-y-2 border-l border-cci-line pl-3">
+                <li><Link href="/conocimiento/biblioteca" className="hover:text-cci-orange-dark">Biblioteca</Link></li>
+                <li><Link href="/glosario" className="hover:text-cci-orange-dark">Glosario</Link></li>
+                <li><Link href="/data/latam" className="hover:text-cci-orange-dark">Panorama LATAM</Link></li>
+              </ul>
+            </li>
+            <li><Link href="/nosotros" className="hover:text-cci-orange-dark">Quiénes somos</Link></li>
+            <li><Link href="/noticias" className="hover:text-cci-orange-dark">Actualidad</Link></li>
             <li><Link href="/vitrina" className="hover:text-cci-orange-dark">Vitrina</Link></li>
+            <li><Link href="/eventos" className="hover:text-cci-orange-dark">Eventos</Link></li>
+            <li><Link href="/eici" className="hover:text-cci-orange-dark">EICI</Link></li>
             <li><Link href="/voces" className="hover:text-cci-orange-dark">Voces</Link></li>
-            <li><Link href="/conocimiento" className="hover:text-cci-orange-dark">Conocimiento</Link></li>
-            <li><Link href="/glosario" className="hover:text-cci-orange-dark">Glosario</Link></li>
           </ul>
         </div>
         <div>

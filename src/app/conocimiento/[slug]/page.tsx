@@ -117,6 +117,8 @@ export default async function RecursoPage({ params }: { params: Promise<{ slug: 
         <span>/</span>
         <Link href="/conocimiento" className="hover:text-cci-orange-dark">Conocimiento</Link>
         <span>/</span>
+        <Link href="/conocimiento/biblioteca" className="hover:text-cci-orange-dark">Biblioteca</Link>
+        <span>/</span>
         <span className="text-cci-slate">{r.titulo}</span>
       </nav>
 

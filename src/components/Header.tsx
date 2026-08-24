@@ -4,14 +4,17 @@ import Link from "next/link";
 import { useState } from "react";
 import { CCILogo } from "./Logo";
 
+// Menú espejo de la portada (Fase 3 · ajuste 1, Parte 3): Inicio · CCI Data ·
+// Conocimiento · Quiénes somos · Actualidad · Vitrina · Eventos · EICI.
 const nav = [
   { href: "/", label: "Inicio" },
-  { href: "/noticias", label: "Actualidad" },
   { href: "/data", label: "CCI Data" },
+  { href: "/conocimiento", label: "Conocimiento" },
+  { href: "/nosotros", label: "Quiénes somos" },
+  { href: "/noticias", label: "Actualidad" },
   { href: "/vitrina", label: "Vitrina" },
   { href: "/eventos", label: "Eventos" },
   { href: "/eici", label: "EICI" },
-  { href: "/nosotros", label: "Quiénes somos" },
 ];
 
 export function Header() {
@@ -36,9 +39,15 @@ export function Header() {
       <div className="container-cci flex h-[68px] items-center justify-between">
         <Link href="/" className="flex items-center"><CCILogo compact width={116} /></Link>
 
-        <nav className="hidden items-center gap-6 lg:flex">
+        <nav className="hidden items-center gap-x-5 lg:flex xl:gap-x-6">
           {nav.map((item) => (
-            <Link key={item.href} href={item.href} className="link-underline text-sm font-medium text-cci-ink hover:text-cci-orange-dark">
+            <Link
+              key={item.href}
+              href={item.href}
+              data-cta="nav"
+              data-ubicacion="header"
+              className="link-underline whitespace-nowrap text-sm font-medium text-cci-ink hover:text-cci-orange-dark"
+            >
               {item.label}
             </Link>
           ))}
@@ -60,7 +69,7 @@ export function Header() {
           <div className="container-cci flex flex-col py-2">
             <Link href="/hazte-socio" onClick={() => setOpen(false)} data-cta="hazte-socio" data-ubicacion="menu-movil" className="btn-primary mb-2 mt-3 w-full">Hazte socio</Link>
             {nav.map((item) => (
-              <Link key={item.href} href={item.href} onClick={() => setOpen(false)} className="border-b border-cci-line/60 py-3 text-sm font-medium text-cci-ink">
+              <Link key={item.href} href={item.href} onClick={() => setOpen(false)} data-cta="nav" data-ubicacion="menu-movil" className="border-b border-cci-line/60 py-3 text-sm font-medium text-cci-ink">
                 {item.label}
               </Link>
             ))}
