@@ -160,7 +160,7 @@ export const FUENTES: Record<string, DataSource> = {
     documentType: "otro",
     geography: "Chile",
     notes:
-      "Programa de Corfo que impulsa estándares BIM para proyectos públicos en Chile. Dominio oficial confirmado; no accesible por curl desde el entorno de build (000).",
+      "Programa de Corfo; desarrolló el Estándar BIM para Proyectos Públicos (referencia estable). Construye2025 informa que el programa está actualmente suspendido por financiamiento, por lo que se cita en tiempo neutro: el hecho estable es el Estándar publicado. Dominio oficial confirmado; no accesible por curl desde el entorno de build (000).",
   },
   "minvu-res-52": {
     id: "minvu-res-52",

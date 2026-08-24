@@ -314,7 +314,7 @@ const BASE: TerminoBase[] = [
       "Coordinar arquitectura, estructura e instalaciones en un modelo federado y resolver las interferencias ANTES de fabricar los paneles, en lugar de descubrirlas en obra.",
     noConfundirCon: ["gemelo-digital"],
     contextoChileno:
-      "Planbim (Corfo) impulsa estándares BIM para proyectos públicos en Chile, y buildingSMART define los estándares abiertos internacionales (openBIM, IFC) que permiten colaborar entre plataformas.",
+      "Planbim, iniciativa de Corfo, desarrolló el Estándar BIM para Proyectos Públicos, referencia para los proyectos del Estado en Chile; y buildingSMART define los estándares abiertos internacionales (openBIM, IFC) que permiten colaborar entre plataformas.",
     relacionados: ["openbim", "ifc", "cde", "deteccion-de-interferencias", "integracion-temprana"],
   },
   {
