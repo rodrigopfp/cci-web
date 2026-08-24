@@ -10,7 +10,7 @@
  *    El "titular" es solo el rubro genérico (o la profesión, en profesionales).
  *  - No se cargan logos: todas usan la marca tipográfica de respaldo.
  *  - No se inventan correos, teléfonos ni URLs: emailContacto y sitioWeb quedan
- *    vacíos (la tarjeta/ficha muestran "Contacto por confirmar").
+ *    vacíos (la ficha ofrece validar el perfil; no muestra el contacto).
  *  - zonas = ["Todo Chile"] provisional para todas.
  *  - Categorías provisionales: se cargan tal cual; Rodrigo las corregirá.
  *  - createOrReplace con _id estable "empresa-<slug>": re-ejecutar no duplica.

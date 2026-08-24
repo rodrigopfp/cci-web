@@ -572,7 +572,7 @@ const LISTA: DataIndicator[] = [
     sourceId: "guia-cci-2024",
     sourceType: "documented_case",
     scope: "Caso Socovesa Sur · BIM Lab · Spoerer (Olimpia II), Guía CCI (2024).",
-    caveat: "Comparado con un 2-3% histórico habitual.",
+    caveat: "vs 2-3% histórico",
     visualizationType: "contador",
     nextReviewAt: REVIEW_ESTUDIOS,
   }),

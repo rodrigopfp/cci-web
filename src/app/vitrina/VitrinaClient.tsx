@@ -14,24 +14,12 @@ import {
   type OpcionTaxonomia,
 } from "@/lib/datos/taxonomia-vitrina";
 
-// ⚠️ TODO Rodrigo: correo oficial del CCI para requerimientos de la Vitrina.
-const EMAIL_CCI = "contacto@construccionindustrializada.cl";
+const EMAIL_CCI = "cci@cdt.cl";
 
 function mailtoRequerimiento(): string {
-  const asunto = encodeURIComponent("Requerimiento de proveedor · Vitrina CCI");
+  const asunto = encodeURIComponent("Requerimiento Vitrina CCI");
   const cuerpo = encodeURIComponent(
-    [
-      "Hola CCI, busco un proveedor de construcción industrializada. Mis datos:",
-      "",
-      "· Qué necesito: ",
-      "· Categoría de solución: ",
-      "· Región / zona de la obra: ",
-      "· Plazo estimado: ",
-      "· Nombre y empresa: ",
-      "· Email y teléfono de contacto: ",
-      "",
-      "Gracias.",
-    ].join("\n")
+    "Hola CCI,\n\nBusco un proveedor de construcción industrializada.\n\nQué necesito:\nRegión / zona de la obra:\nNombre y contacto:\n\nGracias.",
   );
   return `mailto:${EMAIL_CCI}?subject=${asunto}&body=${cuerpo}`;
 }

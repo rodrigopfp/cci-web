@@ -77,6 +77,7 @@ export const FUENTES: Record<string, DataSource> = {
     documentType: "estudio",
     geography: "Chile",
     notes: "Edificación en altura; 74 proyectos 2023-2024; 25 empresas.",
+    muestra: { proyectos: 74, empresas: 25 },
   },
   "matrix-2020": {
     id: "matrix-2020",

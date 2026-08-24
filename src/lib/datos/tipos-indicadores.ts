@@ -66,6 +66,8 @@ export interface DataSource {
   documentType: DocumentType;
   geography?: string;
   notes?: string;
+  /** Tamaño de la muestra del estudio (fuente única de esos conteos). */
+  muestra?: { proyectos: number; empresas: number };
 }
 
 export interface DataIndicator {

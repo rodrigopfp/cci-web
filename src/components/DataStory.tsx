@@ -342,7 +342,7 @@ const CASOS = [
     proyecto: "Coordinación BIM en Olimpia II",
     metrics: [
       { slug: "caso-socovesa-coordinacion", etiqueta: "tiempo de coordinación" },
-      { slug: "caso-socovesa-adicionales", etiqueta: "de adicionales de obra (vs 2-3% histórico)" },
+      { slug: "caso-socovesa-adicionales", etiqueta: "de adicionales de obra" },
     ],
   },
   {
@@ -765,14 +765,21 @@ export function DataStory({ studiesInternacionales }: { studiesInternacionales: 
                   <h3 className="mt-4 font-display text-lg font-800 leading-snug text-cci-ink">{caso.empresa}</h3>
                   <p className="mt-1 text-sm text-cci-slate">{caso.proyecto}</p>
                   <ul className="mt-4 space-y-2 border-t border-cci-line pt-4">
-                    {caso.metrics.map((m) => (
-                      <li key={m.slug} className="flex gap-2 text-sm font-600 text-cci-graphite">
-                        <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-cci-orange" />
-                        <span>
-                          <span className="font-800 text-cci-orange-dark">{metricaTexto(m.slug)}</span> {m.etiqueta}
-                        </span>
-                      </li>
-                    ))}
+                    {caso.metrics.map((m) => {
+                      // El caveat del indicador (p. ej. "vs 2-3% histórico") es la
+                      // única fuente de verdad de esa comparación; se muestra entre
+                      // paréntesis cuando existe.
+                      const cav = obtenerIndicador(m.slug).caveat;
+                      return (
+                        <li key={m.slug} className="flex gap-2 text-sm font-600 text-cci-graphite">
+                          <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-cci-orange" />
+                          <span>
+                            <span className="font-800 text-cci-orange-dark">{metricaTexto(m.slug)}</span> {m.etiqueta}
+                            {cav ? ` (${cav})` : ""}
+                          </span>
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
               </Reveal>
@@ -862,7 +869,7 @@ export function DataStory({ studiesInternacionales }: { studiesInternacionales: 
 
           <div className="mt-8 inline-flex flex-wrap items-center gap-2 rounded-xl border-2 border-dashed border-cci-line bg-cci-paper px-4 py-3 text-sm text-cci-slate">
             <span className="h-2 w-2 rounded-full bg-cci-orange" />
-            Datos IPLC: edificación en altura · 74 proyectos 2023-2024 · 25 empresas
+            {`Datos IPLC: edificación en altura · ${iplc.muestra?.proyectos} proyectos 2023-2024 · ${iplc.muestra?.empresas} empresas`}
           </div>
 
           <p className="mt-8 max-w-3xl text-[11px] leading-relaxed text-cci-slate-light">
