@@ -118,8 +118,9 @@ export function HeroCarousel() {
             Chile necesita<br />construir <span className="text-cci-orange">mejor.</span>
           </h1>
           <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/75" style={{ textShadow: TEXT_SHADOW }}>
-            Más productividad. Más calidad. Menos residuos.
-            <span className="font-bold text-white"> Eso es industrializar.</span>
+            Más productividad. Más calidad.
+            <br className="md:hidden" /> Menos residuos.{" "}
+            <span className="whitespace-nowrap font-bold tracking-[-0.015em] text-white">Eso es industrializar.</span>
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link href="/data" className="btn-primary">Ver la evidencia</Link>
