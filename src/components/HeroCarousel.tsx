@@ -43,7 +43,11 @@ const SLIDES: Slide[] = [
 // Velo grafito de la maqueta: transparente arriba, opaco al pie para garantizar
 // la lectura del titular y la leyenda sobre cualquiera de las fotos.
 const VELO =
-  "linear-gradient(180deg, #2B2A2833 0%, #2B2A2855 40%, #2B2A28E6 78%, #2B2A28F5 100%)";
+  "linear-gradient(180deg, #2B2A2840 0%, #2B2A2875 35%, #2B2A28F0 68%, #2B2A28FA 100%)";
+
+// Blindaje de legibilidad: sombra sutil en H1 y párrafo para que el texto no
+// compita con las fotos más claras (Osaka), incluso donde el velo es medio.
+const TEXT_SHADOW = "0 2px 14px rgba(0,0,0,.35)";
 
 const INTERVALO_MS = 5000;
 
@@ -107,15 +111,15 @@ export function HeroCarousel() {
       {/* --- Contenido: mismo mensaje y botones que el hero anterior --- */}
       <div className="relative w-full px-6 pb-10 sm:px-10 md:px-0 md:pb-0">
         <div className="max-w-[82vw] animate-rise sm:max-w-md md:ml-[21%] md:max-w-xl">
-          <div className="mb-5 inline-flex w-fit items-center whitespace-nowrap border-l-4 border-cci-orange bg-white/[0.06] py-2 pl-4 pr-3 text-[9px] font-700 uppercase leading-none tracking-[0.15em] text-[#F5EEE6] md:text-xs">
+          <div className="mb-5 inline-flex w-fit items-center whitespace-nowrap border-l-4 border-cci-orange bg-[#4A4947] py-2 pl-4 pr-3 text-[9px] font-700 uppercase leading-none tracking-[0.15em] text-[#E7E5E1] md:text-xs">
             Consejo de Construcción Industrializada
           </div>
-          <h1 className="font-display text-4xl font-900 leading-[1.03] text-white md:text-6xl">
+          <h1 className="font-display text-4xl font-900 leading-[1.03] text-white md:text-6xl" style={{ textShadow: TEXT_SHADOW }}>
             Chile necesita<br />construir <span className="text-cci-orange">mejor.</span>
           </h1>
-          <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/75">
-            Más productividad. Más control. Menos residuos. Menos incertidumbre.
-            <span className="font-600 text-white"> Eso es industrializar.</span> Y no te pedimos que lo creas: miremos los datos.
+          <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/75" style={{ textShadow: TEXT_SHADOW }}>
+            Más productividad. Más calidad. Menos residuos.
+            <span className="font-600 text-white"> Eso es industrializar.</span>
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link href="/data" className="btn-primary">Ver la evidencia</Link>
