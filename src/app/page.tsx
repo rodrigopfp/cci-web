@@ -16,7 +16,7 @@ import { VitrinaMiniCard } from "@/components/VitrinaCard";
 import { PartnerCard, SectionHeader, CTASection, EditorialPolicyBlock, VerMasLink } from "@/components/Blocks";
 import { MetricCard } from "@/components/MetricCard";
 import { NewsletterBox } from "@/components/Footer";
-import { HeroObra } from "@/components/HeroObra";
+import { HeroCarousel } from "@/components/HeroCarousel";
 import { formatDate } from "@/lib/format";
 import { SITE_URL } from "@/lib/site";
 import type { Indicator } from "@/data/types";
@@ -82,42 +82,11 @@ export default async function Home() {
 
   return (
     <>
-      {/* HERO — el desafío país. Alto acotado (no pantalla completa) para que la
-          sección RADAR asome al pie de la primera pantalla. */}
-      <section className="relative flex items-center overflow-hidden border-b border-cci-line bg-cci-graphite-dark min-h-[560px] md:max-h-[620px] md:h-[72svh]">
-        <div className="absolute inset-0 opacity-[0.22]" style={{ backgroundImage: "radial-gradient(circle at 88% 15%, #E04E00 0%, transparent 42%), radial-gradient(circle at 5% 95%, #5C5C5C 0%, transparent 45%)" }} />
-        {/* Escena de montaje industrializado (grúa + módulos), animada en loop.
-            Enmarca el texto: pluma arriba, mástil a la derecha, edificio abajo a
-            la derecha. Nunca pasa por delante del titular. */}
-        <HeroObra className="absolute inset-0 opacity-80 md:opacity-100" />
-        {/* Velo bajo el bloque de texto (centro-izquierda) para asegurar contraste. */}
-        <div className="absolute inset-0" style={{ backgroundImage: "radial-gradient(ellipse 60% 82% at 38% 50%, rgba(61,61,61,0.92) 0%, rgba(61,61,61,0.6) 52%, rgba(61,61,61,0) 82%)" }} />
-        <div className="absolute inset-0" style={{ backgroundImage: "linear-gradient(100deg, rgba(61,61,61,0.85) 0%, rgba(61,61,61,0.7) 40%, rgba(61,61,61,0.2) 66%, transparent 82%)" }} />
-        {/* Bloque de texto: centrado vertical; en escritorio arranca ~21% del ancho
-            (alineado a la izquierda). En móvil limitado para dejar el corredor derecho. */}
-        <div className="relative w-full px-6 sm:px-10 md:px-0">
-          <div className="max-w-[82vw] animate-rise sm:max-w-md md:ml-[21%] md:max-w-xl">
-            {/* Antetítulo: caja rectangular translúcida con barra naranja a la
-                izquierda (sustituye al punto). Ancho definido por el contenido
-                (w-fit), en una sola línea; en móvil baja el tamaño de fuente para
-                caber sin cruzarse con la grúa. */}
-            <div className="mb-5 inline-flex w-fit items-center whitespace-nowrap border-l-4 border-cci-orange bg-white/[0.06] py-2 pl-4 pr-3 text-[9px] font-700 uppercase leading-none tracking-[0.15em] text-[#F5EEE6] md:text-xs">
-              Consejo de Construcción Industrializada
-            </div>
-            <h1 className="font-display text-4xl font-900 leading-[1.03] text-white md:text-6xl">
-              Chile necesita<br />construir <span className="text-cci-orange">mejor.</span>
-            </h1>
-            <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/75">
-              Más productividad. Más control. Menos residuos. Menos incertidumbre.
-              <span className="font-600 text-white"> Eso es industrializar.</span> Y no te pedimos que lo creas: miremos los datos.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/data" className="btn-primary">Ver la evidencia</Link>
-              <Link href="/nosotros" className="inline-flex items-center justify-center gap-2 rounded-full border border-white/25 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10">Conoce al CCI</Link>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* HERO — carrusel de fotos del ecosistema CCI (opción A, 25/08). Alto
+          acotado para que la sección RADAR asome al pie de la primera pantalla.
+          Todo el comportamiento (rotación, leyenda, puntos) vive en el client
+          component; el resto de la portada NO cambia. */}
+      <HeroCarousel />
 
       {/* RADAR — instrumentos destacados: abre la portada con las cifras */}
       <section className="container-cci py-14">
