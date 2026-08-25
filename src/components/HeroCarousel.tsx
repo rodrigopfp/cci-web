@@ -25,7 +25,7 @@ const SLIDES: Slide[] = [
   },
   {
     n: 2,
-    caption: "Seminario Vivienda Industrializada · con MINVU",
+    caption: "Seminario Vivienda · con MINVU",
     alt: "Seminario de Vivienda Industrializada del CCI con una presentación del MINVU en pantalla",
   },
   {
@@ -119,19 +119,22 @@ export function HeroCarousel() {
           </h1>
           <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/75" style={{ textShadow: TEXT_SHADOW }}>
             Más productividad. Más calidad. Menos residuos.
-            <span className="font-600 text-white"> Eso es industrializar.</span>
+            <span className="font-bold text-white"> Eso es industrializar.</span>
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link href="/data" className="btn-primary">Ver la evidencia</Link>
-            <Link href="/nosotros" className="inline-flex items-center justify-center gap-2 rounded-full border border-white/25 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10">Conoce al CCI</Link>
+            <Link href="/nosotros" className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-white/90 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10">Conoce al CCI</Link>
           </div>
 
-          {/* Leyenda de la foto activa + puntos indicadores (decorativos) */}
-          <div className="mt-7 flex items-center gap-4">
-            <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#F6B27E] md:text-[11px]">
+          {/* Leyenda de la foto activa + puntos indicadores (decorativos).
+              ALTURA FIJA de una línea (h-4/h-5) para que el bloque NO salte al
+              cambiar de foto: la leyenda va en nowrap y, como red de seguridad,
+              trunca con elipsis si alguna no cupiera. */}
+          <div className="mt-7 flex h-4 items-center gap-4 md:h-5">
+            <p className="min-w-0 truncate font-mono text-[10px] uppercase tracking-[0.14em] text-[#F6B27E] md:text-[11px]">
               {SLIDES[activo].caption}
             </p>
-            <div className="flex items-center gap-1.5" aria-hidden="true">
+            <div className="flex shrink-0 items-center gap-1.5" aria-hidden="true">
               {SLIDES.map((s, i) => (
                 <span
                   key={s.n}
