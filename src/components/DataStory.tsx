@@ -7,10 +7,26 @@
 // scrollspy (IntersectionObserver) y renderiza cada capítulo pasándole sus
 // props. La lógica y el JSX de cada capítulo viven en su propio archivo (P0-1).
 
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import type { Study } from "@/data/types";
 import { usePrefersReducedMotion } from "@/lib/counters";
 import { CAPITULOS } from "@/components/data/capitulos/registro";
+import { BandaIlustracion } from "@/components/data/BandaIlustracion";
+
+// Bandas de ilustración (respiros) que van FUERA de los capítulos, como
+// separador ANTES del capítulo indicado por su id. banda-integracion antes de
+// "Por qué ocurre" (cap3); banda-ciclo antes de "Qué cambia" (cap5), es decir
+// entre "Industrializar no es prefabricar" (cap4) y "Qué cambia".
+const BANDAS: Record<string, { src: string; alt: string }> = {
+  cap3: {
+    src: "/ilustraciones/data/banda-integracion.webp",
+    alt: "Ilustración: componentes dispersos que se ordenan progresivamente hasta formar un conjunto integrado.",
+  },
+  cap5: {
+    src: "/ilustraciones/data/banda-ciclo.webp",
+    alt: "Ilustración: un proceso disperso que pasa por un ciclo de mejora continua y termina en un sistema ordenado.",
+  },
+};
 
 // ---- Navegación por capítulos (pills sticky + scrollspy) ---------------
 function ChapterNav({ active }: { active: string }) {
@@ -58,7 +74,10 @@ export function DataStory({ studiesInternacionales }: { studiesInternacionales: 
     <div ref={storyRef}>
       <ChapterNav active={active} />
       {CAPITULOS.map(({ id, Componente }) => (
-        <Componente key={id} reduced={reduced} studiesInternacionales={studiesInternacionales} />
+        <Fragment key={id}>
+          {BANDAS[id] && <BandaIlustracion src={BANDAS[id].src} alt={BANDAS[id].alt} />}
+          <Componente reduced={reduced} studiesInternacionales={studiesInternacionales} />
+        </Fragment>
       ))}
     </div>
   );
