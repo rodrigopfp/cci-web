@@ -24,6 +24,7 @@ export const SOURCE_TYPES = [
   "international",
   "documented_case",
   "survey",
+  "sector_survey",
   "declared_by_organization",
   "estimate",
 ] as const;

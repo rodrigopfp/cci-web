@@ -35,6 +35,12 @@ export const EVIDENCIA: Record<IndicatorSourceType, InfoEvidencia> = {
     interpretacion: "Resultado observado en un conjunto de proyectos o empresas; no representa necesariamente a todo el mercado.",
     notaVisible: true,
   },
+  sector_survey: {
+    etiqueta: "Encuesta sectorial",
+    interpretacion: "Opinión declarada por profesionales del sector en una encuesta con muestra identificada; refleja percepción, no medición de obras.",
+    requiereCaveat: true,
+    notaVisible: true,
+  },
   documented_case: {
     etiqueta: "Caso documentado",
     interpretacion: "Resultado de un proyecto específico, con alcance y participantes identificados; no es un promedio sectorial.",

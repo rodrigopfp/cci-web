@@ -184,4 +184,73 @@ export const FUENTES: Record<string, DataSource> = {
     documentType: "registro_oficial",
     geography: "Chile",
   },
+
+  // --- Fuentes cargadas y verificadas contra el PDF oficial (P0-2), 2026-08-27 ---
+  "cnep-2025": {
+    id: "cnep-2025",
+    shortLabel: "CNEP · Informe Anual de Productividad 2025",
+    organization: "Comisión Nacional de Evaluación y Productividad (CNEP)",
+    title: "Informe Anual de Productividad 2025",
+    url: "https://cnep.cl/cnep/estudios-publicados/informes-anuales-productividad/informe-anual-de-productividad-2025/Informe-Anual-2025-Final.pdf",
+    publicationDate: "2025",
+    accessedAt: "2026-08-27",
+    documentType: "informe",
+    geography: "Chile",
+    notes:
+      "PTF del sector construcción 2024 (-2,0%) y disminución anual promedio 1996-2019 (-3,1%); productividad laboral sectorial relativa al nivel agregado en Figura 1.A.8.",
+  },
+  "cnp-construccion-2020": {
+    id: "cnp-construccion-2020",
+    shortLabel: "CNP · Productividad en la Construcción (2020)",
+    organization: "Comisión Nacional de Productividad (CNP)",
+    title: "Productividad en el Sector de la Construcción — Informe Final",
+    url: "https://cnep.cl/cnep/estudios-publicados/sectores-y-areas-transversales/productividad-sector-construccion-2020/Productividad-Sector-Construccion_.pdf",
+    publicationDate: "2020",
+    accessedAt: "2026-08-27",
+    documentType: "informe",
+    geography: "Chile",
+    notes:
+      "Infraestructura vial: muestra de 49 obras de 13 empresas (datos 2019, benchmark Matrix). Productividad como valor agregado por persona-día; desviación de plazo respecto a lo programado.",
+    muestra: { proyectos: 49, empresas: 13 },
+  },
+  "barreras-cfs-2022": {
+    id: "barreras-cfs-2022",
+    shortLabel: "Barreras CFS Chile (2022)",
+    organization: "Construye2025 · CCI · CIPYCS · GEPUC (Pontificia Universidad Católica)",
+    title:
+      "Identificación y Evaluación de Impacto de Barreras presentes en la adopción de la Construcción Fuera de Sitio en Chile",
+    url: "https://construye2025.cl/wp-content/uploads/2022/07/IMPACTO-DE-BARRERAS-PRESENTES-EN-LA-ADOPCION-DE-LA-CONSTRUCCION-FUERA-DE-SITIO-EN-CHILE.pdf",
+    publicationDate: "2022",
+    accessedAt: "2026-08-27",
+    documentType: "estudio",
+    geography: "Chile",
+    notes:
+      "Encuesta a 113 profesionales de la construcción industrializada (más del 90% ingenieros, constructores civiles y arquitectos; 50% tomadores de decisiones; 77% con 16+ años de experiencia). Los porcentajes son el promedio de respuestas de alto/muy alto impacto de cada barrera.",
+  },
+  "bim-dgop-2025": {
+    id: "bim-dgop-2025",
+    shortLabel: "MOP · Plan de Implementación BIM DGOP 2025-2028",
+    organization: "Ministerio de Obras Públicas · Dirección General de Obras Públicas (DGOP)",
+    title: "Estrategia y Plan de Implementación de BIM en DGOP 2025-2028",
+    url: "https://repositoriodirplan.mop.gob.cl/biblioteca/bitstreams/e95c3920-d467-41e2-ad1d-b2de69e079c7/download",
+    publicationDate: "2025",
+    accessedAt: "2026-08-27",
+    documentType: "informe",
+    geography: "Chile",
+    notes:
+      "Diagnóstico y plan en un solo documento. Tabla 'Avance de BIM por Dirección' (columnas Central, Regional, Porcentaje por Dirección), resultado de la Medición de Avance de BIM.",
+  },
+  "mop-madera-2026": {
+    id: "mop-madera-2026",
+    shortLabel: "MOP · Madera en la obra pública (2026)",
+    organization: "Ministerio de Obras Públicas (MOP)",
+    title: "En Chile la madera está presente en la obra pública",
+    url: "https://www.mop.gob.cl/en-chile-la-madera-esta-presente-en-la-obra-publica/",
+    publicationDate: "2026-04-22",
+    accessedAt: "2026-08-27",
+    documentType: "otro",
+    geography: "Chile",
+    notes:
+      "Nota institucional (sin cifras cargadas). Menciona industrialización con madera estructural certificada y estandarizada, formación y adopción de BIM, y mecanismos de pago por avance en fábrica.",
+  },
 };
