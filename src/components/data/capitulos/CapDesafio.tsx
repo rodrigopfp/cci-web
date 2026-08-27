@@ -3,6 +3,7 @@
 import { obtenerIndicador, obtenerFuente } from "@/lib/datos/indice";
 import { Reveal, Kicker, BarDuel, FuenteDetalle, val } from "../piezas";
 import { SlopeRelativa } from "../SlopeRelativa";
+import { BrechaVial } from "../BrechaVial";
 import type { CapituloProps } from "./registro";
 
 export function CapDesafio({ reduced }: CapituloProps) {
@@ -43,7 +44,13 @@ export function CapDesafio({ reduced }: CapituloProps) {
           <p className="mt-5 border-t border-white/10 pt-4 text-[11px] leading-relaxed text-white/50">
             Fuente: {obtenerFuente("matrix-2020").shortLabel}.
           </p>
-          <FuenteDetalle slugs={["productividad-chile", "productividad-internacional", "productividad-relativa-construccion-1990"]} dark />
+          <FuenteDetalle slugs={["productividad-chile", "productividad-internacional", "productividad-relativa-construccion-1990", "productividad-vial-chile"]} dark />
+        </Reveal>
+
+        {/* Cierre del capítulo: la brecha también en infraestructura vial. Va
+            DEBAJO de la barra-duelo de edificación, que se conserva intacta. */}
+        <Reveal reduced={reduced} className="mt-10 max-w-2xl rounded-2xl border border-white/10 bg-white/[0.04] p-7">
+          <BrechaVial reduced={reduced} />
         </Reveal>
       </div>
     </section>
