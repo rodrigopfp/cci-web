@@ -20,7 +20,7 @@ export function CapQueMedimos({ reduced }: CapituloProps) {
     <section id="cap8" className="scroll-mt-[160px] bg-white">
       <div className="container-cci py-16 md:py-20">
         <Reveal reduced={reduced}>
-          <Kicker>08 · Lo que estamos midiendo</Kicker>
+          <Kicker>09 · Lo que estamos midiendo</Kicker>
           <h2 className="max-w-3xl font-display text-2xl font-900 leading-tight text-cci-ink md:text-4xl">
             Los indicadores del estándar nacional
           </h2>

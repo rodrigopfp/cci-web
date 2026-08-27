@@ -12,6 +12,7 @@ import { CapDesafio } from "./CapDesafio";
 import { CapPorQue } from "./CapPorQue";
 import { CapNoEsPrefabricar } from "./CapNoEsPrefabricar";
 import { CapQueCambia } from "./CapQueCambia";
+import { CapMejoraEscalar } from "./CapMejoraEscalar";
 import { CapChileAvanza } from "./CapChileAvanza";
 import { CapEvidencia } from "./CapEvidencia";
 import { CapQueMedimos } from "./CapQueMedimos";
@@ -38,7 +39,11 @@ export const CAPITULOS: Capitulo[] = [
   { id: "cap3", num: "03", etiqueta: "Por qué", labelPill: (<><span className="font-mono">03</span> Por qué</>), Componente: CapPorQue },
   { id: "cap4", num: "04", etiqueta: "No es prefabricar", labelPill: (<><span className="font-mono">04</span> No es prefabricar</>), Componente: CapNoEsPrefabricar },
   { id: "cap5", num: "05", etiqueta: "Qué cambia", labelPill: (<><span className="font-mono">05</span> Qué cambia</>), Componente: CapQueCambia },
-  { id: "cap6", num: "06", etiqueta: "Chile avanza", labelPill: (<><span className="font-mono">06</span> Chile avanza</>), Componente: CapChileAvanza },
-  { id: "cap7", num: "07", etiqueta: "La evidencia", labelPill: (<><span className="font-mono">07</span> La evidencia</>), Componente: CapEvidencia },
-  { id: "cap8", num: "08", etiqueta: "Qué medimos", labelPill: (<><span className="font-mono">08</span> Qué medimos</>), Componente: CapQueMedimos },
+  // Capítulo nuevo (P1-4). id NO numérico a propósito: las anclas cap1..cap8
+  // tienen redirects/enlaces y no deben cambiar. La pill visible es 06; los
+  // siguientes corren su NÚMERO visible (07/08/09) sin cambiar su id.
+  { id: "cap-escalar", num: "06", etiqueta: "Escalar la mejora", labelPill: (<><span className="font-mono">06</span> Escalar la mejora</>), Componente: CapMejoraEscalar },
+  { id: "cap6", num: "07", etiqueta: "Chile avanza", labelPill: (<><span className="font-mono">07</span> Chile avanza</>), Componente: CapChileAvanza },
+  { id: "cap7", num: "08", etiqueta: "La evidencia", labelPill: (<><span className="font-mono">08</span> La evidencia</>), Componente: CapEvidencia },
+  { id: "cap8", num: "09", etiqueta: "Qué medimos", labelPill: (<><span className="font-mono">09</span> Qué medimos</>), Componente: CapQueMedimos },
 ];

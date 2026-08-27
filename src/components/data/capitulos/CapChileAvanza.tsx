@@ -15,7 +15,7 @@ export function CapChileAvanza({ reduced }: CapituloProps) {
     <section id="cap6" className="scroll-mt-[160px] bg-white">
       <div className="container-cci py-16 md:py-20">
         <Reveal reduced={reduced}>
-          <Kicker>06 · Chile ya avanza</Kicker>
+          <Kicker>07 · Chile ya avanza</Kicker>
           <h2 className="max-w-3xl font-display text-2xl font-900 leading-tight text-cci-ink md:text-4xl">
             No es una promesa: el país ya se está midiendo — y mejorando
           </h2>
