@@ -2,6 +2,7 @@
 
 import { obtenerIndicador, obtenerFuente } from "@/lib/datos/indice";
 import { Reveal, Kicker, BarDuel, FuenteDetalle, val } from "../piezas";
+import { SlopeRelativa } from "../SlopeRelativa";
 import type { CapituloProps } from "./registro";
 
 export function CapDesafio({ reduced }: CapituloProps) {
@@ -17,6 +18,12 @@ export function CapDesafio({ reduced }: CapituloProps) {
             No es un problema de personas ni de empresas: es un desafío sistémico del proceso
             productivo. La brecha con los estándares internacionales se mide, y es grande.
           </p>
+        </Reveal>
+
+        {/* Pieza de apertura del capítulo: slope de productividad relativa
+            (1,7× 1990 → 0,8× 2024). Va ARRIBA de la barra-duelo, que se conserva. */}
+        <Reveal reduced={reduced} className="mt-10 max-w-2xl rounded-2xl border border-white/10 bg-white/[0.04] p-7">
+          <SlopeRelativa reduced={reduced} />
         </Reveal>
 
         <Reveal reduced={reduced} className="mt-10 max-w-2xl rounded-2xl border border-white/10 bg-white/[0.04] p-7">
@@ -36,7 +43,7 @@ export function CapDesafio({ reduced }: CapituloProps) {
           <p className="mt-5 border-t border-white/10 pt-4 text-[11px] leading-relaxed text-white/50">
             Fuente: {obtenerFuente("matrix-2020").shortLabel}.
           </p>
-          <FuenteDetalle slugs={["productividad-chile", "productividad-internacional"]} dark />
+          <FuenteDetalle slugs={["productividad-chile", "productividad-internacional", "productividad-relativa-construccion-1990"]} dark />
         </Reveal>
       </div>
     </section>
