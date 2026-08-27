@@ -11,17 +11,46 @@ function chipCls(active: boolean): string {
   }`;
 }
 
+// Ilustración de RESPALDO por tema (P1-6). Solo se pinta cuando el recurso NO
+// tiene portada de Sanity. Precedencia: portada Sanity → ilustración del tema →
+// degradado. Solo estos 6 temas tienen ilustración; el resto queda en degradado.
+// (barreras.webp y capital-humano.webp NO se mapean: reservadas para explicadores.)
+const ILUSTRACION_TEMA: Record<string, { src: string; alt: string }> = {
+  productividad: { src: "/ilustraciones/conocimiento/productividad.webp", alt: "Ilustración: elementos equivalentes comparados entre sí a distinta altura." },
+  integracion_temprana: { src: "/ilustraciones/conocimiento/integracion-temprana.webp", alt: "Ilustración: conjuntos de componentes conectados de forma radial a un punto central común." },
+  bim: { src: "/ilustraciones/conocimiento/bim.webp", alt: "Ilustración: capas geométricas superpuestas que coinciden en el espacio." },
+  dfma: { src: "/ilustraciones/conocimiento/dfma.webp", alt: "Ilustración: familias de componentes que convergen en un volumen ensamblado." },
+  sostenibilidad: { src: "/ilustraciones/conocimiento/sostenibilidad.webp", alt: "Ilustración: componentes separados en tres familias de material que vuelven a incorporarse a un nuevo conjunto." },
+  certificacion: { src: "/ilustraciones/conocimiento/normativa.webp", alt: "Ilustración: un conjunto modular contenido dentro de marcos concéntricos alineados." },
+};
+
+function ilustracionPorTema(temas: string[]): { src: string; alt: string } | null {
+  for (const t of temas) if (ILUSTRACION_TEMA[t]) return ILUSTRACION_TEMA[t];
+  return null;
+}
+
 function RecursoCard({ r }: { r: RecursoBiblioteca }) {
+  // Precedencia: portada Sanity manda; la ilustración es solo respaldo.
+  const ilustracion = !r.portada ? ilustracionPorTema(r.temas ?? []) : null;
   return (
     <Link
       href={`/conocimiento/${r.slug}`}
       className="card-rise group flex h-full flex-col overflow-hidden rounded-2xl border border-cci-line bg-white shadow-card focus:outline-none focus-visible:ring-2 focus-visible:ring-cci-orange"
     >
       <div className="relative aspect-[16/9] w-full overflow-hidden bg-gradient-to-br from-cci-graphite to-cci-graphite-dark">
-        {r.portada && (
+        {r.portada ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={r.portada} alt="" aria-hidden="true" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
-        )}
+        ) : ilustracion ? (
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={ilustracion.src} alt={ilustracion.alt} width={1600} height={900} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+            {/* Crédito discreto: es ilustración, no foto de un proyecto real. */}
+            <span className="absolute bottom-2 right-2 rounded bg-white/75 px-1.5 py-0.5 text-[11px] font-600 text-cci-slate backdrop-blur-sm">
+              Ilustración CCI
+            </span>
+          </>
+        ) : null}
         <span className={`absolute left-3 top-3 rounded-full px-2.5 py-1 text-[10px] font-700 uppercase tracking-wide ${estadoChip(r.estado)}`}>
           {ETIQUETAS_ESTADO[r.estado]}
         </span>
