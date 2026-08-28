@@ -240,6 +240,20 @@ export const FUENTES: Record<string, DataSource> = {
     notes:
       "Diagnóstico y plan en un solo documento. Tabla 'Avance de BIM por Dirección' (columnas Central, Regional, Porcentaje por Dirección), resultado de la Medición de Avance de BIM.",
   },
+  "mop-obras-2026": {
+    id: "mop-obras-2026",
+    shortLabel: "MOP · 70 obras estratégicas (abril 2026)",
+    organization: "Ministerio de Obras Públicas (MOP)",
+    title:
+      "MOP define 70 obras estratégicas para acelerar la inversión y la generación de empleo en todo el país",
+    url: "https://dcyf.mop.gob.cl/mop-define-70-obras-estrategicas-para-acelerar-la-inversion-y-la-generacion-de-empleo-en-todo-el-pais/",
+    publicationDate: "2026-04-21",
+    accessedAt: "2026-08-28",
+    documentType: "comunicado",
+    geography: "Chile",
+    notes:
+      "Cartera priorizada tras un análisis técnico de más de 300 obras; inversión equivalente al 8,6% del PIB; entre 200 mil y 250 mil empleos directos e indirectos proyectados hacia 2030.",
+  },
   "mop-madera-2026": {
     id: "mop-madera-2026",
     shortLabel: "MOP · Madera en la obra pública (2026)",

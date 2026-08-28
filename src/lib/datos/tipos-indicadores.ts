@@ -13,6 +13,7 @@ export const DOCUMENT_TYPES = [
   "guia",
   "registro_oficial",
   "informe",
+  "comunicado",
   "otro",
 ] as const;
 export type DocumentType = (typeof DOCUMENT_TYPES)[number];
