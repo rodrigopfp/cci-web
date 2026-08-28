@@ -76,6 +76,28 @@ function TerminoLink({ slug }: { slug: string }) {
   );
 }
 
+// Sello de validación técnica del CCI. Colores del manual de marca: azul
+// institucional #005CAD (cci-blue) y gris #5C5C5C (cci-graphite); los dos tintes
+// celestes (#F4F9FD fondo, #CFE1F2 borde) son propios del sello, no van a la
+// paleta global. Check de línea fina (no relleno), aria-hidden. Sin sombras ni
+// degradados; no debe pesar más que el título. Solo se renderiza en validada_cci.
+function SelloValidacion() {
+  return (
+    <div className="mt-3 flex max-w-[470px] items-center gap-3 rounded-lg border border-[#CFE1F2] bg-[#F4F9FD] px-[18px] py-[13px]">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true" className="shrink-0">
+        <circle cx="12" cy="12" r="10" stroke="#005CAD" strokeWidth="1.6" />
+        <path d="M7.5 12.3l3 3 6-6.6" stroke="#005CAD" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+      <div>
+        <p className="text-[13.5px] font-700 leading-snug text-cci-blue">Definición validada por el CCI</p>
+        <p className="text-[12.5px] leading-snug text-cci-graphite">
+          Revisada por el comité técnico del Consejo de Construcción Industrializada
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function Bloque({ titulo, children }: { titulo: string; children: React.ReactNode }) {
   return (
     <section className="mt-8 border-t border-cci-line pt-8">
@@ -150,7 +172,11 @@ export default async function TerminoPage({ params }: { params: Promise<{ slug: 
       {/* CABECERA */}
       <header>
         <div className="mb-2 flex flex-wrap items-center gap-2">
-          <span className="rounded-full bg-cci-orange-soft px-2.5 py-0.5 text-[11px] font-700 uppercase tracking-wide text-cci-orange-dark">
+          {/* Pastilla de categoría INTENSA (solo en la ficha; el índice la mantiene
+              suave). Misma forma/tamaño; solo cambia el relleno a naranja sólido con
+              texto blanco. font-800 (no 700) para reforzar el contraste blanco sobre
+              #E04E00 (~4,0:1), según indicación de subir peso antes que aclarar. */}
+          <span className="rounded-full bg-cci-orange px-2.5 py-0.5 text-[11px] font-800 uppercase tracking-wide text-white">
             {ETIQUETAS_CATEGORIA[t.categoria]}
           </span>
           {/* Naturaleza (mismo estilo de pill que el indicador de evidencia). */}
@@ -173,9 +199,14 @@ export default async function TerminoPage({ params }: { params: Promise<{ slug: 
           )}
         </div>
         <h1 className="font-display text-3xl font-900 leading-tight text-cci-ink md:text-4xl">{t.titulo}</h1>
-        {estadoLabel && (
+        {/* Bajo el título: el SELLO de validación solo para definiciones validadas
+            por el CCI. Para "revision_grupo_tecnico" (público pero puede cambiar) se
+            mantiene la línea de estado plana; borrador/archivada no muestran nada. */}
+        {t.estadoEditorial === "validada_cci" ? (
+          <SelloValidacion />
+        ) : estadoLabel ? (
           <p className="mt-3 text-sm font-600 text-cci-slate">{estadoLabel}.</p>
-        )}
+        ) : null}
       </header>
 
       {/* 1. DEFINICIÓN CORTA */}
