@@ -88,6 +88,10 @@ export default async function RecursoPage({ params }: { params: Promise<{ slug: 
   const url = `${SITE_URL}/conocimiento/${r.slug}/`;
   const download = urlDescarga(r);
   const descargable = esDescargable(r);
+  // Artículo on-site: se lee completo en la página (tiene cuerpo) y no hay nada
+  // que descargar (ni archivo ni enlaceExterno). En ese caso no se muestra
+  // ningún aviso de descarga: no hay archivo inexistente que anunciar.
+  const esArticuloOnSite = !download && Boolean(r.cuerpo && r.cuerpo.length > 0);
 
   // Cifras del documento: desde el registro único, con su línea Fuente.
   const cifras = r.indicadoresDestacados.map((s) => obtenerIndicadorConFuente(s));
@@ -219,7 +223,8 @@ export default async function RecursoPage({ params }: { params: Promise<{ slug: 
         </section>
       )}
 
-      {/* DESCARGA */}
+      {/* DESCARGA — se omite por completo en artículos on-site sin archivo. */}
+      {!esArticuloOnSite && (
       <section className="mt-10 border-t border-cci-line pt-8">
         {descargable && download ? (
           r.requiereFormulario ? (
@@ -245,6 +250,7 @@ export default async function RecursoPage({ params }: { params: Promise<{ slug: 
           </div>
         )}
       </section>
+      )}
 
       {/* RELACIONADOS + GLOSARIO */}
       {(relacionados.length > 0 || r.terminosGlosario.length > 0) && (
