@@ -28,6 +28,43 @@ export function formatCL(n: number, decimals = 0): string {
 export const val = (slug: string): number => Number(obtenerIndicador(slug).value);
 export const decimalsDe = (n: number): number => (Number.isInteger(n) ? 0 : 2);
 
+/**
+ * Contador SIN salto de layout. La caja se dimensiona por el VALOR FINAL ya
+ * formateado (placeholder invisible con los separadores de miles), y el número
+ * que anima se pinta encima en posición absoluta. Así, mientras cuenta:
+ *  - la caja no cambia de ancho ni de alto (dígitos tabulares + valor final);
+ *  - `whitespace-nowrap` impide el reflow por wrap;
+ *  - el texto contiguo NO se mueve (su columna/hueco no depende del valor actual).
+ * Cuenta al entrar en viewport; con `reduced` o sin JS, queda en el valor final.
+ */
+export function Contador({
+  target,
+  decimals = 0,
+  prefix = "",
+  suffix = "",
+  reduced,
+  className = "",
+}: {
+  target: number;
+  decimals?: number;
+  prefix?: string;
+  suffix?: string;
+  reduced: boolean;
+  className?: string;
+}) {
+  const { ref, inView } = useInView<HTMLSpanElement>();
+  const count = useCountUp(target, inView, reduced);
+  const finalStr = `${prefix}${formatCL(target, decimals)}${suffix}`;
+  const currentStr = `${prefix}${formatCL(count, decimals)}${suffix}`;
+  return (
+    <span ref={ref} className={`relative inline-block whitespace-nowrap tabular-nums ${className}`}>
+      {/* reserva ancho/alto según el valor final; invisible pero ocupa espacio */}
+      <span aria-hidden="true" className="invisible">{finalStr}</span>
+      <span className="absolute inset-0">{currentStr}</span>
+    </span>
+  );
+}
+
 /** Evidencia de un indicador para <MetricCard> (etiqueta neutra + nota). */
 export const evidenciaDe = (slug: string) => {
   const i = obtenerIndicador(slug);
