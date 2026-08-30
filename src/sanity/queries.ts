@@ -227,3 +227,12 @@ const EMPRESA_VITRINA_FIELDS = `
 
 export const empresasVitrinaQuery = `*[_type == "empresaVitrina"] | order(nombre asc){${EMPRESA_VITRINA_FIELDS}}`;
 export const empresaVitrinaBySlugQuery = `*[_type == "empresaVitrina" && slug.current == $slug][0]{${EMPRESA_VITRINA_FIELDS}}`;
+
+// --- Fichas VIT (imágenes del catálogo /data/vit) -----------------------
+// Solo se traen las que tienen autorización completa (autorizadaPor +
+// fechaAutorizacion) e imagen; sin eso, el sitio usa la silueta por tipología.
+export const fichasVitImagenesQuery = `*[_type == "fichaVit" && defined(autorizadaPor) && defined(fechaAutorizacion) && defined(imagen.asset)]{
+  "slug": slug.current,
+  imagen,
+  credito
+}`;

@@ -9,6 +9,7 @@
 import type { DataSource } from "./tipos-indicadores";
 
 const ACCESSED = "2026-08-22"; // fecha de verificación de esta migración inicial
+const ACCESSED_VIT = "2026-08-29"; // verificación de las fuentes de /data/vit
 
 export const FUENTES: Record<string, DataSource> = {
   "mgi-2017": {
@@ -266,5 +267,125 @@ export const FUENTES: Record<string, DataSource> = {
     geography: "Chile",
     notes:
       "Nota institucional (sin cifras cargadas). Menciona industrialización con madera estructural certificada y estandarizada, formación y adopción de BIM, y mecanismos de pago por avance en fábrica.",
+  },
+
+  // ==========================================================================
+  // VIVIENDA INDUSTRIALIZADA EN LA POLÍTICA PÚBLICA (/data/vit) — fuentes Ditec
+  // Minvu + elaboración propia CCI. Añadidas sin tocar las existentes.
+  // ==========================================================================
+  "minvu-398": {
+    id: "minvu-398",
+    shortLabel: "Minvu · publicación N°398 (dic 2025)",
+    organization: "Ministerio de Vivienda y Urbanismo",
+    title:
+      "Vivienda industrializada: nuevas tecnologías para diversificar la vivienda de interés público en Chile",
+    url: "https://www.minvu.gob.cl/",
+    publicationDate: "2025-12-01",
+    accessedAt: ACCESSED_VIT,
+    documentType: "informe",
+    geography: "Chile",
+    notes: "Publicación oficial N°398, dic 2025, 116 págs. Corte de sus cifras: nov 2025.",
+  },
+  "ditec-matta": {
+    id: "ditec-matta",
+    shortLabel: "Ditec · Marco normativo y aprobación (29 may 2026)",
+    organization: "Ditec · Ministerio de Vivienda y Urbanismo",
+    title: "Industrialización en vivienda: marco normativo y aprobación",
+    url: "https://construccionindustrializada.cl/",
+    publicationDate: "2026-05-29",
+    accessedAt: ACCESSED_VIT,
+    documentType: "comunicado",
+    geography: "Chile",
+    notes:
+      "Presentación institucional del Seminario Vivienda Industrializada, 29 may 2026, publicada por el CCI. requiereCaveat: lámina de seminario, no informe estadístico.",
+  },
+  "ditec-jara": {
+    id: "ditec-jara",
+    shortLabel: "Ditec · Res. Ex. N°52 (29 may 2026)",
+    organization: "Ditec · Ministerio de Vivienda y Urbanismo",
+    title: "Res. Ex. N°52: estándares para la evaluación de empresas industrializadoras",
+    url: "https://construccionindustrializada.cl/",
+    publicationDate: "2026-05-29",
+    accessedAt: ACCESSED_VIT,
+    documentType: "comunicado",
+    geography: "Chile",
+    notes:
+      "Presentación institucional del Seminario Vivienda Industrializada, 29 may 2026. requiereCaveat: lámina de seminario, no informe estadístico.",
+  },
+  "ditec-soto": {
+    id: "ditec-soto",
+    shortLabel: "Ditec · Industrialización en vivienda (29 may 2026)",
+    organization: "Ditec · Ministerio de Vivienda y Urbanismo",
+    title: "Industrialización en vivienda",
+    url: "https://construccionindustrializada.cl/",
+    publicationDate: "2026-05-29",
+    accessedAt: ACCESSED_VIT,
+    documentType: "comunicado",
+    geography: "Chile",
+    notes:
+      "Presentación institucional del Seminario Vivienda Industrializada, 29 may 2026. requiereCaveat: lámina de seminario, no informe estadístico.",
+  },
+  "ditec-calderon": {
+    id: "ditec-calderon",
+    shortLabel: "Ditec · Diagnóstico desde lo avanzado (29 may 2026)",
+    organization: "Ditec · Ministerio de Vivienda y Urbanismo",
+    title: "Industrialización habitacional: construyendo la capacidad que Chile necesita",
+    url: "https://construccionindustrializada.cl/",
+    publicationDate: "2026-05-29",
+    accessedAt: ACCESSED_VIT,
+    documentType: "comunicado",
+    geography: "Chile",
+    notes:
+      "Presentación institucional del Seminario Vivienda Industrializada, 29 may 2026. requiereCaveat: lámina de seminario, no informe estadístico.",
+  },
+  "res52-levantamiento": {
+    id: "res52-levantamiento",
+    shortLabel: "Levantamiento industrializadoras Res. Ex. N°52 (29 may 2026)",
+    organization: "Industrializadoras certificadas Res. Ex. N°52",
+    title: "Oportunidades de mejora para escalar la industrialización",
+    url: "https://construccionindustrializada.cl/",
+    publicationDate: "2026-05-29",
+    accessedAt: ACCESSED_VIT,
+    documentType: "otro",
+    geography: "Chile",
+    notes:
+      "Encuesta sectorial entre las industrializadoras certificadas, seminario 29 may 2026. requiereCaveat: dato declarado por las empresas, sin metodología publicada.",
+  },
+  "circular-023": {
+    id: "circular-023",
+    shortLabel: "Circular N°023 Subsecretaría VyU (16 may 2025)",
+    organization: "Subsecretaría de Vivienda y Urbanismo",
+    title: "Circular N°023: implementación del proceso de viviendas industrializadas tipo",
+    url: "https://www.minvu.gob.cl/",
+    publicationDate: "2025-05-16",
+    accessedAt: ACCESSED_VIT,
+    documentType: "registro_oficial",
+    geography: "Chile",
+    notes: "Circular N°023, 16 may 2025, 9 págs. + 4 anexos.",
+  },
+  "minvu-ci-web": {
+    id: "minvu-ci-web",
+    shortLabel: "Minvu · Construcción Industrializada (web, 3 jun 2026)",
+    organization: "Ministerio de Vivienda y Urbanismo",
+    title: "Sección Construcción Industrializada",
+    url: "https://www.minvu.gob.cl/",
+    publicationDate: "2026-06-03",
+    accessedAt: ACCESSED_VIT,
+    documentType: "otro",
+    geography: "Chile",
+    notes: "Sección web del Minvu, actualizada al 3 jun 2026 (fichas VIT y listado de empresas).",
+  },
+  "cci-fichas-vit": {
+    id: "cci-fichas-vit",
+    shortLabel: "CCI · Elaboración propia sobre 24 fichas VIT",
+    organization: "Consejo de Construcción Industrializada (CCI)",
+    title:
+      "Elaboración propia sobre las 24 fichas de vivienda industrializada tipo publicadas por la Ditec",
+    publicationDate: "2026-06-03",
+    accessedAt: ACCESSED_VIT,
+    documentType: "otro",
+    geography: "Chile",
+    notes:
+      "Materialidad y superficie transcritas de las 24 fichas oficiales de la Ditec (actualizadas al 3 jun 2026). Alcance: cubre las 24 fichas en línea, no las 47 VIT aprobadas.",
   },
 };

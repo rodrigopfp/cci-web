@@ -27,6 +27,7 @@ import {
   recursosQuery,
   empresasVitrinaQuery,
   empresaVitrinaBySlugQuery,
+  fichasVitImagenesQuery,
 } from "./queries";
 import type {
   Article,
@@ -702,6 +703,27 @@ export async function getEmpresaVitrinaBySlug(slug: string): Promise<EmpresaVitr
   if (!doc) return null;
   const empresa = toEmpresaVitrina(doc);
   return esVisible(empresa) ? empresa : null;
+}
+
+/**
+ * Imágenes de las fichas VIT (/data/vit), indexadas por slug. Solo devuelve las
+ * autorizadas (la query ya filtra por autorizadaPor + fechaAutorizacion). Si un
+ * slug no está aquí, la página usa la silueta por tipología.
+ */
+export type FichaVitImagen = { url: string; credito?: string; alt?: string };
+export async function getFichasVitImagenes(): Promise<Record<string, FichaVitImagen>> {
+  type Doc = { slug?: string; imagen?: ImagenDoc & { alt?: string }; credito?: string };
+  const docs = await client.fetch<Doc[]>(fichasVitImagenesQuery);
+  const mapa: Record<string, FichaVitImagen> = {};
+  for (const d of Array.isArray(docs) ? docs : []) {
+    if (!d.slug || !d.imagen?.asset?._ref) continue;
+    mapa[d.slug] = {
+      url: builder.image(d.imagen).width(480).fit("max").auto("format").url(),
+      credito: d.credito,
+      alt: d.imagen.alt,
+    };
+  }
+  return mapa;
 }
 
 export async function getEmpresaVitrinaSlugs(): Promise<string[]> {

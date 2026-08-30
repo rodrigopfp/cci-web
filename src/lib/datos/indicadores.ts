@@ -7,6 +7,7 @@
 // ============================================================================
 
 import type { DataIndicator } from "./tipos-indicadores";
+import { INDICADORES_VIT } from "./indicadores-vit";
 
 // Defaults comunes de la migración inicial.
 function mk(
@@ -1192,9 +1193,12 @@ const LISTA: DataIndicator[] = [
   }),
 ];
 
+// Registro completo = migración inicial + sección VIT (/data/vit).
+const LISTA_COMPLETA = [...LISTA, ...INDICADORES_VIT];
+
 export const INDICADORES: Record<string, DataIndicator> = Object.fromEntries(
-  LISTA.map((i) => [i.slug, i])
+  LISTA_COMPLETA.map((i) => [i.slug, i])
 );
 
 // Lista original (conserva orden de declaración) para validaciones/recorridos.
-export const INDICADORES_LISTA = LISTA;
+export const INDICADORES_LISTA = LISTA_COMPLETA;

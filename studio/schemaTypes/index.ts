@@ -5,6 +5,7 @@ import { estudio, empresa, evento, recurso } from "./contenido";
 import { voz } from "./voz";
 import { eici } from "./eici";
 import { empresaVitrina } from "./empresaVitrina";
+import { fichaVit } from "./fichaVit";
 import { requerimiento } from "./requerimiento";
 import { postulacion, descargaLead, aporte, solicitudValidacion } from "./formularios";
 
@@ -22,6 +23,7 @@ export const schemaTypes = [
   voz,
   eici,
   empresaVitrina,
+  fichaVit,
   requerimiento,
   postulacion,
   descargaLead,

@@ -31,6 +31,7 @@ export default defineConfig({
             S.documentTypeListItem("empresaCertificada").title("CCI Data · Empresas certificadas"),
             S.documentTypeListItem("indicador").title("CCI Data · Indicadores"),
             S.documentTypeListItem("hito").title("CCI Data · Línea de tiempo"),
+            S.documentTypeListItem("fichaVit").title("CCI Data · Fichas VIT (imágenes)"),
             S.divider(),
             S.documentTypeListItem("estudio").title("Evidencia · Estudios"),
             S.documentTypeListItem("fuente").title("Fuentes"),
