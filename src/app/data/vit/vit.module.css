@@ -44,8 +44,8 @@
 .chip{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;padding:5px 9px;border-radius:6px;background:var(--azul-claro);color:var(--azul);border:1px solid var(--azul-linea)}
 .chip.corte{background:#fff;color:var(--gris);border-color:var(--linea)}
 .chip.cazul{background:var(--azul);color:#fff;border-color:var(--azul)}
-.chip.cnaranja{background:var(--naranja);color:#fff;border-color:var(--naranja)}
-.chip.cgrafito{background:var(--grafito);color:#fff;border-color:var(--grafito)}
+.chip.cnaranja{background:transparent;color:#8A3B00;border-color:#E04E00}
+.chip.cgrafito{background:transparent;color:var(--gris);border-color:transparent;padding-left:0;padding-right:0}
 .chip.declarado{background:var(--ambar-fondo);color:var(--ambar);border-color:var(--ambar-linea)}
 .chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:18px}
 
@@ -56,6 +56,14 @@
 .serie .item .rot{font-size:14px;color:var(--gris);margin-top:4px;font-weight:600}
 .serie .item .de{font-family:var(--mono);font-size:11px;color:var(--gris-suave);margin-top:9px;letter-spacing:.03em}
 .serie .item .de b{color:var(--gris);font-weight:700}
+
+/* Escala móvil del encabezado (correctivo /data/vit). De 768px hacia arriba se
+   mantiene la escala original sin cambios. */
+@media(max-width:767px){
+  .page h1{font-size:28px;line-height:1.15}
+  .page section:first-of-type .lede{font-size:15.5px;line-height:1.55}
+  .serie{margin-top:16px}
+}
 
 .plazo{margin:22px 0 6px}
 .plazo .fila{margin-bottom:22px}
@@ -201,17 +209,46 @@
 .caso .pie{margin-top:12px;padding-top:10px;border-top:1px solid #EFEEEA;font-size:12.5px;color:var(--gris)}
 .caso .pie b{color:var(--naranja);font-family:var(--display);font-size:15px}
 
-.criterios{display:grid;grid-template-columns:1fr;gap:10px;margin-top:20px}
-@media(min-width:620px){.criterios{grid-template-columns:1fr 1fr}}
-.cr{display:flex;gap:14px;align-items:flex-start;background:var(--azul);border:1px solid var(--azul);border-radius:16px;padding:15px 16px}
-.cr .ic{flex:none;width:46px;height:46px;border-radius:14px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);display:flex;align-items:center;justify-content:center}
-.cr .ic svg{width:27px;height:27px;display:block}
-.cr .ic .s{fill:none;stroke:#fff;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
-.cr .ic .a{fill:#fff;stroke:none}
-.cr .tx{display:block;min-width:0}
-.cr .n{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:rgba(255,255,255,.6);font-weight:700;display:block}
-.cr h3{font-size:15.5px;margin:3px 0 5px;letter-spacing:-.005em;color:#fff}
-.cr p{font-size:13.5px;color:rgba(255,255,255,.82);margin:0;line-height:1.45}
+/* Acordeón de las dimensiones de evaluación (Res. Ex. N°52). El azul deja de
+   ser relleno y pasa a ser acento: solo la caja del ícono de la fila abierta
+   queda azul sólido. Estado FINAL sin JS con la primera fila abierta. */
+.acordeon{margin-top:20px}
+.acc-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+.acc-rotulo{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:#9A9691;font-weight:700}
+.acc-toggle{background:none;border:none;cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--azul);font-weight:700;padding:4px 2px}
+.acc-toggle:focus-visible{outline:2px solid var(--azul);outline-offset:2px;border-radius:4px}
+
+.acc-fila{background:#fff;border:1px solid #E4E0D9;border-radius:16px;margin-bottom:8px}
+.acc-fila:last-child{margin-bottom:0}
+.acc-fila.abierta{border-color:#C9DCEE}
+
+.acc-hd{margin:0}
+.acc-cab{display:flex;align-items:center;gap:12px;width:100%;background:none;border:none;padding:14px 15px;cursor:pointer;text-align:left;font-family:inherit;color:inherit}
+.acc-cab:focus-visible{outline:2px solid var(--azul);outline-offset:2px;border-radius:16px}
+
+.acc-ic{flex:none;width:40px;height:40px;border-radius:12px;background:rgba(0,92,173,.09);display:flex;align-items:center;justify-content:center;transition:background-color .22s}
+.acc-ic svg{width:24px;height:24px;display:block}
+.acc-ic .s{fill:none;stroke:#005CAD;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.acc-ic .a{fill:#005CAD;stroke:none}
+.acc-fila.abierta .acc-ic{background:#005CAD}
+.acc-fila.abierta .acc-ic .s{stroke:#fff}
+.acc-fila.abierta .acc-ic .a{fill:#fff}
+
+.acc-tx{flex:1;min-width:0}
+.acc-n{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;color:#9A9691;font-weight:700;display:block;text-transform:uppercase}
+.acc-t{font-size:16px;font-weight:700;line-height:1.25;color:#1E1D1C;display:block;letter-spacing:-.005em}
+
+.acc-chevron{flex:none;width:18px;height:18px;color:#BDB8B0;transition:transform .22s,color .22s}
+.acc-fila.abierta .acc-chevron{transform:rotate(180deg);color:#005CAD}
+
+.acc-panel{display:grid;grid-template-rows:0fr;transition:grid-template-rows .22s ease}
+.acc-fila.abierta .acc-panel{grid-template-rows:1fr}
+.acc-panel-inner{overflow:hidden;min-height:0}
+.acc-panel-inner p{margin:0;font-size:14.5px;line-height:1.55;color:#5C5C5C;padding:0 15px 16px 67px}
+
+@media(prefers-reduced-motion:reduce){
+  .acc-panel,.acc-ic,.acc-chevron{transition:none}
+}
 
 .agenda{list-style:none;padding:0;margin:18px 0 0;column-gap:26px}
 @media(min-width:620px){.agenda{columns:2}}
@@ -221,7 +258,7 @@
 .panel-claro .agenda li::before{background:var(--naranja)}
 
 .pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
-.pills span{background:var(--naranja);border:1px solid var(--naranja);border-radius:999px;padding:9px 16px;font-size:13.5px;font-weight:600;color:#fff;letter-spacing:.005em}
+.pills span{background:#B23E00;border:1px solid #B23E00;border-radius:999px;padding:9px 16px;font-size:13.5px;font-weight:600;color:#fff;letter-spacing:.005em}
 
 .historia{margin-top:24px;position:relative;padding-left:22px}
 .historia::before{content:"";position:absolute;left:5px;top:6px;bottom:6px;width:2px;background:linear-gradient(180deg,#DBD8D2,var(--durazno),var(--naranja))}

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { obtenerIndicador, obtenerFuente } from "@/lib/datos/indice";
 import { getFichasVitImagenes } from "@/sanity/fetch";
 import { SITE_URL } from "@/lib/site";
+import CriteriosAcordeon from "./CriteriosAcordeon";
 import styles from "./vit.module.css";
 import {
   PLAZOS_ETAPAS, PLAZOS_SERIES, PLAZOS_COLORES, AUTORIZACIONES, VIT_POR_EMPRESA,
@@ -124,7 +125,7 @@ export default async function VitPage() {
   return (
     <div className={S.page}>
       {/* ===== 1 · HERO ===== */}
-      <section className={S.wrap} style={{ paddingTop: 44 }}>
+      <section><div className={S.wrap}>
         <span className={S.kicker}>CCI Data · Registro público</span>
         <h1>Vivienda industrializada<br />en la política pública</h1>
         <p className={S.lede}>
@@ -185,7 +186,7 @@ export default async function VitPage() {
           interés público en Chile</em>, publicación N°398, dic 2025 · Presentaciones Ditec, Seminario
           Vivienda Industrializada, 29 may 2026. Última verificación: 29 ago 2026.
         </Fuente>
-      </section>
+      </div></section>
 
       {/* ===== 2 · PLAZOS ===== */}
       <section className={S.oscura}><div className={S.wrap}>
@@ -425,14 +426,7 @@ export default async function VitPage() {
           Las {CRITERIOS.length} dimensiones que revisa la Ditec antes de autorizar a una empresa. Es también
           el vocabulario con que el Estado describe una capacidad productiva.
         </p>
-        <div className={S.criterios}>
-          {CRITERIOS.map((cr) => (
-            <div className={S.cr} key={cr.n}>
-              <span className={S.ic}>{ICONO_CRITERIO[cr.n]}</span>
-              <span className={S.tx}><span className={S.n}>{cr.n}</span><h3>{cr.titulo}</h3><p>{cr.texto}</p></span>
-            </div>
-          ))}
-        </div>
+        <CriteriosAcordeon criterios={CRITERIOS} iconos={ICONO_CRITERIO} />
 
         <h3 style={{ marginTop: 34, fontSize: 20 }}>Con qué se está fabricando</h3>
         <p style={{ color: "var(--gris)", fontSize: 15 }}>Sistemas y materialidades presentes entre las empresas autorizadas.</p>
