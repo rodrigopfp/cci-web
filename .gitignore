@@ -17,3 +17,9 @@ next-env.d.ts
 /studio/dist
 /studio/.sanity
 .env
+
+# Fichas VIT de la Ditec: NO versionar los PDF descargados ni el texto extraído
+# (pesados y de fuente externa). Sí se versionan el CSV y el script de extracción.
+/scripts/fichas-vit/*.pdf
+/scripts/fichas-vit/*.txt
+/scripts/fichas-vit/_urls.tsv
