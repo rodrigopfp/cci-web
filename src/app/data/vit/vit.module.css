@@ -112,6 +112,7 @@
 .page td{padding:7px 8px 7px 0;border-bottom:1px solid #EFEEEA;vertical-align:top}
 .page td.n{font-family:var(--mono);color:var(--gris-suave);width:26px}
 .page td.r{font-family:var(--mono);font-size:11.5px;color:var(--gris);white-space:nowrap}
+.page td.r a{color:var(--azul);text-decoration:none;border-bottom:1px solid var(--azul-linea)}
 .page td.pr{font-family:var(--mono);font-size:11px;color:var(--azul);white-space:nowrap}
 
 .lista-barras{margin:18px 0 4px}

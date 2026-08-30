@@ -403,7 +403,13 @@ export default async function VitPage() {
             <thead><tr><th>N°</th><th>Industrializadora</th><th>Resolución</th></tr></thead>
             <tbody>
               {AUTORIZACIONES.map((a) => (
-                <tr key={a.n}><td className={S.n}>{a.n}</td><td>{a.empresa}</td><td className={S.r}>{a.resolucion}</td></tr>
+                <tr key={a.n}>
+                  <td className={S.n}>{a.n}</td>
+                  <td>{a.empresa}</td>
+                  <td className={S.r}>
+                    {a.url ? <a href={a.url} target="_blank" rel="noopener noreferrer">{a.resolucion}</a> : a.resolucion}
+                  </td>
+                </tr>
               ))}
             </tbody>
           </table>

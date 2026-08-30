@@ -28,34 +28,38 @@ export const PLAZOS_SERIES: { slug: string; titulo: string; dias: number[] }[] =
 export const PLAZOS_COLORES = ["s1", "s2", "s3", "s4", "s5", "s6", "s7"];
 
 // --- Registro de autorizaciones Res. Ex. N°52 (Ditec, corte feb 2026; nov 2025
-//     en publicación N°398). Reproducido sin reordenar.
-export const AUTORIZACIONES: { n: number; empresa: string; resolucion: string }[] = [
-  { n: 1, empresa: "Patagual Home SpA", resolucion: "0607 · 14.03.2023" },
-  { n: 2, empresa: "Santa Magdalena SpA", resolucion: "0639 · 15.03.2023" },
-  { n: 3, empresa: "E2E SpA", resolucion: "0637 · 16.03.2023" },
-  { n: 4, empresa: "Promet Servicio SpA", resolucion: "0679 · 27.03.2023" },
-  { n: 5, empresa: "Canada House SpA", resolucion: "1702 · 13.11.2025" },
-  { n: 6, empresa: "Baumax SpA", resolucion: "0834 · 21.04.2023" },
-  { n: 7, empresa: "Syntheon Chile Ltda.", resolucion: "0977 · 25.05.2023" },
-  { n: 8, empresa: "Tecno Fast S.A.", resolucion: "1092 · 14.06.2023" },
-  { n: 9, empresa: "Tecnotruss S.A.", resolucion: "1093 · 14.06.2023" },
-  { n: 10, empresa: "Atco Sabinco S.A.", resolucion: "1113 · 19.06.2023" },
-  { n: 11, empresa: "Prefabricadas Premium SpA", resolucion: "1657 · 04.10.2023" },
-  { n: 12, empresa: "CO-OL Ltda.", resolucion: "2089 · 06.02.2024" },
-  { n: 13, empresa: "Cintac S.A.I.C.", resolucion: "0254 · 12.02.2024" },
-  { n: 14, empresa: "Imel Town House SpA", resolucion: "0484 · 01.04.2024" },
-  { n: 15, empresa: "Eterna", resolucion: "0835 · 11.06.2024" },
-  { n: 16, empresa: "RCM Modular Chile S.A.", resolucion: "1736 · 14.11.2024" },
-  { n: 17, empresa: "RTA Casas SpA", resolucion: "1737 · 15.11.2024" },
-  { n: 18, empresa: "RC Tecnova Ltda.", resolucion: "0171 · 31.01.2025" },
+//     en publicación N°398). Reproducido sin reordenar. `url` = resolución
+//     exenta publicada por el Minvu ("Industrializadoras Certificadas por la
+//     Ditec"). Sin url = la segunda autorización de una empresa con dos, que el
+//     Minvu no lista por separado (Eterna y Tecnotruss).
+const M = "https://www.minvu.gob.cl/wp-content/uploads";
+export const AUTORIZACIONES: { n: number; empresa: string; resolucion: string; url?: string }[] = [
+  { n: 1, empresa: "Patagual Home SpA", resolucion: "0607 · 14.03.2023", url: `${M}/2024/11/RES-EX-N607_PATAGUAL_14032023.pdf` },
+  { n: 2, empresa: "Santa Magdalena SpA", resolucion: "0639 · 15.03.2023", url: `${M}/2024/11/RES-EX-N639_SANTA-MAGDALENA_16032023.pdf` },
+  { n: 3, empresa: "E2E SpA", resolucion: "0637 · 16.03.2023", url: `${M}/2024/11/RES-EX-N637_E2E_16032023.pdf` },
+  { n: 4, empresa: "Promet Servicio SpA", resolucion: "0679 · 27.03.2023", url: `${M}/2024/11/RES-EX-N679_PROMET_27032023.pdf` },
+  { n: 5, empresa: "Canada House SpA", resolucion: "1702 · 13.11.2025", url: `${M}/2026/01/CANADA-HOUSE-SPA-RESOLUCION-EXENTA-1702-13-11-2025.pdf` },
+  { n: 6, empresa: "Baumax SpA", resolucion: "0834 · 21.04.2023", url: `${M}/2024/11/RES-EX-N834_BAUMAX_21042023.pdf` },
+  { n: 7, empresa: "Syntheon Chile Ltda.", resolucion: "0977 · 25.05.2023", url: `${M}/2024/11/RES-EX-N977_SYNTHEON-CHILE-LTDA_23052024.pdf` },
+  { n: 8, empresa: "Tecno Fast S.A.", resolucion: "1092 · 14.06.2023", url: `${M}/2024/11/RES-EX-N1092_TECNOFAST_14062023.pdf` },
+  { n: 9, empresa: "Tecnotruss S.A.", resolucion: "1093 · 14.06.2023", url: `${M}/2024/11/RES-EX-N1093_TECNOTRUSS_14062023.pdf` },
+  { n: 10, empresa: "Atco Sabinco S.A.", resolucion: "1113 · 19.06.2023", url: `${M}/2024/11/RES-EX-N1113_ATCO-SABINCO_19062023.pdf` },
+  { n: 11, empresa: "Prefabricadas Premium SpA", resolucion: "1657 · 04.10.2023", url: `${M}/2024/11/RES-EX-N1657_PREFABRICADAS-PREMIUM_04102023.pdf` },
+  { n: 12, empresa: "CO-OL Ltda.", resolucion: "0233 · 06.02.2024", url: `${M}/2024/02/Resolucion-Exenta-N%C2%B0233-de-fecha-06.02.2024-Aprueba-Inscripcion-de-Co-ol-ltda-apta-para-presentar-proyectos-de-viviendas-industializada.pdf` },
+  { n: 13, empresa: "Cintac S.A.I.C.", resolucion: "0254 · 12.02.2024", url: `${M}/2024/02/Resolucion-Exenta-N%C2%B0254-de-Fecha-12.02.2024-Aprueba-incripcion-de-empresa-Industrializadora-CINTAC-S.A.I.C.-apta-para-presentar-proyectos-de-vivienda-industrializada-tipo..pdf` },
+  { n: 14, empresa: "Imel Town House SpA", resolucion: "0484 · 01.04.2024", url: `${M}/2024/04/Res-Ex-N484-01-04-2024-Aprueba-Inscripcion-de-Empresa-Industrializadora-IMEL-TOWN-HOUSE.pdf` },
+  { n: 15, empresa: "Eterna", resolucion: "0835 · 11.06.2024", url: `${M}/2024/06/Res-ExN835-Fecha11062024-Aprueba-InscripciOn-de-empresa-Industrializadora-Eterna-Spa-apta-para-presentar-proy-deVIT.pdf` },
+  { n: 16, empresa: "RCM Modular Chile S.A.", resolucion: "1736 · 14.11.2024", url: `${M}/2024/11/Res-Ex-N1736-de-fecha-14112024-Aprueba-inscripcion-de-empresa-industrializadora-RMC-Modular.pdf` },
+  { n: 17, empresa: "RTA Casas SpA", resolucion: "1737 · 15.11.2024", url: `${M}/2024/11/Res-Ex-N1737-de-fecha-15112024-Aprueba-inscripcion-de-empresa-industrializadora-RTA-Casas-SpA.pdf` },
+  { n: 18, empresa: "RC Tecnova Ltda.", resolucion: "0171 · 31.01.2025", url: `${M}/2026/03/of-171-rivadeneira.pdf` },
   { n: 19, empresa: "Eterna SpA", resolucion: "0320 · 03.03.2025" },
-  { n: 20, empresa: "Grupo SCM SpA", resolucion: "0578 · 24.04.2025" },
-  { n: 21, empresa: "Rodríguez SpA", resolucion: "1196 · 27.08.2025" },
+  { n: 20, empresa: "Grupo SCM SpA", resolucion: "0578 · 24.04.2025", url: `${M}/2025/04/Res-Ex-N578-de-24042025-Aprueba-empresa-Grupo-SCM-como-empresa-industrializadora.pdf` },
+  { n: 21, empresa: "Rodríguez SpA", resolucion: "1196 · 27.08.2025", url: `${M}/2026/03/PREFABRICADOS-DE-CONCRETO-RODRIGUEZ-SPA-RESOLUCION-EXENTA-N1196-DE-27-08-2025.pdf` },
   { n: 22, empresa: "Tecnotruss S.A. (Puerto Varas)", resolucion: "1823 · 02.12.2025" },
-  { n: 23, empresa: "Leonera SpA", resolucion: "0033 · 12.01.2026" },
-  { n: 24, empresa: "Andes SpA", resolucion: "0234 · 11.02.2026" },
-  { n: 25, empresa: "Steel Home SpA", resolucion: "0785 · 26.05.2026" },
-  { n: 26, empresa: "Aceros O'Higgins SpA", resolucion: "1839 · 03.12.2024" },
+  { n: 23, empresa: "Leonera SpA", resolucion: "0033 · 12.01.2026", url: `${M}/2026/01/Res-Ex-33-APRUEBA-VIT-LA-LEONERA-SPA.pdf` },
+  { n: 24, empresa: "Andes SpA", resolucion: "0234 · 11.02.2026", url: `${M}/2026/03/VIVIENDAS-PREFABRICADAS-ANDES-SPA-RESOLUCION-EXENTA-N234-DE-11-02-2026.pdf` },
+  { n: 25, empresa: "Steel Home SpA", resolucion: "0785 · 26.05.2026", url: `${M}/2026/06/Res-Ex-N785-de-26-05-2026-APRUEBA-INSCRIPCION-DE-EMPRESA-INDUSTRIALIZADORA-STEELHOME-SPA.pdf` },
+  { n: 26, empresa: "Aceros O'Higgins SpA", resolucion: "1839 · 03.12.2024", url: `${M}/2024/12/Res-Ex-N1839-APRUEBA-INSCRIPCION-DE-EMPRESA-INDUSTRIALIZADORA-ACEROS-OHIGGINS-SPA.pdf` },
 ];
 
 // --- VIT aprobadas por industrializadora (Ditec, 29 may 2026, sin reordenar).
