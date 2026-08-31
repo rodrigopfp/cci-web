@@ -377,3 +377,40 @@
 .planta-pie em{width:12px;height:12px;border-radius:3px;display:block;font-style:normal}
 
 .page a:focus-visible,.page summary:focus-visible{outline:3px solid var(--azul);outline-offset:3px;border-radius:4px}
+
+/* ============================================================================
+   ESCRITORIO (desde 1024px). El contenedor sube a 1200px y los BLOQUES DE
+   DATOS aprovechan ese ancho; la PROSA se mantiene en ~68ch y los títulos en
+   900px, alineados al margen izquierdo. Nada de esto aplica bajo 1024px: el
+   layout móvil queda exactamente igual.
+   ============================================================================ */
+@media(min-width:1024px){
+  .wrap{max-width:1200px}
+
+  /* Prosa: ancho de lectura, alineada a la izquierda (no centrada). */
+  .lede,.fuente,.aviso,.verificacion,.waffle-nota,.flujo-nota,.norma p{max-width:68ch}
+  /* Títulos de sección. */
+  .page h1,.page h2{max-width:900px}
+  /* Las normativas se leen como artículo citado, no como banda de 1160px. */
+  .norma{max-width:900px}
+
+  /* 4.1 · Leyenda de etapas: una sola fila, sin quiebres internos. */
+  .leyenda{gap:10px 24px}
+  .leyenda span{white-space:nowrap}
+
+  /* 4.2 · Bloque del 87%: dibujo más grande, columnas al ancho disponible. */
+  .planta-duo{grid-template-columns:.72fr 1.28fr;gap:44px}
+
+  /* 4.3 · Donut y leyenda de materiales, en dos columnas más holgadas. */
+  .anillo-box{grid-template-columns:300px 1fr;gap:40px;padding:26px}
+  .anillo{max-width:300px}
+
+  /* 4.4 · Escenarios de uso: etiqueta izquierda, valor derecha, barra al ancho. */
+  .lb{grid-template-columns:230px 1fr 64px;gap:16px}
+
+  /* 4.6 · Grillas: se agregan columnas antes que ensanchar; tope 420px. */
+  .rejilla.dos{grid-template-columns:repeat(2,minmax(0,420px))}
+  .rejilla.tres{grid-template-columns:repeat(3,minmax(0,420px))}
+  .rejilla.cortas{grid-template-columns:repeat(3,minmax(0,420px));gap:12px}
+  .serie{grid-template-columns:repeat(3,minmax(0,420px))}
+}
