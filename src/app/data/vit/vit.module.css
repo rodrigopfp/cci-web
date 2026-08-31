@@ -425,7 +425,7 @@
   .lb{grid-template-columns:230px 1fr 64px;gap:16px}
 
   /* 3.5 · Grillas: se agregan columnas antes que ensanchar; tope 420px. */
-  .rejilla.dos{grid-template-columns:repeat(2,minmax(0,420px))}
+  .rejilla.dos{grid-template-columns:repeat(2,minmax(0,1fr))}
   .rejilla.tres{grid-template-columns:repeat(3,minmax(0,420px))}
   .rejilla.cortas{grid-template-columns:repeat(3,minmax(0,420px));gap:12px}
   .serie{grid-template-columns:repeat(3,minmax(0,420px))}
