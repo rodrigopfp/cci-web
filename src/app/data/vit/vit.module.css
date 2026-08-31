@@ -408,7 +408,10 @@
   /* 4.4 · Escenarios de uso: etiqueta izquierda, valor derecha, barra al ancho. */
   .lb{grid-template-columns:230px 1fr 64px;gap:16px}
 
-  /* 4.6 · Grillas: se agregan columnas antes que ensanchar; tope 420px. */
+  /* 4.6 · Grillas: se agregan columnas antes que ensanchar; tope 420px. Las dos
+     tarjetas con gridColumn 1/-1 en el marcado siguen ocupando la fila completa
+     (son piezas de remate), pero su texto respeta el ancho de lectura. */
+  .rejilla .tarjeta .rot{max-width:68ch}
   .rejilla.dos{grid-template-columns:repeat(2,minmax(0,420px))}
   .rejilla.tres{grid-template-columns:repeat(3,minmax(0,420px))}
   .rejilla.cortas{grid-template-columns:repeat(3,minmax(0,420px));gap:12px}
