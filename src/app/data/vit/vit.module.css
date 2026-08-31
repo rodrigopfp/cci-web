@@ -47,8 +47,9 @@
 .chip.cazul{background:var(--azul);color:#fff;border-color:var(--azul)}
 .chip.cnaranja{background:transparent;color:#8A3B00;border-color:#E04E00}
 .chip.cgrafito{background:transparent;color:var(--gris);border-color:transparent;padding-left:0;padding-right:0}
-/* 19.4 · Distingue el dato declarado por la industria del registro oficial. */
 .chip.declarado{background:#FCEDE3;color:#8A3B00;border-color:#F0C4A6}
+/* En el panel del levantamiento, el chip toma el azul del propio bloque. */
+.panel-claro .chip.declarado{background:#E8F1F9;color:#005CAD;border-color:#C9DCEE}
 .chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:18px}
 
 .serie{display:grid;gap:12px;grid-template-columns:1fr;margin:26px 0 6px}

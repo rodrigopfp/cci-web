@@ -329,7 +329,7 @@ export default async function VitPage() {
         <div className={S["panel-claro"]}>
           <span className={cx("chip declarado")}>Dato declarado por la industria</span>
           <h3 style={{ marginTop: 12, fontSize: 21 }}>Cuánto dicen las empresas que están usando</h3>
-          <p style={{ color: "var(--gris)", fontSize: 15, maxWidth: "80ch" }}>
+          <p style={{ color: "var(--gris)", fontSize: 15 }}>
             En el levantamiento entre las industrializadoras certificadas Res. Ex. N°52, las empresas
             declararon un uso estimado del <b>{cif("uso-capacidad-declarado")}</b> de su capacidad instalada,
             del mismo orden de magnitud que la razón entre lo ejecutado y la capacidad que publica el Minvu.
@@ -345,7 +345,7 @@ export default async function VitPage() {
             Viviendas al año según nivel de utilización de la capacidad ya instalada. Escenarios declarados, no proyecciones del CCI.
           </p>
           <h3 style={{ marginTop: 28, fontSize: 19 }}>Qué frena a las empresas, según ellas mismas</h3>
-          <p style={{ color: "var(--gris)", fontSize: 14.5, maxWidth: "80ch" }}>
+          <p style={{ color: "var(--gris)", fontSize: 14.5 }}>
             Categorías ordenadas por incidencia en el mismo levantamiento. Se publica el orden, no el número de menciones.
           </p>
           <ul className={S.agenda} style={{ marginTop: 10 }}>
