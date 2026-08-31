@@ -258,7 +258,7 @@
 .panel-claro .agenda li::before{background:var(--naranja)}
 
 .pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
-.pills span{background:#B23E00;border:1px solid #B23E00;border-radius:999px;padding:9px 16px;font-size:13.5px;font-weight:600;color:#fff;letter-spacing:.005em}
+.pills span{background:#FCEDE3;border:1px solid #F0C4A6;border-radius:999px;padding:9px 16px;font-size:13.5px;font-weight:600;color:#8A3B00;letter-spacing:.005em}
 
 .historia{margin-top:24px;position:relative;padding-left:22px}
 .historia::before{content:"";position:absolute;left:5px;top:6px;bottom:6px;width:2px;background:linear-gradient(180deg,#DBD8D2,var(--durazno),var(--naranja))}

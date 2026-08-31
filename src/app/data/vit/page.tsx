@@ -433,6 +433,44 @@ export default async function VitPage() {
         <div className={S.pills}>{SISTEMAS.map((s) => <span key={s}>{s}</span>)}</div>
 
         <Fuente>Fuente: Ditec Minvu, presentación «Res. Ex. N°52», 29 may 2026, láminas de criterios de evaluación y de modelos reales por empresa.</Fuente>
+
+        <h3 style={{ marginTop: 38, fontSize: 20 }}>Con qué están hechas</h3>
+        <p style={{ color: "var(--gris)", fontSize: 15, maxWidth: "62ch" }}>Materialidad de las {cif("fichas-publicadas")} fichas publicadas, leída una por una en la ficha oficial de la Ditec.</p>
+
+        <div className={S["anillo-box"]}>
+          <svg className={S.anillo} viewBox="0 0 200 200" role="img" aria-label={`Anillo con la materialidad de las ${cif("fichas-publicadas")} fichas: ${segmentos.map((s) => `${s.cuenta} de ${s.label}`).join(", ")}.`}>
+            <circle cx="100" cy="100" r="62" className={S.pista} />
+            {segmentos.map((s) => (
+              <circle key={s.slug} className={S.seg} cx="100" cy="100" r="62" stroke={s.color} strokeDasharray={`${s.len.toFixed(2)} ${(C - s.len).toFixed(2)}`} strokeDashoffset={s.offset.toFixed(2)}><title>{s.label}: {s.cuenta} fichas</title></circle>
+            ))}
+            <text x="100" y="106" className={S["a-num"]}>{cif("fichas-publicadas")}</text>
+            <text x="100" y="126" className={S["a-rot"]}>FICHAS</text>
+          </svg>
+          <ul className={S["anillo-leyenda"]}>
+            {segmentos.map((s) => (
+              <li key={s.slug}><em style={{ background: s.color }} /><span className={S.ln}>{s.label}</span><span className={S.lc}><b>{s.cuenta}</b> · {s.pct}%</span></li>
+            ))}
+          </ul>
+        </div>
+
+        <div className={cx("rejilla dos")} style={{ marginTop: 14 }}>
+          <div className={cx("tarjeta destacada")}>
+            <div className={S.num}>{fmt(Math.round((nv("materialidad-madera") / nv("fichas-publicadas")) * 100))}%</div>
+            <div className={S.rot}>de las fichas publicadas son de madera. Las que detallan el sistema la describen como madera de grado estructural, seca e impregnada contra termitas y humedad</div>
+          </div>
+          <div className={S.tarjeta}>
+            <h3>{cif("superficie-base-min")} a {cif("superficie-base-max")} m²</h3>
+            <div className={S.rot}>rango de superficie base entre las {cif("fichas-publicadas")} fichas. Con ampliación llegan hasta {cif("superficie-ampliada-max", 1)} m².</div>
+          </div>
+        </div>
+
+        <p className={S["waffle-nota"]}>Tres clasificaciones están en confirmación: una ficha declara materialidades distintas en su portada y en su tabla, y otras dos traen la materialidad en un formato que exige lectura manual. Se ajustarán si cambian.</p>
+
+        <Fuente>
+          Fuente: elaboración propia del CCI sobre las {cif("fichas-publicadas")} fichas de vivienda industrializada tipo publicadas por la
+          Ditec Minvu, actualizadas al 3 jun 2026. <b>Alcance: cubre las {cif("fichas-publicadas")} fichas en línea, no las {cif("vit-aprobadas")} VIT
+          aprobadas.</b> Materialidad transcrita de cada ficha; la agrupación en categorías es del CCI.
+        </Fuente>
       </div></section>
 
       {/* ===== 5 · EMBUDO ===== */}
@@ -521,43 +559,6 @@ export default async function VitPage() {
           N°15, en vigor desde el 28 de noviembre de 2025. Ninguna quedó fuera de norma con el cambio.
         </div>
 
-        <h3 style={{ marginTop: 38, fontSize: 20 }}>Con qué están hechas</h3>
-        <p style={{ color: "var(--gris)", fontSize: 15, maxWidth: "62ch" }}>Materialidad de las {cif("fichas-publicadas")} fichas publicadas, leída una por una en la ficha oficial de la Ditec.</p>
-
-        <div className={S["anillo-box"]}>
-          <svg className={S.anillo} viewBox="0 0 200 200" role="img" aria-label={`Anillo con la materialidad de las ${cif("fichas-publicadas")} fichas: ${segmentos.map((s) => `${s.cuenta} de ${s.label}`).join(", ")}.`}>
-            <circle cx="100" cy="100" r="62" className={S.pista} />
-            {segmentos.map((s) => (
-              <circle key={s.slug} className={S.seg} cx="100" cy="100" r="62" stroke={s.color} strokeDasharray={`${s.len.toFixed(2)} ${(C - s.len).toFixed(2)}`} strokeDashoffset={s.offset.toFixed(2)}><title>{s.label}: {s.cuenta} fichas</title></circle>
-            ))}
-            <text x="100" y="96" className={S["a-num"]}>{cif("fichas-publicadas")}</text>
-            <text x="100" y="116" className={S["a-rot"]}>FICHAS</text>
-          </svg>
-          <ul className={S["anillo-leyenda"]}>
-            {segmentos.map((s) => (
-              <li key={s.slug}><em style={{ background: s.color }} /><span className={S.ln}>{s.label}</span><span className={S.lc}><b>{s.cuenta}</b> · {s.pct}%</span></li>
-            ))}
-          </ul>
-        </div>
-
-        <div className={cx("rejilla dos")} style={{ marginTop: 14 }}>
-          <div className={cx("tarjeta destacada")}>
-            <div className={S.num}>{fmt(Math.round((nv("materialidad-madera") / nv("fichas-publicadas")) * 100))}%</div>
-            <div className={S.rot}>de las fichas publicadas son de madera. Las que detallan el sistema la describen como madera de grado estructural, seca e impregnada contra termitas y humedad</div>
-          </div>
-          <div className={S.tarjeta}>
-            <h3>{cif("superficie-base-min")} a {cif("superficie-base-max")} m²</h3>
-            <div className={S.rot}>rango de superficie base entre las {cif("fichas-publicadas")} fichas. Con ampliación llegan hasta {cif("superficie-ampliada-max", 1)} m².</div>
-          </div>
-        </div>
-
-        <p className={S["waffle-nota"]}>Tres clasificaciones están en confirmación: una ficha declara materialidades distintas en su portada y en su tabla, y otras dos traen la materialidad en un formato que exige lectura manual. Se ajustarán si cambian.</p>
-
-        <Fuente>
-          Fuente: elaboración propia del CCI sobre las {cif("fichas-publicadas")} fichas de vivienda industrializada tipo publicadas por la
-          Ditec Minvu, actualizadas al 3 jun 2026. <b>Alcance: cubre las {cif("fichas-publicadas")} fichas en línea, no las {cif("vit-aprobadas")} VIT
-          aprobadas.</b> Materialidad transcrita de cada ficha; la agrupación en categorías es del CCI.
-        </Fuente>
         <Fuente>
           Fuente: distribución por macrozona térmica y vigencia higrotérmica, Ditec Minvu, presentación
           «Industrialización en vivienda», 29 may 2026 · Programas DS49 y DS10, Minvu publicación N°398, corte
