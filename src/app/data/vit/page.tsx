@@ -734,13 +734,25 @@ export default async function VitPage() {
         <div className={S["doc-ficha"]}>
           <span className={S.et}>Documento</span>
           <h3>Circular N°023 · Subsecretaría de Vivienda y Urbanismo</h3>
-          <div className={S.meta}>
-            <b>Fecha:</b> 16 de mayo de 2025<br />
-            <b>Materia:</b> instruye sobre la implementación del proceso asociado a viviendas industrializadas tipo<br />
-            <b>Dirigida a:</b> directores de Serviu y secretarios regionales ministeriales de todas las regiones<br />
-            <b>Antecedente:</b> Ley N°21.450, artículo cuarto, sobre gestión de suelo y plan de emergencia habitacional<br />
-            <b>Anexos:</b> mandato de cobro VIT · informe de recepción definitiva Serviu · informe de condiciones urbanísticas Seremi · Oficio Ordinario N°2009 del SII
-          </div>
+          <dl className={S.meta}>
+            <dt>Fecha</dt>
+            <dd>16 de mayo de 2025</dd>
+            <dt>Materia</dt>
+            <dd>instruye sobre la implementación del proceso asociado a viviendas industrializadas tipo</dd>
+            <dt>Dirigida a</dt>
+            <dd>directores de Serviu y secretarios regionales ministeriales de todas las regiones</dd>
+            <dt>Antecedente</dt>
+            <dd>Ley N°21.450, artículo cuarto, sobre gestión de suelo y plan de emergencia habitacional</dd>
+            <dt>Anexos</dt>
+            <dd>
+              <ul className={S.anexos}>
+                <li>mandato de cobro VIT</li>
+                <li>informe de recepción definitiva Serviu</li>
+                <li>informe de condiciones urbanísticas Seremi</li>
+                <li>Oficio Ordinario N°2009 del SII</li>
+              </ul>
+            </dd>
+          </dl>
         </div>
 
         <div className={S["flujo-lienzo"]}>
