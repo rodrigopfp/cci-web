@@ -304,9 +304,11 @@ export default async function VitPage() {
         <div className={S.remate}>
           <span className={S["remate-et"]}>Cifras del Minvu</span>
           <div className={S["remate-cuerpo"]}>
-            <div className={cx("num n")}>{cif("dias-equivalentes-ejecutado")}</div>
-            <div className={S["remate-txt"]}>
+            <div className={S["remate-cifra"]}>
+              <div className={cx("num n")}>{cif("dias-equivalentes-ejecutado")}</div>
               <b>días</b>
+            </div>
+            <div className={S["remate-txt"]}>
               <p>Eso es lo que la red instalada tardaría en producir todo lo que la vivienda industrializada ha ejecutado en el país hasta hoy.</p>
             </div>
           </div>
