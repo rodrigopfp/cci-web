@@ -149,7 +149,7 @@
 
 /* 10 · Destacados: el ámbar no pertenece al manual; pasan a la familia naranjo. */
 .aviso{background:#FCEDE3;border:1px solid #F0C4A6;border-radius:16px;padding:16px 18px;margin:20px 0;font-size:14px;color:#8A3B00}
-.aviso b{color:#E04E00}
+.aviso b{color:#B23E00}
 .aviso.celeste{background:#fff;border:none;border-left:4px solid #005CAD;border-radius:0 16px 16px 0;color:#4A4845;font-size:15px;line-height:1.55}
 .aviso.celeste b{color:#005CAD}
 .verificacion{background:var(--papel);border:1px dashed #C9C7C3;border-radius:16px;padding:18px;color:var(--gris);font-size:14px}
@@ -358,7 +358,7 @@
    El texto va en 19px/700 (texto grande WCAG) porque el blanco sobre #E04E00
    da 4,0:1: se sube peso y tamaño en vez de aclarar el fondo. */
 .remate{background:#E04E00;border:none;border-radius:20px;padding:16px 22px;margin-top:18px;color:#fff}
-.remate-et{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.8);font-weight:700;display:block;margin-bottom:8px}
+.remate-et{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#fff;font-weight:700;display:block;margin-bottom:8px}
 .remate-cuerpo{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
 .remate .n{font-family:var(--display);font-weight:900;font-size:clamp(52px,13vw,68px);line-height:.9;letter-spacing:-.045em;color:#fff}
 .remate-txt{flex:1;min-width:200px}
