@@ -329,7 +329,7 @@ export default async function VitPage() {
         <div className={S["panel-claro"]}>
           <span className={cx("chip declarado")}>Dato declarado por la industria</span>
           <h3 style={{ marginTop: 12, fontSize: 21 }}>Cuánto dicen las empresas que están usando</h3>
-          <p style={{ color: "var(--gris)", fontSize: 15, maxWidth: "60ch" }}>
+          <p style={{ color: "var(--gris)", fontSize: 15, maxWidth: "80ch" }}>
             En el levantamiento entre las industrializadoras certificadas Res. Ex. N°52, las empresas
             declararon un uso estimado del <b>{cif("uso-capacidad-declarado")}</b> de su capacidad instalada,
             del mismo orden de magnitud que la razón entre lo ejecutado y la capacidad que publica el Minvu.
@@ -337,15 +337,15 @@ export default async function VitPage() {
             y de uso, está pendiente de publicación y aparecerá aquí.
           </p>
           <div className={S["lista-barras"]} style={{ marginTop: 18 }}>
-            <div className={S.lb}><span className={S.e}>Uso actual · {cif("uso-capacidad-declarado")}</span><span className={S.p} style={{ ...w(16), background: "#CFCDC8" }} /><span className={S.v}>{cif("escenario-uso-actual")}</span></div>
-            <div className={S.lb}><span className={S.e}>Si el uso fuera 50%</span><span className={S.p} style={{ ...w((nv("escenario-uso-50") / nv("escenario-uso-80")) * 100), background: "var(--durazno)" }} /><span className={S.v}>{cif("escenario-uso-50")}</span></div>
-            <div className={S.lb}><span className={S.e}>Si el uso fuera 80%</span><span className={S.p} style={{ ...w(100), background: "var(--naranja)" }} /><span className={S.v}>{cif("escenario-uso-80")}</span></div>
+            <div className={S.lb}><span className={S.e}>Uso actual · {cif("uso-capacidad-declarado")}</span><span className={S.v}>{cif("escenario-uso-actual")}</span><span className={S.pista}><i className={S.p} style={{ ...w(16), background: "#B9B4AC" }} /></span></div>
+            <div className={S.lb}><span className={S.e}>Si el uso fuera 50%</span><span className={S.v}>{cif("escenario-uso-50")}</span><span className={S.pista}><i className={S.p} style={{ ...w((nv("escenario-uso-50") / nv("escenario-uso-80")) * 100), background: "#7FB6DE" }} /></span></div>
+            <div className={S.lb}><span className={S.e}>Si el uso fuera 80%</span><span className={S.v}>{cif("escenario-uso-80")}</span><span className={S.pista}><i className={S.p} style={{ ...w(100), background: "#005CAD" }} /></span></div>
           </div>
           <p style={{ fontFamily: "var(--mono)", fontSize: 11.5, color: "var(--gris-suave)", marginTop: 6 }}>
             Viviendas al año según nivel de utilización de la capacidad ya instalada. Escenarios declarados, no proyecciones del CCI.
           </p>
           <h3 style={{ marginTop: 28, fontSize: 19 }}>Qué frena a las empresas, según ellas mismas</h3>
-          <p style={{ color: "var(--gris)", fontSize: 14.5, maxWidth: "60ch" }}>
+          <p style={{ color: "var(--gris)", fontSize: 14.5, maxWidth: "80ch" }}>
             Categorías ordenadas por incidencia en el mismo levantamiento. Se publica el orden, no el número de menciones.
           </p>
           <ul className={S.agenda} style={{ marginTop: 10 }}>
