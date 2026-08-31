@@ -549,7 +549,7 @@ export default async function VitPage() {
           <div className={S.tarjeta}><div className={S.num}>{cif("vit-ds10")}</div><div className={S.rot}>aprobadas para DS10</div></div>
           <div className={S.tarjeta}><div className={S.num}>{cif("vit-edificios-3pisos")}</div><div className={S.rot}>son edificios de más de 3 pisos</div></div>
         </div>
-        <p style={{ fontFamily: "var(--mono)", fontSize: 11.5, color: "var(--gris-suave)", marginTop: 10 }}>
+        <p className={S["nota-mono"]} style={{ fontFamily: "var(--mono)", fontSize: 11.5, color: "var(--gris-suave)", marginTop: 10 }}>
           DS49 y DS10 al corte de nov 2025, sobre {cif("vit-aprobadas-2025")} VIT. Suman 44 porque una vivienda está aprobada para ambos programas.
         </p>
 
@@ -656,7 +656,7 @@ export default async function VitPage() {
         <h2>El cuello de botella no está en la fábrica</h2>
         <p className={S.lede}>Al revisar los proyectos en ejecución, la propia división identificó dónde se pierde el tiempo que la producción en fábrica ahorra.</p>
         <div className={cx("rejilla tres negras")}>
-          <div className={S.tarjeta} style={{ gridColumn: "1/-1", background: "#E04E00", borderColor: "#E04E00" }}>
+          <div className={cx("tarjeta ancha")} style={{ gridColumn: "1/-1", background: "#E04E00", borderColor: "#E04E00" }}>
             <div className={S.num} style={{ color: "#fff", fontSize: 64 }}>{cif("programacion-industrial")}</div>
             <div className={S.rot} style={{ color: "#FFE6D6", fontSize: 15.5 }}>de las viviendas en ejecución tiene una programación de plazos que aprovecha la eficiencia de la industrialización. El resto se programa como una obra tradicional.</div>
           </div>
@@ -852,7 +852,7 @@ export default async function VitPage() {
         <p className={S.lede}>La división plantea que la industrialización no escala sola: necesita que el resto del proceso opere con la misma lógica. Cinco condiciones habilitantes.</p>
         <div className={cx("rejilla dos")}>
           {CONDICIONES_ESCALA.map((c) => (
-            <div className={S.tarjeta} key={c.titulo} style={c.ancho ? { gridColumn: "1/-1" } : undefined}><h3>{c.titulo}</h3><div className={S.rot}>{c.texto}</div></div>
+            <div className={c.ancho ? cx("tarjeta ancha") : S.tarjeta} key={c.titulo} style={c.ancho ? { gridColumn: "1/-1" } : undefined}><h3>{c.titulo}</h3><div className={S.rot}>{c.texto}</div></div>
           ))}
         </div>
         <Fuente>Fuente: Ditec Minvu, presentación «Industrialización habitacional: construyendo la capacidad que Chile necesita», 29 may 2026.</Fuente>
@@ -860,7 +860,7 @@ export default async function VitPage() {
 
       {/* ===== 14 · DATOS SOLICITADOS ===== */}
       <section><div className={S.wrap}>
-        <div className={S.verificacion}>
+        <div className={cx("verificacion cierre")}>
           <span className={S.et}>Datos solicitados a la Ditec</span>
           Tres piezas están pedidas y aún no publicadas: el listado completo de las {cif("vit-aprobadas")} VIT con su zona
           térmica y superficie por modelo; el criterio de conteo por macrozona; y la conciliación del
