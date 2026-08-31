@@ -393,14 +393,14 @@ export default async function VitPage() {
           <p className={S.mapapie}>Distribución de las {cif("autorizaciones-res52")} autorizaciones vigentes por macrozona. Los límites entre zonas son referenciales.</p>
         </div>
 
-        <div className={S.aviso}>
+        <div className={cx("aviso conteo")}>
           <b>Cómo se cuentan.</b> Las {cif("autorizaciones-res52")} corresponden a autorizaciones vigentes, no a
           empresas: Tecnotruss y Eterna tienen dos cada una. Son <b>{cif("autorizaciones-res52")} autorizaciones de {cif("empresas-res52")} empresas</b>,
           y {cif("empresas-con-vit")} de ellas tienen además al menos una VIT aprobada. Por eso la misma realidad
           aparece publicada como 22, 23 o 25 según la fecha y la unidad de conteo.
         </div>
 
-        <details>
+        <details className={S.azul}>
           <summary>Ver el registro de autorizaciones con su resolución</summary>
           <table>
             <thead><tr><th>N°</th><th>Industrializadora</th><th>Resolución</th></tr></thead>
