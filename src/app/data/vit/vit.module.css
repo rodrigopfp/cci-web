@@ -81,11 +81,24 @@
 
 .rejilla{display:grid;gap:12px;grid-template-columns:1fr}
 @media(min-width:620px){.rejilla.dos{grid-template-columns:1fr 1fr}.rejilla.tres{grid-template-columns:repeat(3,1fr)}}
+/* 7.3 · Trío de cifras cortas: siempre una fila de tres, también en móvil. */
+.rejilla.cortas{grid-template-columns:repeat(3,1fr);gap:9px}
+.rejilla.cortas .tarjeta{background:#E8F1F9;border:1px solid #C9DCEE;border-radius:16px;padding:16px 12px;text-align:center}
+.rejilla.cortas .tarjeta .num{color:#005CAD;font-size:32px;font-weight:800}
+.rejilla.cortas .tarjeta .rot{color:#2C4A66;font-size:12.5px;line-height:1.35;margin-top:6px}
 .tarjeta{background:var(--papel);border:1px solid var(--linea);border-radius:20px;padding:20px}
 .tarjeta .num{font-size:36px;color:var(--tinta)}
 .tarjeta .rot{font-size:14px;color:var(--gris);margin-top:6px}
 .tarjeta.destacada{background:var(--crema);border-color:var(--durazno)}
 .tarjeta.destacada .num{color:var(--naranja);font-size:52px}
+/* 7.1 · Tarjetas de cifra: número a la izquierda, texto a la derecha, celeste. */
+.tarjeta.cifra{background:#E8F1F9;border:1px solid #C9DCEE;border-radius:20px;display:flex;align-items:center;gap:16px}
+.tarjeta.cifra .num{color:#005CAD;font-size:42px;font-weight:800;min-width:88px;flex:none}
+.tarjeta.cifra .rot{color:#2C4A66;font-size:15px;line-height:1.5;margin-top:0}
+/* 6 · Tarjeta del rango de superficie: grafito, sin borde. */
+.tarjeta.grafito{background:#3B3A38;border:none}
+.tarjeta.grafito h3{color:#fff}
+.tarjeta.grafito .rot{color:#C9C6C1}
 .oscura .tarjeta{background:#454341;border-color:#5A5754;color:#F3F2F0}
 .oscura .rejilla.negras .tarjeta{background:#111110;border-color:rgba(255,255,255,.16)}
 .oscura .rejilla.negras .tarjeta .num{color:#fff}
@@ -134,14 +147,14 @@
 
 .aviso{background:var(--ambar-fondo);border:1px solid var(--ambar-linea);border-radius:16px;padding:16px 18px;margin:20px 0;font-size:14px;color:#5C4210}
 .aviso b{color:var(--ambar)}
-.aviso.celeste{background:var(--azul-claro);border-color:var(--azul-linea);color:#1B4B77}
-.aviso.celeste b{color:var(--azul)}
+.aviso.celeste{background:#fff;border:none;border-left:4px solid #005CAD;border-radius:0 16px 16px 0;color:#4A4845;font-size:15px;line-height:1.55}
+.aviso.celeste b{color:#005CAD}
 .verificacion{background:var(--papel);border:1px dashed #C9C7C3;border-radius:16px;padding:18px;color:var(--gris);font-size:14px}
 .verificacion .et{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--gris-suave);font-weight:700;display:block;margin-bottom:8px}
 
-.norma{background:var(--papel);border:1px solid var(--linea);border-radius:20px;padding:20px;margin-bottom:12px}
-.norma .et{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--azul);font-weight:700;text-transform:uppercase}
-.norma p{font-size:14.5px;color:var(--gris);margin:8px 0 0}
+.norma{background:#fff;border:none;border-left:3px solid #005CAD;border-radius:0 14px 14px 0;padding:16px 18px 16px 17px;margin-bottom:12px}
+.norma .et{font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;color:#005CAD;font-weight:600;text-transform:uppercase}
+.norma p{font-size:15px;color:#4A4845;line-height:1.55;margin:8px 0 0}
 .vs{display:grid;gap:12px;grid-template-columns:1fr;margin-top:16px}
 @media(min-width:620px){.vs{grid-template-columns:1fr 1fr}}
 .vs .col{background:var(--papel);border:1px solid var(--linea);border-radius:20px;padding:20px}
@@ -183,7 +196,7 @@
 .anillo-leyenda .ln{flex:1;font-size:14.5px;color:var(--tinta)}
 .anillo-leyenda .lc{font-family:var(--mono);font-size:12.5px;color:var(--gris)}
 .anillo-leyenda .lc b{font-family:var(--display);font-size:17px;color:var(--tinta);font-weight:900;margin-right:2px}
-.waffle-nota{font-family:var(--mono);font-size:11px;color:var(--gris-suave);margin-top:12px;line-height:1.6}
+.waffle-nota{font-family:var(--mono);font-size:11px;color:var(--gris-suave);margin-top:14px;line-height:1.6}
 
 .fichas{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:18px}
 @media(min-width:620px){.fichas{grid-template-columns:repeat(4,1fr)}}

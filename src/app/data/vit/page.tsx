@@ -454,11 +454,11 @@ export default async function VitPage() {
         </div>
 
         <div className={cx("rejilla dos")} style={{ marginTop: 14 }}>
-          <div className={cx("tarjeta destacada")}>
+          <div className={cx("tarjeta cifra")}>
             <div className={S.num}>{fmt(Math.round((nv("materialidad-madera") / nv("fichas-publicadas")) * 100))}%</div>
             <div className={S.rot}>de las fichas publicadas son de madera. Las que detallan el sistema la describen como madera de grado estructural, seca e impregnada contra termitas y humedad</div>
           </div>
-          <div className={S.tarjeta}>
+          <div className={cx("tarjeta grafito")}>
             <h3>{cif("superficie-base-min")} a {cif("superficie-base-max")} m²</h3>
             <div className={S.rot}>rango de superficie base entre las {cif("fichas-publicadas")} fichas. Con ampliación llegan hasta {cif("superficie-ampliada-max", 1)} m².</div>
           </div>
@@ -489,8 +489,8 @@ export default async function VitPage() {
         </div>
 
         <div className={cx("rejilla dos")} style={{ marginTop: 22 }}>
-          <div className={cx("tarjeta destacada")}><div className={S.num}>{cif("vit-aprobadas")}</div><div className={S.rot}>VIT aprobadas al corte de mayo 2026, en manos de {cif("empresas-con-vit")} industrializadoras</div></div>
-          <div className={S.tarjeta}><div className={S.num}>{cif("dias-revision-ditec")}</div><div className={S.rot}>días promedio de revisión en la Ditec, medidos por la propia división</div></div>
+          <div className={cx("tarjeta cifra")}><div className={S.num}>{cif("vit-aprobadas")}</div><div className={S.rot}>VIT aprobadas al corte de mayo 2026, en manos de {cif("empresas-con-vit")} industrializadoras</div></div>
+          <div className={cx("tarjeta cifra")}><div className={S.num}>{cif("dias-revision-ditec")}</div><div className={S.rot}>días promedio de revisión en la Ditec, medidos por la propia división</div></div>
         </div>
 
         <details>
@@ -544,7 +544,7 @@ export default async function VitPage() {
           en el oficio, esa vivienda no sirve para ese terreno.
         </div>
 
-        <div className={cx("rejilla tres")} style={{ marginTop: 20 }}>
+        <div className={cx("rejilla tres cortas")} style={{ marginTop: 20 }}>
           <div className={S.tarjeta}><div className={S.num}>{cif("vit-ds49")}</div><div className={S.rot}>aprobadas para DS49</div></div>
           <div className={S.tarjeta}><div className={S.num}>{cif("vit-ds10")}</div><div className={S.rot}>aprobadas para DS10</div></div>
           <div className={S.tarjeta}><div className={S.num}>{cif("vit-edificios-3pisos")}</div><div className={S.rot}>son edificios de más de 3 pisos</div></div>
@@ -709,8 +709,8 @@ export default async function VitPage() {
 
         <h3 style={{ marginTop: 34, fontSize: 20 }}>Los incentivos vigentes</h3>
         <div className={cx("rejilla dos")} style={{ marginTop: 14 }}>
-          <div className={S.tarjeta}><div className={S.num}>{cif("anticipo-industrializadora")}</div><div className={S.rot}>de anticipo sobre el monto total de partidas industrializadas, pagado directamente a la industrializadora, en DS49 y DS10</div></div>
-          <div className={S.tarjeta}><div className={S.num}>{cif("programas-vivienda-industrializada")}</div><div className={S.rot}>programas incorporan el concepto de vivienda industrializada en sus llamados: DS10, DS49 y, recientemente, DS19</div></div>
+          <div className={cx("tarjeta cifra")}><div className={S.num}>{cif("anticipo-industrializadora")}</div><div className={S.rot}>de anticipo sobre el monto total de partidas industrializadas, pagado directamente a la industrializadora, en DS49 y DS10</div></div>
+          <div className={cx("tarjeta cifra")}><div className={S.num}>{cif("programas-vivienda-industrializada")}</div><div className={S.rot}>programas incorporan el concepto de vivienda industrializada en sus llamados: DS10, DS49 y, recientemente, DS19</div></div>
         </div>
         <div className={S.norma} style={{ marginTop: 12 }}><span className={S.et}>Redistribución de subsidios</span><p>En viviendas tipo se permite redistribuir el subsidio base y los complementarios según los requerimientos del proyecto.</p></div>
         <div className={S.norma}><span className={S.et}>Replicabilidad</span><p>Una VIT aprobada puede volver a usarse sin nuevas revisiones. Ahí está el ahorro administrativo que ninguna otra vía entrega.</p></div>
@@ -803,7 +803,7 @@ export default async function VitPage() {
 
         <h3 style={{ marginTop: 36, fontSize: 20 }}>Gestión de pago</h3>
         <div className={cx("rejilla dos")} style={{ marginTop: 14 }}>
-          <div className={cx("tarjeta destacada")}><div className={S.num}>{cif("anticipo-industrializadora")}</div><div className={S.rot}>de anticipo sobre el total de las partidas de fabricación, con cargo a los subsidios del proyecto, pagable con calificación definitiva y sujeto a disponibilidad presupuestaria</div></div>
+          <div className={cx("tarjeta cifra")}><div className={S.num}>{cif("anticipo-industrializadora")}</div><div className={S.rot}>de anticipo sobre el total de las partidas de fabricación, con cargo a los subsidios del proyecto, pagable con calificación definitiva y sujeto a disponibilidad presupuestaria</div></div>
           <div className={S.tarjeta}><h3>Mandato de cobro</h3><div className={S.rot}>La constructora cede a la industrializadora el derecho a recibir el pago directamente, sin perder sus responsabilidades. La circular adjunta el documento tipo.</div></div>
         </div>
         <div className={S.norma} style={{ marginTop: 12 }}><span className={S.et}>Garantías</span><p>Se aceptan boleta de garantía, certificado de fianza o póliza. Se devuelven cuando el avance de las obras industrializadas supera el porcentaje anticipado. A las industrializadoras no se les exige garantía de seriedad de la oferta ni de fiel cumplimiento, porque la responsable de la obra es la constructora.</p></div>
