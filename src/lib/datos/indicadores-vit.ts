@@ -31,7 +31,7 @@ function mkv(
 const CAVEAT_DECLARADO =
   "Dato declarado por las empresas en el levantamiento de las industrializadoras Res. Ex. N°52, sin metodología publicada.";
 const CAVEAT_MACROZONA =
-  "Distribución por macrozona en verificación con la Ditec: suma 61 sobre 47 VIT y las 24 fichas publicadas declaran alcance nacional, así que no describe disponibilidad regional.";
+  "Distribución por macrozona en verificación con la Ditec: suma 61 sobre 47 VIT porque cada vivienda cuenta en todas las macrozonas para las que está aprobada. La regla exacta de conteo está consultada. El rótulo (N) de la portada de las fichas no es una zona térmica; las zonas aprobadas están en el oficio de cada ficha.";
 
 export const INDICADORES_VIT: DataIndicator[] = [
   // ---------------------------------------------------------------- REGISTRO
@@ -101,6 +101,10 @@ export const INDICADORES_VIT: DataIndicator[] = [
   mkv({ slug: "superficie-base-min", title: "Superficie base mínima", description: "Superficie base mínima entre las 24 fichas.", value: 50, unit: "m²", cutoffDate: "2026-06-03", category: "vivienda", tags: ["materialidad", "superficie"], sourceId: "cci-fichas-vit", sourceType: "cci_data", scope: "Superficie base mínima entre las 24 fichas publicadas (elaboración propia CCI)." }),
   mkv({ slug: "superficie-base-max", title: "Superficie base máxima", description: "Superficie base máxima entre las 24 fichas.", value: 64, unit: "m²", cutoffDate: "2026-06-03", category: "vivienda", tags: ["materialidad", "superficie"], sourceId: "cci-fichas-vit", sourceType: "cci_data", scope: "Superficie base máxima entre las 24 fichas publicadas (elaboración propia CCI)." }),
   mkv({ slug: "superficie-ampliada-max", title: "Superficie ampliada máxima", description: "Superficie ampliada máxima entre las 24 fichas.", value: 73.6, unit: "m²", cutoffDate: "2026-06-03", category: "vivienda", tags: ["materialidad", "superficie"], sourceId: "cci-fichas-vit", sourceType: "cci_data", scope: "Superficie ampliada máxima entre las 24 fichas publicadas (elaboración propia CCI)." }),
+
+  // ------------------------------------------ BUSCADOR POR COMUNA (zonas Ditec)
+  mkv({ slug: "comunas-zonificadas", title: "Comunas con zona térmica asignada por la Ditec", description: "Comunas de la tabla de zonificación térmica por comuna de la Ditec (NCh1079).", value: 345, unit: "comunas", cutoffDate: "2023-04-01", category: "normativa", tags: ["vit", "termica", "comunas"], sourceId: "ditec-zonas-termicas-comunas", sourceType: "official_chile", scope: "Comunas listadas en «Zonas térmicas DITEC» (PDF fechado solo por mes: abril 2023; la fecha de corte usa el primer día del mes): 345 comunas en 410 filas; no incluye la comuna Antártica.", lastVerifiedAt: "2026-09-21" }),
+  mkv({ slug: "comunas-varias-zonas", title: "Comunas con más de una zona térmica", description: "Comunas que la Ditec parte en dos o tres zonas según altitud o meridiano.", value: 59, unit: "comunas", cutoffDate: "2023-04-01", category: "normativa", tags: ["vit", "termica", "comunas"], sourceId: "ditec-zonas-termicas-comunas", sourceType: "official_chile", scope: "Comunas con dos o tres zonas en «Zonas térmicas DITEC» (PDF fechado solo por mes: abril 2023): 51 por altitud, 5 por meridiano y 3 por ambas.", lastVerifiedAt: "2026-09-21" }),
 
   // ------------------------------------------------- INCENTIVOS (marco normativo)
   mkv({ slug: "anticipo-industrializadora", title: "Anticipo a la industrializadora", description: "Anticipo sobre el monto total de partidas industrializadas, pagado directamente a la industrializadora.", value: 50, suffix: "%", cutoffDate: "2025-05-16", category: "normativa", tags: ["normativa", "incentivo", "pago"], sourceId: "circular-023", sourceType: "official_chile", scope: "Anticipo de hasta 50% de las partidas de fabricación, pagable con calificación definitiva (Circular N°023, gestión de pago), en DS49 y DS10." }),

@@ -23,3 +23,4 @@ next-env.d.ts
 /scripts/fichas-vit/*.pdf
 /scripts/fichas-vit/*.txt
 /scripts/fichas-vit/_urls.tsv
+/scripts/fichas-vit/_resoluciones-urls.tsv

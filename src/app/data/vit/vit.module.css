@@ -432,6 +432,113 @@
 .page a:focus-visible,.page summary:focus-visible{outline:3px solid var(--azul);outline-offset:3px;border-radius:4px}
 
 /* ============================================================================
+   CHIPS DE ZONAS TÉRMICAS (catálogo y buscador). Azul = Estado; la zona activa
+   va en azul sólido; la condicionada, con borde punteado cálido (#8A3B00 sobre
+   blanco: 7,3:1).
+   ============================================================================ */
+.zc-lista{list-style:none;display:flex;flex-wrap:wrap;gap:5px;margin:11px 0 0;padding:0}
+.zc{display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:26px;padding:0 7px;border-radius:8px;font-family:var(--mono);font-size:12.5px;font-weight:700;color:var(--azul);background:#E8F1F9;border:1px solid #C9DCEE}
+.zc.activa{background:var(--azul);color:#fff;border-color:var(--azul)}
+.zc.cond{border:1px dashed #C9761C;background:#fff;color:#8A3B00}
+.zc.cond.activa{background:#8A3B00;color:#fff;border:1px solid #8A3B00}
+.zc-lista.compacto{gap:4px;margin-top:7px}
+.zc-lista.compacto .zc{min-width:22px;height:20px;padding:0 5px;font-size:10.5px;border-radius:6px}
+
+/* ============================================================================
+   BUSCADOR POR COMUNA. Móvil primero; en escritorio el bloque usa el ancho de
+   datos de la página y las tarjetas van a dos columnas.
+   ============================================================================ */
+.bc{margin:26px 0 8px;background:var(--papel);border:1px solid var(--linea);border-radius:20px;padding:22px 20px 20px}
+/* El kicker va en el naranjo oscuro accesible que ya usa la página (#B23E00,
+   5,9:1 sobre blanco); el #E04E00 queda en 4,0:1 sobre el fondo blanco del bloque. */
+.bc .kicker{color:#B23E00}
+/* `.page h3` y `.page p` (especificidad 0,1,1) pisan a las clases sueltas: los
+   selectores del bloque se anteponen con .page para ganar. */
+.page .bc-titulo{font-family:var(--display);font-weight:900;font-size:clamp(22px,5vw,28px);line-height:1.12;letter-spacing:-.015em;margin:0 0 10px;color:var(--tinta)}
+.page .bc-bajada{font-size:15.5px;line-height:1.55;color:var(--gris);margin:0 0 18px;max-width:60ch}
+.page .bc-noscript{background:#FCEDE3;border:1px solid #F0C4A6;border-radius:12px;padding:12px 14px;font-size:14px;color:#8A3B00;margin:0 0 14px}
+.bc-campo{position:relative}
+.bc-label{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gris);font-weight:700;margin-bottom:6px}
+/* Región viva para lectores de pantalla: presente en el DOM, sin ocupar espacio. */
+.page .bc-anuncio{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.bc-input-wrap{position:relative}
+.bc-lupa{position:absolute;left:16px;top:17px;color:var(--azul);pointer-events:none}
+.bc-input{width:100%;appearance:none;border:1.5px solid #C9DCEE;border-radius:14px;background:#fff;font:inherit;font-size:17px;padding:15px 16px 15px 46px;color:var(--tinta);outline:none}
+.bc-input::placeholder{color:#767370}
+.bc-input:focus-visible{border-color:var(--azul);box-shadow:0 0 0 3px rgba(0,92,173,.18);outline:2px solid transparent}
+.bc-input:disabled{background:#F4F3F0;color:var(--gris)}
+.bc-lista{position:absolute;left:0;right:0;top:calc(100% + 6px);margin:0;padding:0;list-style:none;background:#fff;border:1px solid var(--linea);border-radius:14px;box-shadow:0 12px 30px rgba(0,0,0,.10);overflow:hidden;z-index:20}
+.bc-opcion{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:12px 16px;cursor:pointer;color:var(--tinta);font-size:15.5px;border-top:1px solid var(--linea)}
+.bc-opcion:first-child{border-top:0}
+.bc-opcion.marcada{background:#E8F1F9;box-shadow:inset 4px 0 0 var(--azul);font-weight:600}
+.bc-opcion small{font-size:12px;color:var(--gris);white-space:nowrap}
+.bc-vacio{padding:14px 16px;font-size:14px;color:var(--gris)}
+.bc-ejemplos{margin-top:12px;display:flex;flex-wrap:wrap;gap:7px;align-items:center}
+.bc-ejemplos span{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gris);margin-right:4px;font-weight:700}
+.bc-ejemplos button{appearance:none;border:1px solid var(--linea);background:#fff;border-radius:999px;padding:7px 13px;font:inherit;font-size:13.5px;color:var(--grafito);cursor:pointer}
+.bc-ejemplos button:hover{border-color:var(--azul);color:var(--azul)}
+.bc-ejemplos button:focus-visible,.bc-fila button:focus-visible,.bc-orden button:focus-visible{outline:3px solid var(--azul);outline-offset:2px}
+.bc-ejemplos button:disabled{color:var(--gris-suave);cursor:default}
+
+.bc-resultado{margin-top:22px;scroll-margin-top:24px}
+.bc-zona{background:#E8F1F9;border:1px solid #C9DCEE;border-radius:20px;padding:20px 20px 18px}
+.bc-zona-top{display:flex;align-items:center;gap:18px}
+.bc-letra{flex:0 0 auto;width:74px;height:74px;border-radius:18px;background:var(--azul);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:42px;font-weight:900;letter-spacing:-.02em}
+.bc-comuna{font-family:var(--display);font-size:24px;font-weight:900;letter-spacing:-.02em;color:var(--tinta);line-height:1.1}
+.bc-region{font-family:var(--mono);font-size:12px;color:#44668A;margin-top:4px}
+.bc-que{font-size:14.5px;color:#2C4A66;margin-top:8px;line-height:1.4}
+.bc-que b{color:var(--azul)}
+.bc-regla{margin-top:16px;padding-top:14px;border-top:1px solid #C9DCEE}
+.bc-regla-t{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#44668A;margin-bottom:8px;font-weight:700}
+.bc-fila{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px dashed #C9DCEE;font-size:14px;color:#2C4A66}
+.bc-regla-t + .bc-fila{border-top:0}
+.bc-fila b{display:inline-block;min-width:26px;text-align:center;font-weight:800;color:var(--azul);margin-right:8px;font-family:var(--mono)}
+.bc-fila.activa{color:#123E66}
+.bc-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--azul);white-space:nowrap;font-weight:700}
+.bc-fila button{appearance:none;border:1px solid var(--azul);background:#fff;color:var(--azul);border-radius:999px;font:inherit;font-size:12.5px;font-weight:600;padding:6px 11px;cursor:pointer;white-space:nowrap}
+.bc-fila button:hover{background:var(--azul);color:#fff}
+.page .bc-nota{margin:10px 0 0;font-size:12.5px;line-height:1.5;color:#44668A}
+.bc-nota b{color:#2C4A66}
+
+.bc-resumen{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:22px 0 12px;flex-wrap:wrap}
+.bc-n{font-size:15px;color:var(--gris)}
+.bc-n b{color:var(--tinta)}
+.bc-orden{display:flex;background:#fff;border:1px solid var(--linea);border-radius:999px;padding:3px}
+.bc-orden button{appearance:none;border:0;background:transparent;font:inherit;font-size:12.5px;font-weight:600;color:var(--gris);padding:6px 11px;border-radius:999px;cursor:pointer}
+.bc-orden button[aria-pressed="true"]{background:var(--grafito);color:#fff}
+
+.bc-tarjetas{display:grid;grid-template-columns:1fr;gap:10px}
+.bc-viv{background:#fff;border:1px solid var(--linea);border-radius:18px;padding:16px 16px 14px}
+.bc-viv-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.bc-viv-nombre{font-family:var(--display);font-size:17.5px;font-weight:800;color:var(--tinta);line-height:1.2}
+/* Industrializadora y oficio en mono (encargo), en gris de 6,7:1. */
+.bc-viv-ind{font-family:var(--mono);font-size:12px;color:var(--gris);margin-top:4px;line-height:1.45}
+.bc-mono{font-family:var(--mono);font-size:11.5px;color:var(--gris)}
+.bc-km{flex:0 0 auto;text-align:right}
+.bc-km-v{font-family:var(--display);font-size:20px;font-weight:900;letter-spacing:-.02em;color:var(--tinta);line-height:1;white-space:nowrap}
+.bc-km-l{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--gris);margin-top:3px}
+.bc-km.pend .bc-km-v{font-family:var(--mono);font-size:11.5px;font-weight:700;color:var(--gris);border:1px dashed #B9B4AC;border-radius:999px;padding:6px 9px;line-height:1;white-space:normal;text-align:center;max-width:150px}
+.page .bc-condicion{margin:9px 0 0;font-size:12.5px;line-height:1.45;color:#8A3B00;background:#FCEDE3;border:1px solid #F0C4A6;border-radius:10px;padding:7px 10px}
+.bc-condicion b{color:#8A3B00}
+.page .bc-viv-nota{margin:8px 0 0;font-size:12px;line-height:1.45;color:var(--gris)}
+.page .bc-planta{margin:10px 0 0;font-size:12.5px;color:var(--gris)}
+.bc-planta b{font-weight:600;color:var(--grafito)}
+.bc-sin{background:#fff;border:1px dashed #B9B4AC;border-radius:18px;padding:20px;font-size:14.5px;line-height:1.55;color:var(--gris)}
+.bc-sin b{color:var(--tinta)}
+.bc-cierre{margin:22px 0 0;background:var(--azul);color:#fff;border-radius:16px;padding:16px 18px;font-size:14.5px;line-height:1.55}
+.bc-cierre b{color:#fff}
+.page .bc-fuente{margin:18px 0 0;padding-left:12px;border-left:3px solid var(--azul-linea);font-size:12.5px;line-height:1.5;color:var(--gris);font-family:var(--mono)}
+
+@media(min-width:620px){
+  .bc{padding:26px 24px 24px}
+}
+@media(min-width:1024px){
+  .bc-tarjetas{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .page .bc-bajada,.page .bc-cierre,.page .bc-fuente{max-width:var(--prosa)}
+  .bc-campo{max-width:640px}
+}
+
+/* ============================================================================
    ESCRITORIO (desde 1024px). El contenedor sube a 1200px y los BLOQUES DE
    DATOS aprovechan ese ancho; la PROSA se mantiene en ~68ch y los títulos en
    900px, alineados al margen izquierdo. Nada de esto aplica bajo 1024px: el

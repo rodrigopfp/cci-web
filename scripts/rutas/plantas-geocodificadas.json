@@ -1,0 +1,111 @@
+{
+  "fecha": "2026-09-21",
+  "motor": "Nominatim · OpenStreetMap",
+  "userAgent": "cci-hub/1.0 (Consejo de Construccion Industrializada; https://construccionindustrializada.cl)",
+  "plantas": [
+    {
+      "id": "tecnotruss-colina",
+      "empresa": "Tecnotruss S.A.",
+      "nombre": "Planta Tecno Panel",
+      "comuna": "Colina",
+      "lat": null,
+      "lon": null,
+      "consultaUsada": null,
+      "nivel": null,
+      "precision": "sin resultado",
+      "displayName": null,
+      "esPrimeraVariante": false,
+      "intentos": [
+        {
+          "consulta": "Avenida José de San Martín, Loteo Industrial Los Libertadores, Colina, Región Metropolitana, Chile",
+          "hit": false
+        },
+        {
+          "consulta": "Loteo Industrial Los Libertadores, Colina, Región Metropolitana, Chile",
+          "hit": false
+        },
+        {
+          "consulta": "Los Libertadores, Colina, Región Metropolitana, Chile",
+          "hit": false
+        },
+        {
+          "consulta": "Avenida José de San Martín, Colina, Región Metropolitana, Chile",
+          "hit": false
+        }
+      ]
+    },
+    {
+      "id": "tecnofast-lampa",
+      "empresa": "Tecno Fast S.A.",
+      "nombre": "Planta Lampa",
+      "comuna": "Lampa",
+      "lat": -33.3136952,
+      "lon": -70.7248201,
+      "consultaUsada": "Avenida La Montaña 692, Lampa, Región Metropolitana, Chile",
+      "nivel": "highway/secondary",
+      "precision": "calle (sin número)",
+      "displayName": "Avenida La Montaña, Lampa, Chicauma, Provincia de Chacabuco, Región Metropolitana de Santiago, 9340000, Chile",
+      "esPrimeraVariante": true,
+      "intentos": [
+        {
+          "consulta": "Avenida La Montaña 692, Lampa, Región Metropolitana, Chile",
+          "hit": true
+        }
+      ]
+    },
+    {
+      "id": "tecnofast-colina",
+      "empresa": "Tecno Fast S.A.",
+      "nombre": "Planta Colina",
+      "comuna": "Colina",
+      "lat": -33.3240948,
+      "lon": -70.7187081,
+      "consultaUsada": "Avenida Presidente Eduardo Frei Montalva 17000, Colina, Región Metropolitana, Chile",
+      "nivel": "highway/secondary",
+      "precision": "calle (sin número)",
+      "displayName": "Avenida Presidente Eduardo Frei Montalva, Quilicura, Colina, Provincia de Chacabuco, Región Metropolitana de Santiago, 9340000, Chile",
+      "esPrimeraVariante": true,
+      "intentos": [
+        {
+          "consulta": "Avenida Presidente Eduardo Frei Montalva 17000, Colina, Región Metropolitana, Chile",
+          "hit": true
+        }
+      ]
+    },
+    {
+      "id": "prefabricadas-premium-coquimbo",
+      "empresa": "Prefabricadas Premium SpA",
+      "nombre": "Planta Pan de Azúcar",
+      "comuna": "Coquimbo",
+      "lat": null,
+      "lon": null,
+      "consultaUsada": null,
+      "nivel": null,
+      "precision": "sin resultado",
+      "displayName": null,
+      "esPrimeraVariante": false,
+      "intentos": [
+        {
+          "consulta": "Fundo Santa Amalia Lote 5A, Pan de Azúcar, Coquimbo, Chile",
+          "hit": false
+        },
+        {
+          "consulta": "Santa Amalia, Pan de Azúcar, Coquimbo, Chile",
+          "hit": false
+        },
+        {
+          "consulta": "Ruta 43, Pan de Azúcar, Coquimbo, Chile",
+          "hit": false
+        },
+        {
+          "consulta": "Pan de Azúcar, Coquimbo, Región de Coquimbo, Chile",
+          "hit": false
+        },
+        {
+          "consulta": "Pan de Azúcar, Elqui, Chile",
+          "hit": false
+        }
+      ]
+    }
+  ]
+}

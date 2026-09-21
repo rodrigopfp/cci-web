@@ -10,6 +10,7 @@ import type { DataSource } from "./tipos-indicadores";
 
 const ACCESSED = "2026-08-22"; // fecha de verificación de esta migración inicial
 const ACCESSED_VIT = "2026-08-29"; // verificación de las fuentes de /data/vit
+const ACCESSED_BUSCADOR = "2026-09-21"; // verificación de las fuentes del buscador por comuna
 
 export const FUENTES: Record<string, DataSource> = {
   "mgi-2017": {
@@ -389,5 +390,140 @@ export const FUENTES: Record<string, DataSource> = {
     geography: "Chile",
     notes:
       "Materialidad y superficie transcritas de las 24 fichas oficiales de la Ditec (actualizadas al 3 jun 2026). Alcance: cubre las 24 fichas en línea, no las 47 VIT aprobadas.",
+  },
+
+  // ==========================================================================
+  // BUSCADOR POR COMUNA (/data/vit) — zonas por vivienda, zona por comuna,
+  // cabeceras comunales, plantas y rutas. Verificadas 20–21 sep 2026.
+  // ==========================================================================
+  "ditec-fichas-vit-oficios": {
+    id: "ditec-fichas-vit-oficios",
+    shortLabel: "Ditec · Oficios aprobatorios en las 24 fichas VIT",
+    organization: "Ditec · Ministerio de Vivienda y Urbanismo",
+    title: "Oficios aprobatorios de vivienda industrializada tipo, incluidos en las 24 fichas VIT publicadas",
+    url: "https://www.minvu.gob.cl/construccion-industrializada/",
+    publicationDate: "2025-10",
+    accessedAt: ACCESSED_BUSCADOR,
+    documentType: "registro_oficial",
+    geography: "Chile",
+    notes:
+      "Cada ficha PDF (carpeta wp-content/uploads/2025/10) trae el oficio de la Ditec con el campo «Zona Térmica para la cual se desarrolló». La zona por vivienda se transcribe literal de ese campo; la url y la página exactas van en cada fila de vit-zonas.ts. Alcance: 24 fichas en línea, no las 47 VIT aprobadas.",
+  },
+  "ditec-zonas-termicas-comunas": {
+    id: "ditec-zonas-termicas-comunas",
+    shortLabel: "Ditec · Zonificación térmica por comuna (NCh1079)",
+    organization: "Ditec · Ministerio de Vivienda y Urbanismo",
+    title: "Zonas térmicas DITEC — zonificación térmica por comuna según NCh1079",
+    url: "https://www.minvu.gob.cl/wp-content/uploads/2023/04/Zonas-Termicas-DITEC.pdf",
+    publicationDate: "2023-04",
+    accessedAt: ACCESSED_BUSCADOR,
+    documentType: "norma",
+    geography: "Chile",
+    notes:
+      "Tabla región · provincia · comuna · zona, con reglas por meridiano y altitud. Curada a mano desde el PDF en scripts/fichas-vit/zonas-termicas-comunas.csv: 410 filas, 345 comunas, 59 con más de una zona (51 por altitud, 5 por meridiano, 3 por ambas). La tabla no incluye la comuna Antártica.",
+  },
+  "coordenadas-comunas-altazor": {
+    id: "coordenadas-comunas-altazor",
+    shortLabel: "Coordenadas de comunas (GitHub altazor-1967, provisional)",
+    organization: "altazor-1967 · GitHub (a partir de Wikipedia, Anexo: Comunas de Chile)",
+    title: "Comunas-de-Chile — «Latitud - Longitud Chile.csv», tabulación de coordenadas de las comunas de Chile 2020",
+    url: "https://github.com/altazor-1967/Comunas-de-Chile",
+    publicationDate: "2020",
+    accessedAt: ACCESSED_BUSCADOR,
+    documentType: "otro",
+    geography: "Chile",
+    notes:
+      "PROVISIONAL, a reemplazar por una fuente oficial de cabeceras comunales (IDE Chile / BCN / INE) cuando haya una capa de puntos descargable; la BCN solo publica polígonos y topónimos. Trae código CUT y coordenadas decimales de la cabecera. Descargado el 21.09.2026 (raw, rama master) a scripts/fichas-vit/coordenadas-comunas-altazor.csv.",
+  },
+  "cci-zona-centro-urbano": {
+    id: "cci-zona-centro-urbano",
+    shortLabel: "CCI · Zona del centro urbano (elaboración propia)",
+    organization: "Consejo de Construcción Industrializada (CCI)",
+    title: "Zona térmica del centro urbano en comunas con más de una zona",
+    url: "https://www.minvu.gob.cl/wp-content/uploads/2023/04/Zonas-Termicas-DITEC.pdf",
+    publicationDate: "2026-09-21",
+    accessedAt: ACCESSED_BUSCADOR,
+    documentType: "otro",
+    geography: "Chile",
+    notes:
+      "Elaboración propia del CCI: coordenadas de la cabecera comunal sobre la regla de la Ditec. Partición por altitud → zona de la franja más baja; por meridiano → longitud de la cabecera comparada con el meridiano (\"> 71°\" = longitud oeste mayor que 71°, más al oeste); ambas → primero meridiano, luego la franja más baja. Generado por scripts/rutas/generar-comunas.ts.",
+  },
+  "osm-nominatim": {
+    id: "osm-nominatim",
+    shortLabel: "Nominatim · OpenStreetMap (geocodificación)",
+    organization: "OpenStreetMap Foundation · Nominatim",
+    title: "Nominatim — geocodificación de las direcciones de planta",
+    url: "https://nominatim.openstreetmap.org/",
+    publicationDate: "2026-09-21",
+    accessedAt: ACCESSED_BUSCADOR,
+    documentType: "otro",
+    geography: "Chile",
+    notes:
+      "Un request por segundo, User-Agent que identifica al CCI (scripts/rutas/geocodificar-plantas.ts). Datos © OpenStreetMap contributors (ODbL).",
+  },
+  "osm-osrm": {
+    id: "osm-osrm",
+    shortLabel: "OSRM · OpenStreetMap (rutas por carretera)",
+    organization: "Project OSRM · OpenStreetMap",
+    title: "OSRM, servicio table, perfil driving — distancia por carretera desde cada planta a cada cabecera comunal",
+    url: "https://router.project-osrm.org/",
+    publicationDate: "2026-09-21",
+    accessedAt: ACCESSED_BUSCADOR,
+    documentType: "otro",
+    geography: "Chile",
+    notes:
+      "Servidor público de demostración de OSRM. Distancias en metros, redondeadas a km enteros en el registro (scripts/rutas/calcular-rutas.ts). Hacia Chiloé, Aysén y Magallanes las rutas pueden incluir transbordador o tramos por Argentina, tal como las calcula el motor. © OpenStreetMap contributors.",
+  },
+  "osm-ors": {
+    id: "osm-ors",
+    shortLabel: "OpenRouteService · OpenStreetMap (rutas por carretera, plan B)",
+    organization: "HeiGIT · OpenRouteService · OpenStreetMap",
+    title: "OpenRouteService, servicio matrix, perfil driving-car — distancia por carretera desde cada planta a cada cabecera comunal",
+    url: "https://openrouteservice.org/",
+    publicationDate: "2026-09-21",
+    accessedAt: ACCESSED_BUSCADOR,
+    documentType: "otro",
+    geography: "Chile",
+    notes:
+      "Plan B de scripts/rutas/calcular-rutas.ts (MOTOR=ors, clave ORS_API_KEY). No se ha usado: las rutas vigentes vienen de OSRM. Datos © OpenStreetMap contributors.",
+  },
+  "minvu-res-ex-1093": {
+    id: "minvu-res-ex-1093",
+    shortLabel: "Minvu · Res. Ex. N°1.093 (Tecnotruss, 14.06.2023)",
+    organization: "Ministerio de Vivienda y Urbanismo · Ditec",
+    title: "Resolución Exenta N°1.093 de 14.06.2023 — aprueba inscripción de la empresa industrializadora Tecnotruss S.A.",
+    url: "https://www.minvu.gob.cl/wp-content/uploads/2024/11/RES-EX-N1093_TECNOTRUSS_14062023.pdf",
+    publicationDate: "2023-06-14",
+    accessedAt: ACCESSED_BUSCADOR,
+    documentType: "registro_oficial",
+    geography: "Chile",
+    notes:
+      "Resuelvo 3 (p. 2), tabla «Planta industrializadora»: Tecno Panel, Av. José de San Martín sin número, sitio 98, Loteo Industrial Los Libertadores, Colina, Región Metropolitana; sistema en base a paneles SIP.",
+  },
+  "minvu-res-ex-1092": {
+    id: "minvu-res-ex-1092",
+    shortLabel: "Minvu · Res. Ex. N°1.092 (Tecno Fast, 14.06.2023)",
+    organization: "Ministerio de Vivienda y Urbanismo · Ditec",
+    title: "Resolución Exenta N°1.092 de 14.06.2023 — aprueba inscripción de la empresa industrializadora Tecno Fast S.A.",
+    url: "https://www.minvu.gob.cl/wp-content/uploads/2024/11/RES-EX-N1092_TECNOFAST_14062023.pdf",
+    publicationDate: "2023-06-14",
+    accessedAt: ACCESSED_BUSCADOR,
+    documentType: "registro_oficial",
+    geography: "Chile",
+    notes:
+      "Resuelvo 3 (p. 2), tabla «Planta industrializadora»: dos plantas, Av. La Montaña N°692, Lampa, y Av. Pdte. Eduardo «Frey» Montalva N°17000 (sic; Frei Montalva), Colina, ambas en la Región Metropolitana; marco plataforma en base a paneles y/o módulos.",
+  },
+  "minvu-res-ex-1657": {
+    id: "minvu-res-ex-1657",
+    shortLabel: "Minvu · Res. Ex. N°1.657 (Prefabricadas Premium, 04.10.2023)",
+    organization: "Ministerio de Vivienda y Urbanismo · Ditec",
+    title: "Resolución Exenta N°1.657 de 04.10.2023 — aprueba inscripción de la empresa industrializadora Prefabricadas Premium SpA",
+    url: "https://www.minvu.gob.cl/wp-content/uploads/2024/11/RES-EX-N1657_PREFABRICADAS-PREMIUM_04102023.pdf",
+    publicationDate: "2023-10-04",
+    accessedAt: ACCESSED_BUSCADOR,
+    documentType: "registro_oficial",
+    geography: "Chile",
+    notes:
+      "Resuelvo 1 (p. 2): domiciliada en Santa Amalia Lote 5A, comuna y región de Coquimbo. La resolución no trae tabla de plantas; la ubicación de la planta (Fundo Santa Amalia Lote 5A, Pan de Azúcar, Coquimbo) fue confirmada por la empresa el 21.09.2026.",
   },
 };

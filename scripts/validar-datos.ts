@@ -16,6 +16,12 @@ import { FUENTES } from "../src/lib/datos/fuentes";
 import { SOURCE_TYPES, CATEGORIES, VERIFICATION_STATUSES } from "../src/lib/datos/tipos-indicadores";
 import { EVIDENCIA } from "../src/lib/datos/evidencia";
 import { validarLatam, PAISES_LATAM } from "../src/lib/datos/latam";
+// Buscador por comuna de /data/vit: zonas por vivienda, comunas, plantas y rutas.
+import { validarZonasVit, ZONAS_VIT } from "../src/lib/datos/vit-zonas";
+import { validarComunas, COMUNAS, COMUNAS_META } from "../src/lib/datos/comunas";
+import { validarPlantas, PLANTAS } from "../src/lib/datos/plantas";
+import { validarRutas, RUTAS, RUTAS_META, FUENTE_POR_MOTOR } from "../src/lib/datos/rutas";
+import { CATALOGO } from "../src/app/data/vit/datos-vit";
 
 // Slugs que legítimamente pueden valer 0 (hoy ninguno). Whitelist explícita.
 const CERO_PERMITIDO = new Set<string>();
@@ -38,6 +44,15 @@ function validarIndicadores(): { errores: string[]; avisos: string[] } {
   // Las fuentes también se referencian desde el glosario: cuéntalas como usadas
   // para no marcar como huérfanas las que solo usan los términos (p. ej. planbim).
   for (const t of TERMINOS) for (const fid of t.fuentes) fuentesUsadas.add(fid);
+  // …y desde los datasets del buscador por comuna.
+  for (const v of ZONAS_VIT) fuentesUsadas.add(v.fuente.id);
+  for (const p of PLANTAS) { fuentesUsadas.add(p.fuenteId); fuentesUsadas.add(p.fuenteCoordenadasId); }
+  fuentesUsadas.add(COMUNAS_META.fuenteZonas);
+  fuentesUsadas.add(COMUNAS_META.fuenteCoordenadas);
+  fuentesUsadas.add(COMUNAS_META.fuenteCentroUrbano);
+  fuentesUsadas.add(RUTAS_META.fuenteId);
+  for (const id of Object.values(FUENTE_POR_MOTOR)) fuentesUsadas.add(id); // motores de ruta (incluido el plan B)
+  fuentesUsadas.add("osm-nominatim");
 
   for (const i of INDICADORES_LISTA) {
     const donde = `indicador "${i.slug}"`;
@@ -110,15 +125,33 @@ function main() {
   const publicos = TERMINOS.filter(esPublico).length;
   const { errores: erroresInd, avisos } = validarIndicadores();
   const erroresLatam = validarLatam();
+  const erroresZonas = validarZonasVit(CATALOGO.map((c) => c.slug));
+  const erroresComunas = validarComunas();
+  const erroresPlantas = validarPlantas(FUENTES);
+  const erroresRutas = validarRutas(FUENTES);
+  // Fuentes de los datasets del buscador deben existir.
+  for (const id of [COMUNAS_META.fuenteZonas, COMUNAS_META.fuenteCoordenadas, COMUNAS_META.fuenteCentroUrbano, RUTAS_META.fuenteId, "osm-nominatim"])
+    if (!FUENTES[id]) erroresComunas.push(`fuente inexistente "${id}" referenciada por los datasets del buscador.`);
+  for (const v of ZONAS_VIT) if (!FUENTES[v.fuente.id]) erroresZonas.push(`vivienda "${v.slug}": fuente inexistente "${v.fuente.id}".`);
+  // Los indicadores publicados sobre la tabla de comunas deben calzar con el dataset.
+  const ind = Object.fromEntries(INDICADORES_LISTA.map((i) => [i.slug, i]));
+  const nPartidas = COMUNAS.filter((c) => c.zonas.length > 1).length;
+  if (Number(ind["comunas-zonificadas"]?.value) !== COMUNAS.length) erroresComunas.push(`el indicador "comunas-zonificadas" (${ind["comunas-zonificadas"]?.value}) no calza con el dataset (${COMUNAS.length}).`);
+  if (Number(ind["comunas-varias-zonas"]?.value) !== nPartidas) erroresComunas.push(`el indicador "comunas-varias-zonas" (${ind["comunas-varias-zonas"]?.value}) no calza con el dataset (${nPartidas}).`);
 
   console.log(`Glosario: ${TERMINOS.length} términos (${publicos} públicos, ${TERMINOS.length - publicos} borradores).`);
   console.log(`Indicadores: ${INDICADORES_LISTA.length} · Fuentes: ${Object.keys(FUENTES).length}.`);
   console.log(`Panorama LATAM: ${PAISES_LATAM.length} países (${PAISES_LATAM.filter((p) => p.estadoFicha !== "en_levantamiento").length} con contenido).`);
+  console.log(`Buscador por comuna: ${ZONAS_VIT.length} viviendas con zonas · ${COMUNAS.length} comunas (${COMUNAS.filter((c) => c.zonas.length > 1).length} con varias zonas) · ${PLANTAS.length} plantas · ${RUTAS.length} rutas (${RUTAS.filter((r) => r.estado === "ok").length} ok, calculadas el ${RUTAS_META.fechaCalculo}).`);
 
   const errores = [
     ...erroresGlosario.map((e) => `[glosario] ${e}`),
     ...erroresInd.map((e) => `[indicadores] ${e}`),
     ...erroresLatam.map((e) => `[latam] ${e}`),
+    ...erroresZonas.map((e) => `[vit-zonas] ${e}`),
+    ...erroresComunas.map((e) => `[comunas] ${e}`),
+    ...erroresPlantas.map((e) => `[plantas] ${e}`),
+    ...erroresRutas.map((e) => `[rutas] ${e}`),
   ];
 
   if (avisos.length > 0) {
@@ -131,7 +164,7 @@ function main() {
     for (const e of errores) console.error(`  - ${e}`);
     process.exit(1);
   }
-  console.log("\n✔ Datos válidos (glosario + indicadores + fuentes).");
+  console.log("\n✔ Datos válidos (glosario + indicadores + fuentes + buscador por comuna).");
 }
 
 main();

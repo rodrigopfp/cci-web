@@ -3,6 +3,12 @@ import { obtenerIndicador, obtenerFuente } from "@/lib/datos/indice";
 import { getFichasVitImagenes } from "@/sanity/fetch";
 import { SITE_URL } from "@/lib/site";
 import CriteriosAcordeon from "./CriteriosAcordeon";
+import BuscadorComuna, { type ComunaUI, type ViviendaUI, type PlantaUI } from "./BuscadorComuna";
+import ChipsZonas from "./ChipsZonas";
+import { ZONAS_VIT, ZONAS_VIT_POR_SLUG, zonasDeVivienda, type ViviendaZonas } from "@/lib/datos/vit-zonas";
+import { COMUNAS } from "@/lib/datos/comunas";
+import { PLANTAS } from "@/lib/datos/plantas";
+import { RUTAS, RUTAS_META } from "@/lib/datos/rutas";
 import styles from "./vit.module.css";
 import {
   PLAZOS_ETAPAS, PLAZOS_SERIES, PLAZOS_COLORES, AUTORIZACIONES, VIT_POR_EMPRESA,
@@ -44,6 +50,10 @@ function cif(slug: string, dec = 0): string {
   return fmt(Number(it.value), dec) + (it.suffix ?? "");
 }
 const w = (pct: number): React.CSSProperties => ({ width: `${pct}%` });
+const fechaCorta = (iso: string) => { const [y, m, d] = iso.split("-"); return `${d}.${m}.${y}`; };
+const PALABRA = ["ninguna", "una", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho", "nueve", "diez"];
+const palabra = (n: number) => (n >= 0 && n < PALABRA.length ? PALABRA[n] : fmt(n));
+const tieneZona = (v: ViviendaZonas, letras: string) => zonasDeVivienda(v).some((z) => letras.includes(z));
 
 function Fuente({ children }: { children: React.ReactNode }) {
   return <div className={S.fuente}>{children}</div>;
@@ -121,6 +131,53 @@ export default async function VitPage() {
     const c = i % COLS, rr = Math.floor(i / COLS);
     return { x: 74.0 + c * 25.6, y: 306.8 - rr * 19.2, on: i < coloreadas };
   });
+
+  // ---- Buscador por comuna: el registro, recortado al mínimo para el cliente.
+  //      Rutas: por comuna, un km por planta (mismo orden que PLANTAS); null = sin ruta.
+  const plantasUI: PlantaUI[] = PLANTAS.map((p) => ({
+    id: p.id, nombre: p.nombre, fuenteTexto: p.fuenteTexto, aproximada: p.origenCoordenadas !== "geocodificada",
+  }));
+  const idxPlanta = new Map(PLANTAS.map((p, i) => [p.id, i]));
+  const kmPorCut = new Map<string, (number | null)[]>();
+  for (const r of RUTAS) {
+    const arr = kmPorCut.get(r.cut) ?? PLANTAS.map(() => null as number | null);
+    const i = idxPlanta.get(r.plantaId);
+    if (i !== undefined) arr[i] = r.estado === "ok" ? r.km : null;
+    kmPorCut.set(r.cut, arr);
+  }
+  const comunasUI: ComunaUI[] = COMUNAS.map((c) => ({
+    cut: c.cut, nombre: c.nombre, region: c.region,
+    ...(c.alias ? { alias: c.alias } : {}),
+    zonas: c.zonas.map((z) => ({ zona: z.zona, condicion: z.condicion })),
+    zonaCentroUrbano: c.zonaCentroUrbano,
+    ...(c.verificar ? { verificar: c.verificar } : {}),
+    km: kmPorCut.get(c.cut) ?? PLANTAS.map(() => null),
+  }));
+  const viviendasUI: ViviendaUI[] = CATALOGO.map((f) => {
+    const z = ZONAS_VIT_POR_SLUG[f.slug];
+    return {
+      slug: f.slug, nombre: f.tipo, industrializadora: z.industrializadora,
+      oficio: `${z.oficio.numero} · ${fechaCorta(z.oficio.fecha)}`,
+      zonas: zonasDeVivienda(z),
+      condicionadas: z.zonasCondicionadas.map((c) => ({ zonas: [...c.zonas], condicion: c.condicion })),
+      ...(z.notaLiteral ? { notaLiteral: z.notaLiteral } : {}),
+      plantas: PLANTAS.map((p, i) => (p.industrializadoraId === z.industrializadoraId ? i : -1)).filter((i) => i >= 0),
+    };
+  });
+  // Conteos del texto "Cómo leer estos tres números", derivados del registro con
+  // el mismo criterio de compatibilidad del buscador (zona firme o condicionada).
+  const nAE = ZONAS_VIT.filter((v) => tieneZona(v, "ABCDE")).length;
+  const nFG = ZONAS_VIT.filter((v) => tieneZona(v, "FG")).length;
+  const nH = ZONAS_VIT.filter((v) => tieneZona(v, "H")).length;
+  const nIfirme = ZONAS_VIT.filter((v) => v.zonasAprobadas.includes("I")).length;
+  const nIcond = ZONAS_VIT.filter((v) => !v.zonasAprobadas.includes("I") && v.zonasCondicionadas.some((c) => c.zonas.includes("I"))).length;
+  const fraseHI = nH === 0 && nIfirme === 0 && nIcond === 0
+    ? "ninguna a H o I"
+    : [
+        nIfirme > 0 ? `${palabra(nIfirme)} a I` : "",
+        nIcond > 0 ? `${palabra(nIcond)} ${nIcond === 1 ? "llega" : "llegan"} a I solo con condición` : "",
+        nH === 0 ? "ninguna a H" : `${palabra(nH)} a H`,
+      ].filter(Boolean).join(", ").replace(/, ([^,]*)$/, " y $1");
 
   return (
     <div className={S.page}>
@@ -523,6 +580,20 @@ export default async function VitPage() {
             {CINTA_TERMICA.map((c) => <i key={c.z} style={{ background: c.color }}>{c.z}</i>)}
           </div>
           <div className={S.ejes}><span>A · extremo norte</span><span>I · extremo austral</span></div>
+        </div>
+
+        <BuscadorComuna
+          comunas={comunasUI}
+          viviendas={viviendasUI}
+          plantas={plantasUI}
+          totalFichas={nv("fichas-publicadas")}
+          vitAprobadas={nv("vit-aprobadas")}
+          vitMacrozonaHI={nv("vit-macrozona-hi")}
+          fechaRutas={fechaCorta(RUTAS_META.fechaCalculo)}
+          ejemplos={["Vicuña", "La Serena", "Ovalle", "Puente Alto", "Temuco", "Putre"]}
+        />
+
+        <div className={S.termica}>
           <div className={S.macro}>
             <div className={S.m}><div className={S.n} style={{ color: "#E04E00" }}>{cif("vit-macrozona-abcde")}</div><div className={S.z}>Zonas A – E</div><div className={S.d}>Norte y centro</div></div>
             <div className={S.m}><div className={S.n} style={{ color: "#3FA894" }}>{cif("vit-macrozona-fg")}</div><div className={S.z}>Zonas F – G</div><div className={S.d}>Sur</div></div>
@@ -533,10 +604,9 @@ export default async function VitPage() {
         <div className={S.verificacion} style={{ marginTop: 16 }}>
           <span className={S.et}>Cómo leer estos tres números</span>
           Suman {fmt(nv("vit-macrozona-abcde") + nv("vit-macrozona-fg") + nv("vit-macrozona-hi"))}, más que las {cif("vit-aprobadas")} VIT
-          aprobadas, así que una vivienda cuenta en más de una macrozona. Al revisar las {cif("fichas-publicadas")} fichas
-          publicadas apareció un dato que lo complica: <b>las {cif("fichas-publicadas")} declaran alcance nacional</b>, de modo que
-          estas cifras no describen cuántas viviendas puede usar cada región. Qué mide exactamente esta
-          distribución está consultado a la Ditec y se publicará cuando responda. Hasta entonces, el reparto se muestra sin interpretarlo.
+          aprobadas, porque cada vivienda cuenta en todas las macrozonas para las que está aprobada. Los oficios de las {cif("fichas-publicadas")} fichas
+          publicadas lo confirman: {nAE === ZONAS_VIT.length ? "todas" : palabra(nAE)} están aprobadas en al menos una zona A–E, {palabra(nFG)} llegan a F o G, {fraseHI}.
+          La regla exacta de conteo de la Ditec está consultada.
         </div>
 
         <div className={cx("aviso celeste")}>
@@ -572,10 +642,13 @@ export default async function VitPage() {
         <p style={{ color: "var(--gris)", fontSize: 15, maxWidth: "62ch" }}>
           La Ditec publica la ficha de cada vivienda aprobada, con su planimetría, superficie y
           especificaciones. Hoy hay <b>{cif("fichas-publicadas")} fichas en línea</b> de las {cif("vit-aprobadas")} VIT aprobadas.
+          El rótulo (N) de la portada no es una zona térmica; las zonas aprobadas están en el oficio de
+          cada ficha.
         </p>
         <div className={S.fichas}>
           {CATALOGO.map((f) => {
             const img = imagenes[f.slug];
+            const z = ZONAS_VIT_POR_SLUG[f.slug];
             return (
               <a className={S.ficha} key={f.slug} href={f.url} target="_blank" rel="noopener noreferrer">
                 <span className={S.im}>
@@ -586,7 +659,11 @@ export default async function VitPage() {
                     <Silueta tipo={f.silueta} />
                   )}
                 </span>
-                <span className={S.b}><span className={S.t}>{f.tipo}</span><span className={S.e}>{f.empresa}</span><span className={S.p}>{f.programa} · Abrir ficha →</span></span>
+                <div className={S.b}>
+                  <span className={S.t}>{f.tipo}</span><span className={S.e}>{f.empresa}</span>
+                  <ChipsZonas compacto zonas={zonasDeVivienda(z)} condicionadas={z.zonasCondicionadas.flatMap((c) => c.zonas)} />
+                  <span className={S.p}>{f.programa} · Abrir ficha →</span>
+                </div>
               </a>
             );
           })}
@@ -876,11 +953,14 @@ export default async function VitPage() {
       <section><div className={S.wrap}>
         <div className={cx("verificacion cierre")}>
           <span className={S.et}>Datos solicitados a la Ditec</span>
-          Tres piezas están pedidas y aún no publicadas: el listado completo de las {cif("vit-aprobadas")} VIT con su zona
-          térmica y superficie por modelo; el criterio de conteo por macrozona; y la conciliación del
+          Siete piezas están pedidas y aún no publicadas: el listado completo de las {cif("vit-aprobadas")} VIT con su zona
+          térmica y superficie por modelo; la regla de conteo de la distribución por macrozona; la conciliación del
           registro de autorizaciones, porque el sitio del Minvu lista 26 empresas al 3 de junio de 2026
           —incluida Aceros O'Higgins, que no aparece en la presentación del seminario— y consigna a Canada
-          House con una resolución distinta de la que muestra esa misma lámina. Se publican cuando estén confirmadas.
+          House con una resolución distinta de la que muestra esa misma lámina; las fichas de las {fmt(nv("vit-aprobadas") - nv("fichas-publicadas"))} VIT
+          aprobadas que no están publicadas; la Res. Ex. 764 de 2023 que cita el oficio de Canada House y no aparece
+          en la web; el ORD 1006 de 2024 de Promet, que el ORD 749 solo complementa; y la zona del centro urbano
+          de La Ligua. Se publican cuando estén confirmadas.
         </div>
       </div></section>
 
